@@ -1,0 +1,25 @@
+# Unity
+unity/DragonGateSlot/[Ll]ibrary/
+unity/DragonGateSlot/[Tt]emp/
+unity/DragonGateSlot/[Oo]bj/
+unity/DragonGateSlot/[Bb]uild/
+unity/DragonGateSlot/[Bb]uilds/
+unity/DragonGateSlot/[Ll]ogs/
+unity/DragonGateSlot/[Uu]ser[Ss]ettings/
+
+# IDE
+.vs/
+.vscode/
+*.csproj
+*.sln
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
