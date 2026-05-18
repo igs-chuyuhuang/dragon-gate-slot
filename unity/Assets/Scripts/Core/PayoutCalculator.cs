@@ -16,7 +16,7 @@ namespace DragonGateSlot.Core
             switch (j.Result)
             {
                 case JudgeResult.Pass:
-                    return bet * GetPassMultiplier(j.GateWidth);
+                    return bet * GetPassMultiplier(j.Gap);
                 case JudgeResult.HitWall:
                     return bet * 1.2f;
                 case JudgeResult.SameValueHit:
@@ -26,12 +26,12 @@ namespace DragonGateSlot.Core
             }
         }
 
-        static float GetPassMultiplier(int gateWidth)
+        static float GetPassMultiplier(int gap)
         {
-            if (gateWidth <= 1) return 6f;       // 極窄門 diff=1 → width=0 or 1 inner slots
-            if (gateWidth <= 3) return 4f;       // 窄門 diff 2~3
-            if (gateWidth <= 7) return 2f;       // 中門 diff 4~7
-            return 1f;                            // 寬門 diff 8~11
+            if (gap <= 2) return 6f;       // 極窄門 gap=2
+            if (gap <= 4) return 4f;       // 窄門 gap 3~4
+            if (gap <= 8) return 2f;       // 中門 gap 5~8
+            return 1f;                      // 寬門 gap 9~12
         }
     }
 }

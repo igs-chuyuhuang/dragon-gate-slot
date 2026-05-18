@@ -6,7 +6,7 @@ namespace DragonGateSlot.Core
     {
         public int Row;
         public JudgeResult Result;
-        public int GateWidth; // abs(left - right) - 1, meaningful only for Pass
+        public int Gap; // hi - lo, meaningful only for Pass
         public bool HasScatter; // any cell in this row is Scatter
     }
 
@@ -51,12 +51,11 @@ namespace DragonGateSlot.Core
             if (m == lo || m == hi)
             {
                 j.Result = JudgeResult.HitWall;
-                j.GateWidth = hi - lo - 1;
             }
             else if (m > lo && m < hi)
             {
                 j.Result = JudgeResult.Pass;
-                j.GateWidth = hi - lo - 1;
+                j.Gap = hi - lo;
             }
             else
             {

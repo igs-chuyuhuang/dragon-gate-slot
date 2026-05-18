@@ -31,7 +31,7 @@ namespace DragonGateSlot.Core
         /// <summary>Execute a spin and return results for UI display. Returns null if cannot spin.</summary>
         public SpinResult ExecuteSpin()
         {
-            if (_balance < _bet)
+            if (_balance < _bet * 10)
                 return null;
 
             _balance -= _bet;
