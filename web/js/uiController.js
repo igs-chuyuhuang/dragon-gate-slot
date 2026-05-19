@@ -20,9 +20,6 @@ function updateUI() {
   $('jp-basic').textContent = gm.jp.pools.basic.toFixed(0);
   $('jp-major').textContent = gm.jp.pools.major.toFixed(0);
   $('jp-grand').textContent = gm.jp.pools.grand.toFixed(0);
-  const scEl = $('sc-counter');
-  scEl.textContent = `🐉 ${gm.scatterCounter}/3`;
-  scEl.classList.toggle('almost', gm.scatterCounter === 2);
   const fgEl = $('fg-info');
   if (gm.fg.active) {
     fgEl.style.display = 'block';
@@ -99,7 +96,7 @@ function showResult(result) {
       return text;
     });
     lines.push(`─── 結算: ${result.totalPayout >= 0 ? '+' : ''}${result.totalPayout} ───`);
-    if (result.scatterCount > 0) lines.push(`🐉 SC × ${result.scatterCount} (累積 ${gm.scatterCounter}/3)`);
+    if (result.scatterCount > 0) lines.push(`🐉 SC × ${result.scatterCount}`);
     if (result.fgTriggered) lines.push('🎰 Free Game 觸發！');
     $('results').textContent = lines.join('\n');
     $('win').textContent = result.totalPayout >= 0 ? `+${result.totalPayout}` : `${result.totalPayout}`;

@@ -12,7 +12,6 @@ export class GameManager {
     this.betIndex = 1;
     this.fg = new FreeGame();
     this.jp = new JpSystem(this.bet);
-    this.scatterCounter = 0;
   }
 
   get bet() { return BET_OPTIONS[this.betIndex]; }
@@ -39,16 +38,12 @@ export class GameManager {
     }
 
     const sc = countScatters(board);
-    this.scatterCounter += sc;
 
     if (isFG) {
       const spinScore = this.fg.scoreSpin(board);
       let extended = false;
-      if (this.scatterCounter >= 3) {
-        this.scatterCounter -= 3;
-        extended = this.fg.extend();
-        if (extended) this.fg.active = true;
-      }
+      if (sc >= 3) extended = this.fg.extend();
+      if (extended) this.fg.active = true;
       const fgDone = !this.fg.active;
       let jpResult = null;
       if (fgDone) {
@@ -63,8 +58,7 @@ export class GameManager {
     this.balance += totalPayout;
 
     let fgTriggered = false;
-    if (this.scatterCounter >= 3) {
-      this.scatterCounter -= 3;
+    if (sc >= 3) {
       this.fg.start();
       fgTriggered = true;
     }
