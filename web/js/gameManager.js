@@ -23,12 +23,14 @@ export class GameManager {
   executeSpin() {
     if (!this.canSpin()) return null;
 
-    this.balance -= this.bet;
-    const board = spin();
-    const { judgments, scatterCount } = judgeBoard(board);
-    const payout = calculate(judgments, this.bet);
-    this.balance += payout;
+    const betPerRow = this.bet;
+    this.balance -= betPerRow * 3;
 
-    return { board, judgments, payout, scatterCount };
+    const board = spin();
+    const judgments = judgeBoard(board);
+    const totalPayout = calculate(judgments, betPerRow);
+    this.balance += totalPayout;
+
+    return { board, judgments, totalPayout };
   }
 }

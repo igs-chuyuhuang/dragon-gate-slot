@@ -1,19 +1,20 @@
 import { cellToString } from './slotEngine.js';
-import { JudgeResult } from './dragonGateJudge.js';
 import { GameManager } from './gameManager.js';
 
 const gm = new GameManager();
 const $ = id => document.getElementById(id);
 
-const resultLabels = {
-  [JudgeResult.Pass]: '✓ 穿門',
-  [JudgeResult.HitWall]: '⚡ 碰壁',
-  [JudgeResult.Miss]: '✗ 未穿',
-  [JudgeResult.SameValueHit]: '💀 同值命中',
+const typeLabels = {
+  'through': '✓ 穿門',
+  'wall': '⚡ 碰壁 (賠雙)',
+  'miss': '✗ 未穿',
+  'same-hit': '💀 同值命中',
+  'same-miss': '✗ 同值未中',
+  'sc': '🐉 Scatter (跳過)',
 };
 
 function updateUI() {
-  $('balance').textContent = gm.balance.toFixed(1);
+  $('balance').textContent = gm.balance.toFixed(0);
   $('bet').textContent = gm.bet;
   $('spin-btn').disabled = !gm.canSpin();
 }
@@ -28,14 +29,16 @@ function renderBoard(board) {
     }
 }
 
-function renderJudgments(judgments, payout, scatterCount) {
+function renderJudgments(judgments, totalPayout, betPerRow) {
   const lines = judgments.map(j => {
-    let text = `列${j.row + 1}: ${resultLabels[j.result]}`;
-    if (j.result === JudgeResult.Pass) text += ` (gap=${j.gap})`;
+    let text = `列${j.row + 1}: ${typeLabels[j.type]}`;
+    if (j.type === 'through') text += ` +${betPerRow * j.mult}`;
+    else if (j.type === 'wall') text += ` -${betPerRow * 2}`;
+    else if (j.type === 'same-hit') text += ` -${betPerRow * 3}`;
     return text;
   });
-  lines.push(`─── 派彩: ${payout >= 0 ? '+' : ''}${payout.toFixed(1)} ───`);
-  if (scatterCount > 0) lines.push(`🐉 Scatter × ${scatterCount}${scatterCount >= 3 ? ' → Free Game!' : ''}`);
+  const sign = totalPayout >= 0 ? '+' : '';
+  lines.push(`─── 結算: ${sign}${totalPayout} (已扣注 ${betPerRow * 3}) ───`);
   $('results').textContent = lines.join('\n');
 }
 
@@ -43,8 +46,8 @@ function onSpin() {
   const result = gm.executeSpin();
   if (!result) return;
   renderBoard(result.board);
-  renderJudgments(result.judgments, result.payout, result.scatterCount);
-  $('win').textContent = result.payout.toFixed(1);
+  renderJudgments(result.judgments, result.totalPayout, gm.bet);
+  $('win').textContent = result.totalPayout >= 0 ? `+${result.totalPayout}` : `${result.totalPayout}`;
   updateUI();
 }
 

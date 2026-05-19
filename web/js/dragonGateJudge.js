@@ -1,33 +1,35 @@
-export const JudgeResult = { Pass: 'Pass', HitWall: 'HitWall', Miss: 'Miss', SameValueHit: 'SameValueHit' };
-
 export function judgeBoard(board) {
-  const judgments = [0, 1, 2].map(r => judgeRow(r, board[r][0], board[r][1], board[r][2]));
-  let scatterCount = 0;
-  for (let r = 0; r < 3; r++)
-    for (let c = 0; c < 3; c++)
-      if (board[r][c].isScatter) scatterCount++;
-  return { judgments, scatterCount };
+  return [0, 1, 2].map(r => judgeRow(r, board[r][0], board[r][1], board[r][2]));
 }
 
 function judgeRow(row, left, mid, right) {
-  const j = { row, result: JudgeResult.Miss, gap: 0 };
+  // SC in row → skip
+  if (left.isScatter || mid.isScatter || right.isScatter)
+    return { row, type: 'sc', mult: 0, gap: 0 };
+
   const l = left.value, m = mid.value, r2 = right.value;
 
   // Same-value gate
   if (l === r2) {
-    j.result = (m === l) ? JudgeResult.SameValueHit : JudgeResult.Miss;
-    return j;
+    if (m === l) return { row, type: 'same-hit', mult: -3, gap: 0 };
+    return { row, type: 'same-miss', mult: 0, gap: 0 };
   }
 
   // Normal gate
   const lo = Math.min(l, r2);
   const hi = Math.max(l, r2);
+  const gap = hi - lo - 1;
 
-  if (m === lo || m === hi) {
-    j.result = JudgeResult.HitWall;
-  } else if (m > lo && m < hi) {
-    j.result = JudgeResult.Pass;
-    j.gap = hi - lo - 1;
-  }
-  return j;
+  if (m === lo || m === hi)
+    return { row, type: 'wall', mult: -2, gap };
+  if (m > lo && m < hi)
+    return { row, type: 'through', mult: getPassMult(gap), gap };
+  return { row, type: 'miss', mult: 0, gap };
+}
+
+function getPassMult(gap) {
+  if (gap <= 1) return 6;   // 極窄門
+  if (gap <= 3) return 4;   // 窄門
+  if (gap <= 7) return 2;   // 中門
+  return 1;                  // 寬門
 }
