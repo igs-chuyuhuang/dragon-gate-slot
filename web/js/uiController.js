@@ -76,5 +76,12 @@ export function init() {
   $('spin-btn').addEventListener('click', onSpin);
   $('bet-up').addEventListener('click', () => { gm.setBetIndex(gm.betIndex + 1); updateUI(); });
   $('bet-down').addEventListener('click', () => { gm.setBetIndex(gm.betIndex - 1); updateUI(); });
+  document.addEventListener('keydown', e => {
+    if ((e.key === 'f' || e.key === 'F') && !gm.fg.active) {
+      gm.triggerFreeGame();
+      $('results').textContent = '🐉 Free Game 觸發！（測試）\n按 SPIN 開始';
+      updateUI();
+    }
+  });
   updateUI();
 }

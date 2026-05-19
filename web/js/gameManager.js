@@ -26,6 +26,11 @@ export class GameManager {
     return this.balance >= this.bet * 3;
   }
 
+  triggerFreeGame() {
+    if (!this.fg.active) { this.fg.start(); return true; }
+    return false;
+  }
+
   executeSpin() {
     if (!this.canSpin()) return null;
 
