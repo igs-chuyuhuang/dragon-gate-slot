@@ -1,7 +1,13 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: sans-serif; background: #1a1a2e; color: #eee; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
-h1 { color: #e94560; margin-bottom: 16px; }
-.board { display: grid; grid-template-columns: repeat(3, 80px); gap: 6px; margin: 16px 0; }
+h1 { color: #e94560; margin-bottom: 12px; }
+.jp-bar { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
+.jp { padding: 4px 10px; border-radius: 6px; font-size: 14px; }
+.jp.basic { background: #1a3a5c; }
+.jp.major { background: #5c3a1a; }
+.jp.grand { background: #5c1a1a; }
+.fg-info { background: #2d1b69; padding: 8px 16px; border-radius: 8px; margin-bottom: 8px; font-size: 16px; color: #ffd700; text-align: center; }
+.board { display: grid; grid-template-columns: repeat(3, 80px); gap: 6px; margin: 12px 0; }
 .cell { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; background: #16213e; border: 2px solid #0f3460; border-radius: 8px; }
 .cell.scatter { background: #533483; color: #ffd700; }
 .controls { display: flex; gap: 12px; align-items: center; margin: 12px 0; }
@@ -10,4 +16,6 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 button.small { padding: 6px 12px; background: #0f3460; }
 .info { display: flex; gap: 24px; font-size: 18px; margin: 8px 0; }
 .info span { background: #16213e; padding: 6px 14px; border-radius: 6px; }
-#results { white-space: pre; font-family: monospace; background: #16213e; padding: 12px; border-radius: 8px; margin-top: 12px; min-height: 80px; min-width: 280px; text-align: center; }
+#results { white-space: pre; font-family: monospace; background: #16213e; padding: 12px; border-radius: 8px; margin-top: 12px; min-height: 80px; min-width: 300px; text-align: center; }
+body.fg-mode { background: #0d0d2b; }
+body.fg-mode .board .cell { border-color: #ffd700; }
