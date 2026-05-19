@@ -3,7 +3,6 @@ import { JudgeResult } from './dragonGateJudge.js';
 import { GameManager } from './gameManager.js';
 
 const gm = new GameManager();
-
 const $ = id => document.getElementById(id);
 
 const resultLabels = {
@@ -25,18 +24,18 @@ function renderBoard(board) {
       const cell = board[r][c];
       const el = $(`cell-${r}-${c}`);
       el.textContent = cellToString(cell);
-      el.className = 'cell ' + cell.type.toLowerCase();
+      el.className = 'cell' + (cell.isScatter ? ' scatter' : '');
     }
 }
 
-function renderJudgments(judgments, payout) {
+function renderJudgments(judgments, payout, scatterCount) {
   const lines = judgments.map(j => {
     let text = `列${j.row + 1}: ${resultLabels[j.result]}`;
     if (j.result === JudgeResult.Pass) text += ` (gap=${j.gap})`;
-    if (j.hasScatter) text += ' [Scatter]';
     return text;
   });
   lines.push(`─── 派彩: ${payout >= 0 ? '+' : ''}${payout.toFixed(1)} ───`);
+  if (scatterCount > 0) lines.push(`🐉 Scatter × ${scatterCount}${scatterCount >= 3 ? ' → Free Game!' : ''}`);
   $('results').textContent = lines.join('\n');
 }
 
@@ -44,19 +43,14 @@ function onSpin() {
   const result = gm.executeSpin();
   if (!result) return;
   renderBoard(result.board);
-  renderJudgments(result.judgments, result.payout);
+  renderJudgments(result.judgments, result.payout, result.scatterCount);
   $('win').textContent = result.payout.toFixed(1);
-  updateUI();
-}
-
-function onBetChange(delta) {
-  gm.setBetIndex(gm.betIndex + delta);
   updateUI();
 }
 
 export function init() {
   $('spin-btn').addEventListener('click', onSpin);
-  $('bet-up').addEventListener('click', () => onBetChange(1));
-  $('bet-down').addEventListener('click', () => onBetChange(-1));
+  $('bet-up').addEventListener('click', () => { gm.setBetIndex(gm.betIndex + 1); updateUI(); });
+  $('bet-down').addEventListener('click', () => { gm.setBetIndex(gm.betIndex - 1); updateUI(); });
   updateUI();
 }
