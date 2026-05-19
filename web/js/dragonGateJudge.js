@@ -3,10 +3,6 @@ export function judgeBoard(board) {
 }
 
 function judgeRow(row, left, mid, right) {
-  // SC in row → skip
-  if (left.isScatter || mid.isScatter || right.isScatter)
-    return { row, type: 'sc', mult: 0, gap: 0 };
-
   const l = left.value, m = mid.value, r2 = right.value;
 
   // Same-value gate
@@ -16,20 +12,17 @@ function judgeRow(row, left, mid, right) {
   }
 
   // Normal gate
-  const lo = Math.min(l, r2);
-  const hi = Math.max(l, r2);
+  const lo = Math.min(l, r2), hi = Math.max(l, r2);
   const gap = hi - lo - 1;
 
-  if (m === lo || m === hi)
-    return { row, type: 'wall', mult: -2, gap };
-  if (m > lo && m < hi)
-    return { row, type: 'through', mult: getPassMult(gap), gap };
+  if (m === lo || m === hi) return { row, type: 'wall', mult: -2, gap };
+  if (m > lo && m < hi) return { row, type: 'through', mult: getPassMult(gap), gap };
   return { row, type: 'miss', mult: 0, gap };
 }
 
 function getPassMult(gap) {
-  if (gap <= 1) return 6;   // 極窄門
-  if (gap <= 3) return 4;   // 窄門
-  if (gap <= 7) return 2;   // 中門
-  return 1;                  // 寬門
+  if (gap <= 1) return 6;
+  if (gap <= 3) return 4;
+  if (gap <= 7) return 2;
+  return 1;
 }

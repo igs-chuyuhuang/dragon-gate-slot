@@ -43,7 +43,7 @@ export class JpSystem {
     const dist = Math.abs(score - center);
     const maxDist = Math.max(center - lo, hi - center);
     const ratio = 1 - dist / maxDist;
-    const payout = pool / 7 * ratio;
+    const payout = pool / 9 * ratio;
     return { tier, payout, msg: `${tier.toUpperCase()} 門內 (距中心${dist})` };
   }
 }
