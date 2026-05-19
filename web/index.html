@@ -16,7 +16,6 @@
   </div>
 
   <div id="fg-info" class="fg-info" style="display:none"></div>
-
   <div class="sc-bar"><span id="sc-counter">🐉 0/3</span></div>
 
   <div class="board">
@@ -31,18 +30,16 @@
     <div class="cell" id="cell-2-2">-</div>
   </div>
 
-  <div class="controls" id="stop-controls" style="display:none">
-    <button id="stop-left">停左</button>
-    <button id="stop-mid">停球</button>
-    <button id="stop-right">停右</button>
-    <button id="stop-all">全停</button>
-  </div>
-
   <div class="controls">
     <button class="small" id="bet-down">◀</button>
     <span>押注: <strong id="bet">10</strong></span>
     <button class="small" id="bet-up">▶</button>
     <button id="spin-btn">SPIN</button>
+  </div>
+
+  <div class="controls">
+    <input type="number" id="auto-count" value="10" min="1" max="999" style="width:60px;text-align:center;border-radius:4px;border:none;padding:4px">
+    <button id="auto-btn">自動</button>
   </div>
 
   <div class="info">
