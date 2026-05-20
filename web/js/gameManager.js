@@ -23,7 +23,7 @@ export class GameManager {
 
   canSpin() {
     if (this.fg.active) return true;
-    return this.balance >= this.bet * 3;
+    return this.balance >= this.bet * 6;
   }
 
   executeSpin() {
