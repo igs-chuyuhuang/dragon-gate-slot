@@ -20,6 +20,12 @@ body {
   letter-spacing: 6px;
   margin: 8px 0 4px;
   text-align: center;
+  position: relative;
+  z-index: 10;
+  background: rgba(10, 10, 20, 0.7);
+  padding: 6px 20px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
 }
 .logo-sub {
   display: block;
@@ -80,26 +86,52 @@ body {
   pointer-events: none;
 }
 
-.board { display: grid; grid-template-columns: repeat(3, 110px); gap: 6px; }
+.board { display: flex; gap: 6px; }
+.reel {
+  width: 110px; height: 336px; /* 3 cells × 110px + 2 gaps × 3px */
+  overflow: hidden;
+  position: relative;
+  border-radius: 8px;
+}
+.reel-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  position: absolute;
+  left: 0; right: 0;
+  will-change: transform;
+}
 .cell {
   width: 110px; height: 110px;
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(180deg, #0d1525, #162040);
   border: 2px solid #2a4a7a;
   border-radius: 8px;
-  transition: transform 0.15s;
   overflow: hidden;
   box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+  flex-shrink: 0;
 }
 .cell img { width: 88%; height: 88%; object-fit: contain; }
 .cell.scatter { border-color: #ffd700; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(255,215,0,0.5); }
-.cell.rolling { background: rgba(5,8,20,0.9); filter: blur(1px); animation: reel-scroll 0.12s linear infinite; }
 .cell.stop-bounce { animation: bounce 0.5s ease-out; }
 
-@keyframes reel-scroll { 0% { transform: translateY(-4px); } 50% { transform: translateY(4px); } 100% { transform: translateY(-4px); } }
 @keyframes bounce { 0% { transform: scaleY(0.85) translateY(6px); } 50% { transform: scaleY(1.08) translateY(-3px); } 100% { transform: scaleY(1) translateY(0); } }
 .cell.sc-flash { animation: bounce 0.5s ease-out, flash 0.6s ease-in-out 2; }
 @keyframes flash { 0%,100% { box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); } 50% { box-shadow: 0 0 16px 4px #ffd700; } }
+
+/* FG Transition Overlay */
+.fg-transition-overlay {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.85);
+  z-index: 2000;
+  pointer-events: none;
+}
+.fg-transition-overlay img {
+  max-width: 80vw; max-height: 70vh;
+  object-fit: contain;
+  filter: drop-shadow(0 0 40px rgba(255,215,0,0.6));
+}
 
 /* === Win Popup === */
 .win-popup {
@@ -242,8 +274,10 @@ body.fg-mode .stage-frame { border-image: linear-gradient(180deg, #ffd700, #ff66
   body { padding: 6px; }
   .logo { font-size: 24px; letter-spacing: 4px; }
   .logo-sub { font-size: 10px; }
-  .board { grid-template-columns: repeat(3, clamp(70px, 25vw, 110px)); gap: 4px; }
+  .board { gap: 4px; }
+  .reel { width: clamp(70px, 25vw, 110px); height: calc(clamp(70px, 25vw, 110px) * 3 + 6px); }
   .cell { width: clamp(70px, 25vw, 110px); height: clamp(70px, 25vw, 110px); }
+  .reel-strip { gap: 3px; }
   .stage-frame { padding: 10px; }
   .spin-btn { width: 85px; height: 85px; }
   .console { padding: 8px 10px; gap: 6px; }

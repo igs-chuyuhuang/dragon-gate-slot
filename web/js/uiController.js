@@ -3,6 +3,7 @@ import { GameManager } from './gameManager.js';
 import { initSpinButton } from './effects/spinButton.js';
 import { registerThrough, resetCombo } from './effects/comboSystem.js';
 import { playWallHit } from './effects/wallHit.js';
+import { anime } from './gameFeel.js';
 
 const gm = new GameManager();
 const $ = id => document.getElementById(id);
@@ -19,10 +20,19 @@ const CARD_IMG = {
   10: 'CD-13_num10.png', 11: 'CD-04_jack.png', 12: 'CD-03_queen.png', 13: 'CD-02_king.png'
 };
 const SC_IMG = 'SC-01_scatter_dragon.png';
+const ALL_IMGS = Object.values(CARD_IMG);
+
+// Audio
+const scatterAudio = new Audio('assets/sfx/dragon_roar.mp3');
+scatterAudio.volume = 0.6;
 
 function cellToImg(cell) {
   const src = cell.isScatter ? SC_IMG : CARD_IMG[cell.value];
   return `<img src="assets/img/${src}" alt="${cellToString(cell)}">`;
+}
+
+function randomImg() {
+  return ALL_IMGS[Math.floor(Math.random() * ALL_IMGS.length)];
 }
 
 function fmt(n) { return Math.round(n).toLocaleString(); }
@@ -45,33 +55,108 @@ function updateUI() {
   $('auto-btn').textContent = autoSpins > 0 ? `停止 (${autoSpins})` : '自動';
 }
 
+// === Real Reel Scrolling Animation ===
+const CELL_H = 110;
+const GAP = 3;
+const CELL_TOTAL = CELL_H + GAP; // 113px per cell
+const EXTRA_SYMBOLS = 12; // extra symbols for scrolling illusion
+
+function buildReelStrip(col, finalCells) {
+  // Build a strip: [extra random symbols...] + [3 final symbols]
+  const strip = document.querySelector(`#reel-${col} .reel-strip`);
+  strip.innerHTML = '';
+  // Extra random symbols on top (will scroll past)
+  for (let i = 0; i < EXTRA_SYMBOLS; i++) {
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+    strip.appendChild(div);
+  }
+  // Final 3 symbols (row 0, 1, 2 for this column)
+  for (let r = 0; r < 3; r++) {
+    const cell = finalCells[r];
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.id = `cell-${r}-${col}`;
+    div.innerHTML = cellToImg(cell);
+    strip.appendChild(div);
+  }
+  return strip;
+}
+
 function animateSpin(board) {
   return new Promise(resolve => {
     spinning = true;
-    const imgKeys = Object.keys(CARD_IMG);
-    const intervals = [];
-    for (let r = 0; r < 3; r++)
-      for (let c = 0; c < 3; c++) {
-        const el = $(`cell-${r}-${c}`);
-        el.className = 'cell rolling';
-        const iv = setInterval(() => {
-          const v = imgKeys[Math.floor(Math.random() * imgKeys.length)];
-          el.innerHTML = `<img src="assets/img/${CARD_IMG[v]}">`;
-        }, 80);
-        intervals.push({ r, c, iv, el });
-      }
-    const stopCol = (col, delay) => setTimeout(() => {
-      intervals.filter(x => x.c === col).forEach(x => {
-        clearInterval(x.iv);
-        const cell = board[x.r][x.c];
-        x.el.innerHTML = cellToImg(cell);
-        x.el.className = 'cell stop-bounce' + (cell.isScatter ? ' scatter sc-flash' : '');
+    const totalSymbols = EXTRA_SYMBOLS + 3;
+    // Final position: show last 3 symbols (index EXTRA_SYMBOLS to EXTRA_SYMBOLS+2)
+    const finalY = -(EXTRA_SYMBOLS * CELL_TOTAL);
+
+    for (let col = 0; col < 3; col++) {
+      const finalCells = [board[0][col], board[1][col], board[2][col]];
+      const strip = buildReelStrip(col, finalCells);
+      // Start from top
+      strip.style.transform = 'translateY(0)';
+    }
+
+    // Animate each reel with staggered stop
+    const delays = [0, 200, 400];
+    const durations = [800, 1000, 1200];
+    let completed = 0;
+
+    for (let col = 0; col < 3; col++) {
+      const strip = document.querySelector(`#reel-${col} .reel-strip`);
+      anime({
+        targets: strip,
+        translateY: [0, finalY],
+        duration: durations[col],
+        delay: delays[col],
+        easing: 'cubicBezier(0.2, 0.6, 0.3, 1)',
+        complete: () => {
+          // Add bounce effect to final cells
+          const cells = strip.querySelectorAll('.cell');
+          const finalCells = Array.from(cells).slice(-3);
+          finalCells.forEach(c => {
+            if (c.querySelector('img[alt*="🐉"]') || board.some((row, r) => row[col].isScatter && c.id === `cell-${r}-${col}`)) {
+              c.classList.add('scatter', 'sc-flash');
+            }
+            c.classList.add('stop-bounce');
+          });
+
+          // Play scatter sound if scatter in this column
+          for (let r = 0; r < 3; r++) {
+            if (board[r][col].isScatter) {
+              scatterAudio.currentTime = 0;
+              scatterAudio.play().catch(() => {});
+              break;
+            }
+          }
+
+          completed++;
+          if (completed === 3) {
+            setTimeout(() => { spinning = false; resolve(); }, 250);
+          }
+        }
       });
-      if (col === 2) setTimeout(() => { spinning = false; resolve(); }, 250);
-    }, delay);
-    stopCol(0, 800);
-    stopCol(1, 1200);
-    stopCol(2, 1600);
+    }
+  });
+}
+
+// === Free Game Transition ===
+function showFGTransition() {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'fg-transition-overlay';
+    overlay.innerHTML = '<img src="assets/img/FG-01_free_game.png" alt="Free Game">';
+    document.body.appendChild(overlay);
+
+    const img = overlay.querySelector('img');
+    anime.set(overlay, { opacity: 0 });
+    anime.set(img, { scale: 0.5, opacity: 0 });
+
+    anime.timeline({ complete: () => { overlay.remove(); resolve(); } })
+      .add({ targets: overlay, opacity: [0, 1], duration: 400, easing: 'easeOutQuad' })
+      .add({ targets: img, scale: [0.5, 1.05, 1], opacity: [0, 1], duration: 800, easing: 'easeOutElastic(1, 0.6)' }, 0)
+      .add({ targets: overlay, opacity: 0, duration: 500, easing: 'easeInQuad', delay: 1500 });
   });
 }
 
@@ -83,6 +168,12 @@ async function doSpin() {
   await animateSpin(result.board);
   showResult(result);
   updateUI();
+
+  // FG transition after showing result
+  if (result.fgTriggered) {
+    await showFGTransition();
+  }
+
   return result;
 }
 
@@ -134,7 +225,6 @@ function showResult(result) {
         default:
           cls = 'r-miss'; text = `✗ 未穿`;
       }
-      // Check for scatter in row
       const rowCells = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]];
       const hasSC = rowCells.some(c => c.isScatter);
       if (hasSC) { cls = 'r-sc'; text = `🐉 龍符號（不判定）`; }
@@ -153,13 +243,11 @@ function showResult(result) {
     if (result.totalPayout > 0) winEl.classList.add('win-positive', 'win-countup');
     else if (result.totalPayout < 0) winEl.classList.add('win-negative');
 
-    // #7 慶祝動畫
     if (result.totalPayout > 0) {
       const hasHighMult = result.judgments.some(j => j.type === 'through' && j.mult >= 4);
       if (hasHighMult) { showCelebration(); showWinPopup(result.totalPayout); }
       else if (result.totalPayout >= gm.bet * 5) { showWinPopup(result.totalPayout); }
     }
-    if (result.fgTriggered) showFGOverlay();
   }
 }
 
@@ -178,14 +266,6 @@ function showWinPopup(amount) {
   popup.style.display = 'flex';
   popup.onclick = () => { popup.style.display = 'none'; };
   setTimeout(() => { popup.style.display = 'none'; }, 3000);
-}
-
-function showFGOverlay() {
-  const el = document.createElement('div');
-  el.className = 'fg-trigger-overlay';
-  el.innerHTML = '<span>🐉 Free Game！</span>';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2200);
 }
 
 async function autoSpin() {
@@ -214,7 +294,6 @@ export function init() {
   $('bet-up').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex + 1); updateUI(); } });
   $('bet-down').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex - 1); updateUI(); } });
 
-  // 自動按鈕組
   document.querySelectorAll('.auto-preset').forEach(btn => {
     btn.addEventListener('click', () => {
       autoCount = parseInt(btn.dataset.count);
@@ -223,7 +302,6 @@ export function init() {
     });
   });
 
-  // #2 空白鍵 = SPIN
   document.addEventListener('keydown', e => {
     if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
     if ((e.key === 'f' || e.key === 'F') && !gm.fg.active && !spinning) {
@@ -232,6 +310,15 @@ export function init() {
       updateUI();
     }
   });
+
+  // Initialize reel strips with placeholder content
+  for (let col = 0; col < 3; col++) {
+    const strip = document.querySelector(`#reel-${col} .reel-strip`);
+    for (let r = 0; r < 3; r++) {
+      const cell = $(`cell-${r}-${col}`);
+      cell.innerHTML = `<img src="assets/img/${ALL_IMGS[Math.floor(Math.random() * ALL_IMGS.length)]}">`;
+    }
+  }
 
   updateUI();
 }
