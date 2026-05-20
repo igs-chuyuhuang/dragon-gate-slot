@@ -26,6 +26,8 @@ AI Producer Agent 作為統籌核心，負責任務拆解、工作分派與成�
 | Art Prompt Agent | 美術素材 prompt、AI 生圖 |
 | Unity Developer Agent | Unity 程式開發 |
 | QA Test Agent | 測試計畫、Bug 追蹤 |
+| Creative Director Agent | 創新玩法設計、wow moment、視覺節奏互動亮點 |
+| Game Feel Agent | 特效爽感設計、動畫時間軸、easing 曲線、音效觸發點 |
 
 ## AI 工具應用規劃
 
