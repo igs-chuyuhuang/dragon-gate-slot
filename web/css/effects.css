@@ -1,0 +1,25 @@
+/* effects.css — 特效爽感相關樣式 */
+
+/* 裂痕效果 */
+.cell { position: relative; }
+.cell.cracked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10 L45 30 L55 45 L42 60 L50 80 L48 95' stroke='%23e94560' stroke-width='2' fill='none'/%3E%3Cpath d='M50 45 L60 55 L65 70' stroke='%23e94560' stroke-width='1.5' fill='none'/%3E%3Cpath d='M45 30 L35 40' stroke='%23e94560' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;
+  opacity: 0.8;
+  animation: crack-fade 400ms ease-in forwards;
+  pointer-events: none;
+}
+@keyframes crack-fade { to { opacity: 0; } }
+
+/* 飛出數字 */
+.fly-number {
+  position: fixed;
+  font-size: 28px;
+  font-weight: bold;
+  color: #ffd700;
+  z-index: 950;
+  pointer-events: none;
+  text-shadow: 0 0 8px #ff6b35, 0 2px 4px rgba(0,0,0,0.6);
+}

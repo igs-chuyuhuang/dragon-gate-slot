@@ -1,5 +1,8 @@
 import { cellToString } from './slotEngine.js';
 import { GameManager } from './gameManager.js';
+import { initSpinButton } from './effects/spinButton.js';
+import { registerThrough, resetCombo } from './effects/comboSystem.js';
+import { playWallHit } from './effects/wallHit.js';
 
 const gm = new GameManager();
 const $ = id => document.getElementById(id);
@@ -86,6 +89,14 @@ function showResult(result) {
     winEl.textContent = result.fgDone && result.jpResult ? `+${fmt(result.jpResult.payout)}` : '-';
     winEl.className = result.jpResult && result.jpResult.payout > 0 ? 'win-positive' : '';
   } else {
+    // 特效觸發
+    let hasThrough = false;
+    result.judgments.forEach(j => {
+      if (j.type === 'through') { registerThrough(j.row, j.mult); hasThrough = true; }
+      else if (j.type === 'wall') { playWallHit(j.row); }
+    });
+    if (!hasThrough) resetCombo();
+
     let html = '';
     result.judgments.forEach(j => {
       let cls, text;
@@ -170,6 +181,7 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 export function init() {
   $('spin-btn').addEventListener('click', doSpin);
+  initSpinButton($('spin-btn'));
   $('auto-btn').addEventListener('click', autoSpin);
   $('bet-up').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex + 1); updateUI(); } });
   $('bet-down').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex - 1); updateUI(); } });
