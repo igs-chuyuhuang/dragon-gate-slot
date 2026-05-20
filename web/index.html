@@ -36,8 +36,10 @@
     <button id="spin-btn">SPIN</button>
   </div>
 
-  <div class="controls">
-    <input type="number" id="auto-count" value="10" min="1" max="999" style="width:60px;text-align:center;border-radius:4px;border:none;padding:4px">
+  <div class="auto-group">
+    <button class="auto-preset" data-count="10">10次</button>
+    <button class="auto-preset" data-count="50">50次</button>
+    <button class="auto-preset" data-count="100">100次</button>
     <button id="auto-btn">自動</button>
   </div>
 
@@ -46,8 +48,8 @@
     <span>贏分: <strong id="win">0</strong></span>
   </div>
 
-  <pre id="results">按 SPIN 開始遊戲</pre>
-  <p style="font-size:12px;color:#666;margin-top:8px">按 F 進入 Free Game（測試用）</p>
+  <div id="results">按 SPIN 開始遊戲</div>
+  <p style="font-size:12px;color:#666;margin-top:8px">空白鍵 = SPIN ｜ F = 測試 Free Game</p>
 
   <script type="module">
     import { init } from './js/uiController.js';

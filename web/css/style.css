@@ -1,29 +1,93 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: sans-serif; background: #1a1a2e; color: #eee; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
 h1 { color: #e94560; margin-bottom: 12px; }
+
+/* JP Bar — #6 對比度修正 */
 .jp-bar { display: flex; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; justify-content: center; }
 .jp { padding: 4px 10px; border-radius: 6px; font-size: 14px; }
 .jp.basic { background: #1a3a5c; }
-.jp.major { background: #5c3a1a; }
-.jp.grand { background: #5c1a1a; }
+.jp.major { background: #5c3a1a; color: #ffd700; }
+.jp.grand { background: #5c1a1a; color: #ffd700; }
+
+/* SC / FG */
 .sc-bar { margin-bottom: 8px; font-size: 16px; }
 .sc-bar .almost { color: #ffd700; animation: pulse 0.6s infinite alternate; }
 @keyframes pulse { from { opacity: 1; } to { opacity: 0.4; } }
 .fg-info { background: #2d1b69; padding: 8px 16px; border-radius: 8px; margin-bottom: 8px; font-size: 16px; color: #ffd700; text-align: center; }
-.board { display: grid; grid-template-columns: repeat(3, 80px); gap: 6px; margin: 12px 0; }
-.cell { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; background: #16213e; border: 2px solid #0f3460; border-radius: 8px; transition: transform 0.15s; }
+
+/* Board — 桌面加大到 100px + 間距 */
+.board { display: grid; grid-template-columns: repeat(3, 100px); gap: 8px; margin: 24px 0; }
+.cell { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; background: #16213e; border: 2px solid #0f3460; border-radius: 8px; transition: transform 0.15s; }
 .cell.scatter { background: #533483; color: #ffd700; }
-.cell.rolling { background: #0a1628; color: #556; filter: blur(1px); }
-.cell.stop-bounce { animation: bounce 0.3s ease-out; }
-@keyframes bounce { 0% { transform: scaleY(0.85); } 50% { transform: scaleY(1.08); } 100% { transform: scaleY(1); } }
-.cell.sc-flash { animation: bounce 0.3s ease-out, flash 0.6s ease-in-out 2; }
+.cell.rolling { background: #0a1628; color: #556; filter: blur(1px); animation: reel-scroll 0.12s linear infinite; }
+.cell.stop-bounce { animation: bounce 0.5s ease-out; }
+
+/* #4 滾動動畫 — translateY 位移感 */
+@keyframes reel-scroll { 0% { transform: translateY(-4px); } 50% { transform: translateY(4px); } 100% { transform: translateY(-4px); } }
+@keyframes bounce { 0% { transform: scaleY(0.85) translateY(6px); } 50% { transform: scaleY(1.08) translateY(-3px); } 100% { transform: scaleY(1) translateY(0); } }
+.cell.sc-flash { animation: bounce 0.5s ease-out, flash 0.6s ease-in-out 2; }
 @keyframes flash { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 16px 4px #ffd700; } }
+
+/* Controls */
 .controls { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
-button { padding: 8px 14px; font-size: 15px; border: none; border-radius: 6px; cursor: pointer; background: #e94560; color: #fff; }
-button:disabled { opacity: 0.4; cursor: not-allowed; }
+button { padding: 8px 14px; font-size: 15px; border: none; border-radius: 6px; cursor: pointer; background: #e94560; color: #fff; min-height: 44px; transition: filter 0.15s, transform 0.1s; }
+button:hover { filter: brightness(1.2); }
+button:active { transform: scale(0.95); }
+button:disabled { opacity: 0.4; cursor: not-allowed; filter: none; transform: none; }
 button.small { padding: 6px 12px; background: #0f3460; }
-.info { display: flex; gap: 24px; font-size: 18px; margin: 8px 0; }
+
+/* #2 SPIN 按鈕強化 */
+#spin-btn { font-size: 20px; font-weight: bold; padding: 12px 32px; height: 60px; letter-spacing: 2px; }
+
+/* 自動按鈕組 */
+.auto-group { display: flex; gap: 6px; align-items: center; margin: 8px 0; }
+.auto-group button { font-size: 13px; padding: 6px 10px; min-height: 36px; background: #0f3460; }
+.auto-group button.active { background: #e94560; }
+#auto-btn { background: #e94560; }
+
+/* Info */
+.info { display: flex; gap: 24px; font-size: 18px; margin: 16px 0; flex-wrap: wrap; justify-content: center; }
 .info span { background: #16213e; padding: 6px 14px; border-radius: 6px; }
-#results { white-space: pre; font-family: monospace; background: #16213e; padding: 12px; border-radius: 8px; margin-top: 12px; min-height: 80px; min-width: 300px; text-align: center; }
+
+/* #3 贏分顏色 */
+.win-positive { color: #4caf50; }
+.win-negative { color: #e94560; }
+
+/* #5 判定結果改彩色 */
+#results { background: #16213e; padding: 12px; border-radius: 8px; margin-top: 12px; min-height: 80px; min-width: 300px; text-align: center; line-height: 1.8; }
+#results .row-result { margin: 4px 0; font-size: 15px; }
+#results .r-pass { color: #4caf50; }
+#results .r-wall { color: #e94560; }
+#results .r-same { color: #b71c1c; }
+#results .r-miss { color: #888; }
+#results .r-sc { color: #ffd700; }
+#results .r-summary { margin-top: 8px; border-top: 1px solid #333; padding-top: 8px; font-size: 16px; font-weight: bold; }
+
+/* #7 慶祝動畫 */
+.celebrate-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 999; animation: gold-flash 0.8s ease-out 3; }
+@keyframes gold-flash { 0%,100% { background: transparent; } 50% { background: rgba(255,215,0,0.15); } }
+.win-countup { animation: countup-pop 0.6s ease-out; }
+@keyframes countup-pop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #ffd700; } 100% { transform: scale(1); } }
+.fg-trigger-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); z-index: 1000; animation: fg-fade 2s ease-out forwards; }
+.fg-trigger-overlay span { font-size: 48px; color: #ffd700; font-weight: bold; animation: fg-zoom 1s ease-out; }
+@keyframes fg-zoom { 0% { transform: scale(0.3); opacity: 0; } 60% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes fg-fade { 0%,70% { opacity: 1; } 100% { opacity: 0; } }
+
+/* FG mode */
 body.fg-mode { background: #0d0d2b; }
 body.fg-mode .board .cell { border-color: #ffd700; }
+
+/* #1 手機適配 */
+@media (max-width: 480px) {
+  body { padding: 10px; }
+  h1 { font-size: 20px; }
+  .board { grid-template-columns: repeat(3, clamp(60px, 22vw, 120px)); gap: 4px; margin: 16px 0; }
+  .cell { width: clamp(60px, 22vw, 120px); height: clamp(60px, 22vw, 120px); font-size: 18px; }
+  .controls { flex-wrap: wrap; justify-content: center; }
+  .info { gap: 12px; font-size: 15px; }
+  .info span { padding: 4px 10px; }
+  #spin-btn { width: 100%; height: 56px; font-size: 18px; }
+  #results { min-width: unset; width: 100%; font-size: 13px; }
+  .auto-group { flex-wrap: wrap; justify-content: center; }
+  .jp-bar { font-size: 12px; gap: 6px; }
+}
