@@ -11,13 +11,28 @@ let autoSpins = 0;
 let autoStopped = false;
 let autoCount = 10;
 
+// Card value → image file mapping
+const CARD_IMG = {
+  1: 'CD-01_ace.png', 2: 'CD-05_num2.png', 3: 'CD-06_num3.png',
+  4: 'CD-07_num4.png', 5: 'CD-08_num5.png', 6: 'CD-09_num6.png',
+  7: 'CD-10_num7.png', 8: 'CD-11_num8.png', 9: 'CD-12_num9.png',
+  10: 'CD-13_num10.png', 11: 'CD-04_jack.png', 12: 'CD-03_queen.png', 13: 'CD-02_king.png'
+};
+const SC_IMG = 'SC-01_scatter_dragon.png';
+
+function cellToImg(cell) {
+  const src = cell.isScatter ? SC_IMG : CARD_IMG[cell.value];
+  return `<img src="assets/img/${src}" alt="${cellToString(cell)}">`;
+}
+
 function fmt(n) { return Math.round(n).toLocaleString(); }
 
 function updateUI() {
   $('balance').textContent = fmt(gm.balance);
   $('bet').textContent = fmt(gm.bet);
   $('spin-btn').disabled = spinning || !gm.canSpin();
-  $('spin-btn').textContent = gm.fg.active ? `FG SPIN (${gm.fg.spinsLeft})` : 'SPIN';
+  const label = $('spin-btn').querySelector('.spin-label');
+  if (label) label.textContent = gm.fg.active ? `FG (${gm.fg.spinsLeft})` : 'SPIN';
   $('jp-basic').textContent = fmt(gm.jp.pools.basic);
   $('jp-major').textContent = fmt(gm.jp.pools.major);
   $('jp-grand').textContent = fmt(gm.jp.pools.grand);
@@ -33,20 +48,23 @@ function updateUI() {
 function animateSpin(board) {
   return new Promise(resolve => {
     spinning = true;
-    const names = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    const imgKeys = Object.keys(CARD_IMG);
     const intervals = [];
     for (let r = 0; r < 3; r++)
       for (let c = 0; c < 3; c++) {
         const el = $(`cell-${r}-${c}`);
         el.className = 'cell rolling';
-        const iv = setInterval(() => { el.textContent = names[Math.floor(Math.random() * 13)]; }, 60);
+        const iv = setInterval(() => {
+          const v = imgKeys[Math.floor(Math.random() * imgKeys.length)];
+          el.innerHTML = `<img src="assets/img/${CARD_IMG[v]}">`;
+        }, 80);
         intervals.push({ r, c, iv, el });
       }
     const stopCol = (col, delay) => setTimeout(() => {
       intervals.filter(x => x.c === col).forEach(x => {
         clearInterval(x.iv);
         const cell = board[x.r][x.c];
-        x.el.textContent = cellToString(cell);
+        x.el.innerHTML = cellToImg(cell);
         x.el.className = 'cell stop-bounce' + (cell.isScatter ? ' scatter sc-flash' : '');
       });
       if (col === 2) setTimeout(() => { spinning = false; resolve(); }, 250);
