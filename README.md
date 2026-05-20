@@ -23,6 +23,8 @@ qa/            ← 測試文件、Bug 清單
 | 美術/音效 | Art + Audio Agent | AI 生圖/音效 |
 | 程式-核心邏輯 | Unity Developer Agent | 穿門判定、Free Game、JP |
 | 程式-前端/UI | Unity Developer Agent | UI、動畫、素材整合 |
+| 創意總監 | Creative Director Agent | 創新玩法設計、wow moment、小遊戲、連擊儀式感 |
+| 特效爽感 | Game Feel Agent | 體感特效設計（Spin 蓄力、穿門火花、碰壁裂痕、JP 多段揭曉）|
 
 ## 遊戲規格
 
