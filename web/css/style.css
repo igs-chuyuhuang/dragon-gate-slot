@@ -59,13 +59,13 @@ button.small { padding: 6px 12px; background: #0f3460; }
 #results .r-pass { color: #4caf50; }
 #results .r-wall { color: #e94560; }
 #results .r-same { color: #b71c1c; }
-#results .r-miss { color: #888; }
+#results .r-miss { color: #9e9e9e; }
 #results .r-sc { color: #ffd700; }
 #results .r-summary { margin-top: 8px; border-top: 1px solid #333; padding-top: 8px; font-size: 16px; font-weight: bold; }
 
 /* #7 慶祝動畫 */
 .celebrate-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 999; animation: gold-flash 0.8s ease-out 3; }
-@keyframes gold-flash { 0%,100% { background: transparent; } 50% { background: rgba(255,215,0,0.15); } }
+@keyframes gold-flash { 0%,100% { background: transparent; } 50% { background: rgba(255,215,0,0.28); } }
 .win-countup { animation: countup-pop 0.6s ease-out; }
 @keyframes countup-pop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #ffd700; } 100% { transform: scale(1); } }
 .fg-trigger-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); z-index: 1000; animation: fg-fade 2s ease-out forwards; }

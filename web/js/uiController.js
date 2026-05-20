@@ -119,7 +119,10 @@ function showResult(result) {
     resEl.innerHTML = html;
 
     winEl.textContent = `${result.totalPayout >= 0 ? '+' : ''}${fmt(result.totalPayout)}`;
-    winEl.className = result.totalPayout > 0 ? 'win-positive win-countup' : result.totalPayout < 0 ? 'win-negative' : '';
+    winEl.classList.remove('win-positive', 'win-negative', 'win-countup');
+    void winEl.offsetWidth;
+    if (result.totalPayout > 0) winEl.classList.add('win-positive', 'win-countup');
+    else if (result.totalPayout < 0) winEl.classList.add('win-negative');
 
     // #7 慶祝動畫
     if (result.totalPayout > 0) {
@@ -131,6 +134,7 @@ function showResult(result) {
 }
 
 function showCelebration() {
+  document.querySelector('.celebrate-overlay')?.remove();
   const el = document.createElement('div');
   el.className = 'celebrate-overlay';
   document.body.appendChild(el);
