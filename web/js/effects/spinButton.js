@@ -2,10 +2,16 @@
 import { anime } from '../gameFeel.js';
 
 let chargeAnim = null;
+const chargeAudio = new Audio('assets/sfx/spin_charge.mp3');
+const releaseAudio = new Audio('assets/sfx/spin_release.mp3');
+chargeAudio.loop = true;
+chargeAudio.volume = 0.4;
 
 export function initSpinButton(btnEl) {
   btnEl.addEventListener('pointerdown', () => {
     if (btnEl.disabled) return;
+    chargeAudio.currentTime = 0;
+    chargeAudio.play().catch(() => {});
     chargeAnim = anime.timeline({ loop: true })
       .add({
         targets: btnEl,
@@ -24,7 +30,10 @@ export function initSpinButton(btnEl) {
   });
 
   const release = () => {
+    chargeAudio.pause();
     if (chargeAnim) { chargeAnim.pause(); chargeAnim = null; }
+    releaseAudio.currentTime = 0;
+    releaseAudio.play().catch(() => {});
     anime.remove(btnEl);
     anime({
       targets: btnEl,

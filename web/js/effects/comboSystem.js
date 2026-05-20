@@ -4,6 +4,8 @@ import { playGateThrough } from './gateThrough.js';
 
 let comboCount = 0;
 let comboTimer = null;
+const comboAudio = new Audio('assets/sfx/combo_hit.mp3');
+const throughAudio = new Audio('assets/sfx/gate_through.mp3');
 
 const LEVELS = [
   null,
@@ -38,6 +40,9 @@ export function registerThrough(row, mult) {
 export function resetCombo() { comboCount = 0; clearTimeout(comboTimer); }
 
 function playEnhanced(row, mult, level) {
+  throughAudio.currentTime = 0;
+  throughAudio.playbackRate = level.pitch;
+  throughAudio.play().catch(() => {});
   const cells = [0, 1, 2].map(c => document.getElementById(`cell-${row}-${c}`));
   const board = document.querySelector('.board');
   const s = level.shake;
@@ -88,6 +93,8 @@ function playEnhanced(row, mult, level) {
 }
 
 function showComboText(count) {
+  comboAudio.currentTime = 0;
+  comboAudio.play().catch(() => {});
   const el = document.createElement('div');
   el.className = 'fly-number';
   el.textContent = `${count} COMBO!`;

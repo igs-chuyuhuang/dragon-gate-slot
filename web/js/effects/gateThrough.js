@@ -2,8 +2,12 @@
 import { anime, getPixi } from '../gameFeel.js';
 
 let pixiReady = null;
+const throughAudio = new Audio('assets/sfx/gate_through.mp3');
+const flyAudio = new Audio('assets/sfx/score_fly.mp3');
 
 export function playGateThrough(row, mult) {
+  throughAudio.currentTime = 0;
+  throughAudio.play().catch(() => {});
   const cells = [0, 1, 2].map(c => document.getElementById(`cell-${row}-${c}`));
   const board = document.querySelector('.board');
 
@@ -39,7 +43,11 @@ export function playGateThrough(row, mult) {
   spawnSparks(cx, cy, 25);
 
   // 4. 倍率數字飛出
-  setTimeout(() => flyNumber(cx, cy, mult), 150);
+  setTimeout(() => {
+    flyAudio.currentTime = 0;
+    flyAudio.play().catch(() => {});
+    flyNumber(cx, cy, mult);
+  }, 150);
 }
 
 function flyNumber(cx, cy, mult) {

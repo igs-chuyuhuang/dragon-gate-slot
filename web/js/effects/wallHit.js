@@ -1,7 +1,12 @@
 // wallHit.js — 碰壁撞擊特效（膨脹 + 裂痕 + 推開）
 import { anime } from '../gameFeel.js';
 
+const hitAudio = new Audio('assets/sfx/wall_hit.mp3');
+const crackAudio = new Audio('assets/sfx/crack.mp3');
+
 export function playWallHit(row) {
+  hitAudio.currentTime = 0;
+  hitAudio.play().catch(() => {});
   const cells = [0, 1, 2].map(c => document.getElementById(`cell-${row}-${c}`));
   const [left, mid, right] = cells;
 
@@ -20,6 +25,8 @@ export function playWallHit(row) {
 
   // 3. 裂痕 class（CSS handles the visual）
   setTimeout(() => {
+    crackAudio.currentTime = 0;
+    crackAudio.play().catch(() => {});
     mid.classList.add('cracked');
     // 微弱餘震
     anime({
