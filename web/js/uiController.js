@@ -156,7 +156,8 @@ function showResult(result) {
     // #7 慶祝動畫
     if (result.totalPayout > 0) {
       const hasHighMult = result.judgments.some(j => j.type === 'through' && j.mult >= 4);
-      if (hasHighMult) showCelebration();
+      if (hasHighMult) { showCelebration(); showWinPopup(result.totalPayout); }
+      else if (result.totalPayout >= gm.bet * 5) { showWinPopup(result.totalPayout); }
     }
     if (result.fgTriggered) showFGOverlay();
   }
@@ -168,6 +169,15 @@ function showCelebration() {
   el.className = 'celebrate-overlay';
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 2500);
+}
+
+function showWinPopup(amount) {
+  const popup = $('win-popup');
+  const amountEl = $('win-popup-amount');
+  amountEl.textContent = fmt(amount);
+  popup.style.display = 'flex';
+  popup.onclick = () => { popup.style.display = 'none'; };
+  setTimeout(() => { popup.style.display = 'none'; }, 3000);
 }
 
 function showFGOverlay() {

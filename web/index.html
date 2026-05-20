@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="css/effects.css">
 </head>
 <body>
+  <!-- Logo Title -->
+  <h1 class="logo">射龍門<span class="logo-sub">DRAGON GATE SLOT</span></h1>
+
   <!-- JP Panel -->
   <div class="jp-bar">
     <div class="jp basic"><img src="assets/img/JP-01_basic.png" alt="Basic"><span id="jp-basic">500</span></div>
@@ -20,38 +23,51 @@
 
   <!-- Main Stage -->
   <div class="stage">
-    <div class="board">
-      <div class="cell" id="cell-0-0"></div>
-      <div class="cell" id="cell-0-1"></div>
-      <div class="cell" id="cell-0-2"></div>
-      <div class="cell" id="cell-1-0"></div>
-      <div class="cell" id="cell-1-1"></div>
-      <div class="cell" id="cell-1-2"></div>
-      <div class="cell" id="cell-2-0"></div>
-      <div class="cell" id="cell-2-1"></div>
-      <div class="cell" id="cell-2-2"></div>
+    <div class="stage-frame">
+      <div class="board">
+        <div class="cell" id="cell-0-0"></div>
+        <div class="cell" id="cell-0-1"></div>
+        <div class="cell" id="cell-0-2"></div>
+        <div class="cell" id="cell-1-0"></div>
+        <div class="cell" id="cell-1-1"></div>
+        <div class="cell" id="cell-1-2"></div>
+        <div class="cell" id="cell-2-0"></div>
+        <div class="cell" id="cell-2-1"></div>
+        <div class="cell" id="cell-2-2"></div>
+      </div>
     </div>
   </div>
 
-  <!-- Results Panel -->
-  <div id="results">按 SPIN 開始遊戲</div>
+  <!-- Win Popup Overlay -->
+  <div id="win-popup" class="win-popup" style="display:none">
+    <img src="assets/img/UI-05_win_frame.png" class="win-frame" alt="Win">
+    <div class="win-popup-content">
+      <div class="win-popup-label">恭喜獲得</div>
+      <div class="win-popup-amount" id="win-popup-amount">0</div>
+    </div>
+  </div>
 
   <!-- Bottom Console -->
   <div class="console">
-    <div class="info">
-      <span class="info-box">餘額 <strong id="balance">1,000</strong></span>
-      <span class="info-box win-box">贏分 <strong id="win">0</strong></span>
+    <div class="console-section">
+      <div class="console-panel" style="background-image:url('assets/img/UI-03_balance.png')">
+        <span class="panel-label">餘額</span>
+        <strong id="balance">1,000</strong>
+      </div>
     </div>
-    <div class="controls">
+    <div class="console-section console-center">
       <button class="small" id="bet-down">◀</button>
-      <span class="bet-display">押注 <strong id="bet">10</strong></span>
+      <div class="console-panel" style="background-image:url('assets/img/UI-02_bet_panel.png')">
+        <span class="panel-label">押注</span>
+        <strong id="bet">10</strong>
+      </div>
       <button class="small" id="bet-up">▶</button>
     </div>
-    <div class="auto-group">
-      <button class="auto-preset" data-count="10">10次</button>
-      <button class="auto-preset" data-count="50">50次</button>
-      <button class="auto-preset" data-count="100">100次</button>
-      <button id="auto-btn">自動</button>
+    <div class="console-section">
+      <div class="console-panel win-panel">
+        <span class="panel-label">贏分</span>
+        <strong id="win">0</strong>
+      </div>
     </div>
   </div>
 
@@ -60,6 +76,17 @@
     <img src="assets/img/UI-04_spin_btn.png" alt="SPIN">
     <span class="spin-label">SPIN</span>
   </button>
+
+  <!-- Auto Controls -->
+  <div class="auto-group">
+    <button class="auto-preset" data-count="10">10次</button>
+    <button class="auto-preset" data-count="50">50次</button>
+    <button class="auto-preset" data-count="100">100次</button>
+    <button id="auto-btn">自動</button>
+  </div>
+
+  <!-- Results Panel -->
+  <div id="results">按 SPIN 開始遊戲</div>
 
   <script type="module">
     import { init } from './js/uiController.js';
