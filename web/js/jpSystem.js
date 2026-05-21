@@ -38,7 +38,7 @@ export class JpSystem {
     if (score === center) {
       const payout = pool * 3;
       this.pools[tier] = seed;
-      return { tier, payout, msg: `🎯 精準命中 ${tier.toUpperCase()} 中心！×3` };
+      return { tier, payout, perfect: true, msg: `🎯 精準命中 ${tier.toUpperCase()} 中心！×3` };
     }
     // Segmented payout based on distance percentage
     const halfWidth = (hi - lo) / 2;

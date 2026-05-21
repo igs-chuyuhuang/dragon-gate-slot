@@ -200,7 +200,7 @@ function showHint(text, color) {
 export function initFgMeterDebug(gm) {
   document.addEventListener('keydown', async (e) => {
     if (e.ctrlKey || e.altKey || e.metaKey) return;
-    const scores = { '1': 85, '2': 160, '3': 260 };
+    const scores = { '1': 85, '2': 160, '3': 260, '4': 90, '5': 265 };
     if (!scores[e.key]) return;
 
     const targetScore = scores[e.key];
@@ -223,7 +223,7 @@ export function initFgMeterDebug(gm) {
     hideFgMeter();
     await delay(400);
 
-    // Simulate jpResult
+    // Simulate jpResult (4/5 = perfect center hits)
     const jpResult = gm.jp.evalJpGate(targetScore);
     await playJpReveal(targetScore, jpResult);
   });
