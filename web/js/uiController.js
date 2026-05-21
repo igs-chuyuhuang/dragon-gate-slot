@@ -101,11 +101,13 @@ function highlightRow(row, type) {
 }
 
 const TARGET_Y = -(REEL_SYMBOLS * CELL_TOTAL);
+const stopAudio = new Audio('assets/sfx/spin_release.mp3');
+stopAudio.volume = 0.5;
 
 function animateSpin(board) {
   return new Promise(resolve => {
     spinning = true;
-    onSpinStart(); // B. vignette + motion blur
+    onSpinStart();
 
     for (let col = 0; col < 3; col++) {
       const finalCells = [board[0][col], board[1][col], board[2][col]];
@@ -113,9 +115,11 @@ function animateSpin(board) {
       strip.style.transform = 'translateY(0px)';
     }
 
-    document.querySelector('#reel-0 .reel-strip').offsetHeight; // force reflow
+    document.querySelector('#reel-0 .reel-strip').offsetHeight;
 
-    const delays = [0, 500, 250]; // left→right→middle (中間最後停，製造懸念)
+    // Left(0ms) → Right(150ms) → Middle(300ms), durations 600/650/700ms
+    const delays = [0, 300, 150]; // col0=left, col1=middle(last), col2=right
+    const durations = [500, 600, 550]; // main scroll phase per col
     let completed = 0;
 
     for (let col = 0; col < 3; col++) {
@@ -124,11 +128,16 @@ function animateSpin(board) {
       anime({
         targets: strip,
         translateY: [
-          { value: TARGET_Y - OVERSHOOT, duration: 800 + col * 200, easing: 'easeInOutQuad' },
-          { value: TARGET_Y, duration: 250, easing: 'easeOutBounce' }
+          { value: TARGET_Y - OVERSHOOT, duration: durations[col], easing: 'easeInQuad' },
+          { value: TARGET_Y, duration: 150, easing: 'easeOutBack' }
         ],
         delay: delays[col],
         complete: () => {
+          // Stop thud audio
+          const thud = stopAudio.cloneNode();
+          thud.volume = 0.5;
+          thud.play().catch(() => {});
+
           const cells = strip.querySelectorAll('.cell');
           const finalCells = Array.from(cells).slice(-3);
           finalCells.forEach(c => {
@@ -138,7 +147,7 @@ function animateSpin(board) {
             c.classList.add('stop-bounce');
           });
 
-          onColumnStop(col); // B. column impact
+          onColumnStop(col);
 
           for (let r = 0; r < 3; r++) {
             if (board[r][col].isScatter) {
@@ -150,7 +159,7 @@ function animateSpin(board) {
 
           completed++;
           if (completed === 3) {
-            setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 200);
+            setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 100);
           }
         }
       });
@@ -277,7 +286,7 @@ async function autoSpin() {
     if (result && result.fgTriggered) {
       while (gm.fg.active && !autoStopped) { await doSpin(); updateUI(); }
     }
-    if (autoSpins > 0 && !autoStopped) await delay(600);
+    if (autoSpins > 0 && !autoStopped) await delay(300);
   }
   autoSpins = 0;
   updateUI();
