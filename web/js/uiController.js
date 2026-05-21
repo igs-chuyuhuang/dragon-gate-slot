@@ -62,11 +62,19 @@ const CELL_TOTAL = CELL_H + GAP; // 113px per cell
 const EXTRA_SYMBOLS = 12; // extra symbols for scrolling illusion
 
 function buildReelStrip(col, finalCells) {
-  // Build a strip: [3 final symbols] + [extra random symbols below]
-  // Animation will start showing randoms (offset down) then scroll up to show finals
+  // Strip: [12 random symbols on top] + [3 final symbols at bottom]
+  // Reel shows bottom 3 cells. Animation starts with strip pulled up (showing randoms),
+  // then slides down to 0 (showing finals at bottom) = symbols fall from top to bottom.
   const strip = document.querySelector(`#reel-${col} .reel-strip`);
   strip.innerHTML = '';
-  // Final 3 symbols at top (row 0, 1, 2 for this column)
+  // Random symbols on top (scroll past during spin)
+  for (let i = 0; i < EXTRA_SYMBOLS; i++) {
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+    strip.appendChild(div);
+  }
+  // Final 3 symbols at bottom (row 0, 1, 2 for this column)
   for (let r = 0; r < 3; r++) {
     const cell = finalCells[r];
     const div = document.createElement('div');
@@ -75,30 +83,25 @@ function buildReelStrip(col, finalCells) {
     div.innerHTML = cellToImg(cell);
     strip.appendChild(div);
   }
-  // Extra random symbols below (scrolling content)
-  for (let i = 0; i < EXTRA_SYMBOLS; i++) {
-    const div = document.createElement('div');
-    div.className = 'cell';
-    div.innerHTML = `<img src="assets/img/${randomImg()}">`;
-    strip.appendChild(div);
-  }
   return strip;
 }
 
 function animateSpin(board) {
   return new Promise(resolve => {
     spinning = true;
-    // Start offset: strip pushed down so random symbols are visible (finals above viewport)
-    const startY = EXTRA_SYMBOLS * CELL_TOTAL;
+    // Strip has 15 cells total. Reel viewport shows bottom 3.
+    // At rest (translateY=0), bottom 3 (finals) are visible.
+    // Start offset: pull strip UP so random symbols are visible instead.
+    const startY = -(EXTRA_SYMBOLS * CELL_TOTAL);
 
     for (let col = 0; col < 3; col++) {
       const finalCells = [board[0][col], board[1][col], board[2][col]];
       const strip = buildReelStrip(col, finalCells);
-      // Start with strip offset down (showing random symbols)
       strip.style.transform = `translateY(${startY}px)`;
     }
 
-    // Animate each reel: scroll from bottom to top (symbols appear to fall from top)
+    // Animate: translateY from negative (pulled up) to 0 (finals at bottom visible)
+    // Visually: symbols scroll downward (fall from top)
     const delays = [0, 200, 400];
     const durations = [800, 1000, 1200];
     let completed = 0;
@@ -112,9 +115,9 @@ function animateSpin(board) {
         delay: delays[col],
         easing: 'cubicBezier(0.2, 0.6, 0.3, 1)',
         complete: () => {
-          // Add bounce effect to final cells (first 3 in strip)
+          // Add bounce effect to final cells (last 3 in strip)
           const cells = strip.querySelectorAll('.cell');
-          const finalCells = Array.from(cells).slice(0, 3);
+          const finalCells = Array.from(cells).slice(-3);
           finalCells.forEach(c => {
             if (c.querySelector('img[alt*="🐉"]') || board.some((row, r) => row[col].isScatter && c.id === `cell-${r}-${col}`)) {
               c.classList.add('scatter', 'sc-flash');
