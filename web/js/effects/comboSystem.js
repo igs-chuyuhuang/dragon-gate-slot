@@ -131,6 +131,7 @@ function flashWhiteGold() {
 async function spawnShockwave() {
   let pixi;
   try { pixi = await getPixi(); } catch { return; }
+  if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
   const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
   const ring = new PIXI.Graphics();
@@ -145,6 +146,7 @@ async function spawnShockwave() {
 async function spawnComboSparks(count) {
   let pixi;
   try { pixi = await getPixi(); } catch { return; }
+  if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
   const cx = window.innerWidth / 2, cy = window.innerHeight * 0.4;
 
@@ -165,6 +167,7 @@ async function spawnComboSparks(count) {
 async function spawnBreakParticles() {
   let pixi;
   try { pixi = await getPixi(); } catch { return; }
+  if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
   const cx = window.innerWidth / 2, cy = window.innerHeight * 0.4;
 

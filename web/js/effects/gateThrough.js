@@ -150,6 +150,7 @@ function playBigHit() {
 async function spawnImpactParticles(cx, cy) {
   let pixi;
   try { pixi = await getPixi(); } catch { return; }
+  if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
 
   // Small sparks (40)

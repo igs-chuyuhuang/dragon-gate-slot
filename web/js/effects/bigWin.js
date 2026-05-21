@@ -85,6 +85,7 @@ export function playBigWin(payout, bet) {
 async function spawnSideBurst(count) {
   let pixi;
   try { pixi = await getPixi(); } catch { return; }
+  if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
 
   const w = window.innerWidth;
