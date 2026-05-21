@@ -59,20 +59,19 @@ function updateUI() {
 const CELL_H = 110;
 const GAP = 3;
 const CELL_TOTAL = CELL_H + GAP; // 113px per cell
-const EXTRA_SYMBOLS = 30; // many symbols for continuous scrolling feel
-const OVERSHOOT = 25; // px to overshoot past target
+const REEL_SYMBOLS = 20; // random symbols before final 3
+const OVERSHOOT = 18; // px overshoot on stop
 
 function buildReelStrip(col, finalCells) {
   const strip = document.querySelector(`#reel-${col} .reel-strip`);
   strip.innerHTML = '';
-  // Random symbols on top (scroll past during spin)
-  for (let i = 0; i < EXTRA_SYMBOLS; i++) {
+  // [20 random] + [3 final] = 23 total, top to bottom
+  for (let i = 0; i < REEL_SYMBOLS; i++) {
     const div = document.createElement('div');
     div.className = 'cell';
     div.innerHTML = `<img src="assets/img/${randomImg()}">`;
     strip.appendChild(div);
   }
-  // Final 3 symbols at bottom
   for (let r = 0; r < 3; r++) {
     const cell = finalCells[r];
     const div = document.createElement('div');
@@ -84,39 +83,40 @@ function buildReelStrip(col, finalCells) {
   return strip;
 }
 
+// Target translateY to show final 3 symbols (index 20,21,22) in viewport
+// Viewport shows cells at top:0, so we need translateY = -(REEL_SYMBOLS * CELL_TOTAL)
+const TARGET_Y = -(REEL_SYMBOLS * CELL_TOTAL);
+
 function animateSpin(board) {
   return new Promise(resolve => {
     spinning = true;
-    // At translateY=0, bottom 3 (finals) visible. Start pulled up.
-    const startY = -(EXTRA_SYMBOLS * CELL_TOTAL);
 
     for (let col = 0; col < 3; col++) {
       const finalCells = [board[0][col], board[1][col], board[2][col]];
       const strip = buildReelStrip(col, finalCells);
-      strip.style.transform = `translateY(${startY}px)`;
+      // Start at top: show random symbols (translateY = 0)
+      strip.style.transform = 'translateY(0px)';
     }
 
-    // Staggered stop: each reel spins longer
-    const baseDelay = [0, 250, 500];
+    // Force reflow so initial position is applied before animation
+    document.querySelector('#reel-0 .reel-strip').offsetHeight;
+
+    const delays = [0, 250, 500];
     let completed = 0;
 
     for (let col = 0; col < 3; col++) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
 
-      // Use keyframes for: fast scroll → decelerate → overshoot → bounce back
+      // Animate: scroll down from top (0) to target (negative = showing finals)
+      // Keyframes: fast scroll → overshoot → bounce back
       anime({
         targets: strip,
         translateY: [
-          // Phase 1: accelerate + high-speed scroll (covers most distance)
-          { value: startY * 0.15, duration: 600, easing: 'easeInQuad' },
-          // Phase 2: decelerate, overshoot past target
-          { value: OVERSHOOT, duration: 400, easing: 'easeOutQuad' },
-          // Phase 3: bounce back to target
-          { value: 0, duration: 250, easing: 'easeOutBounce' }
+          { value: TARGET_Y - OVERSHOOT, duration: 800 + col * 200, easing: 'easeInOutQuad' },
+          { value: TARGET_Y, duration: 250, easing: 'easeOutBounce' }
         ],
-        delay: baseDelay[col],
+        delay: delays[col],
         complete: () => {
-          // Add bounce effect to final cells (last 3 in strip)
           const cells = strip.querySelectorAll('.cell');
           const finalCells = Array.from(cells).slice(-3);
           finalCells.forEach(c => {
@@ -126,7 +126,6 @@ function animateSpin(board) {
             c.classList.add('stop-bounce');
           });
 
-          // Play scatter sound if scatter in this column
           for (let r = 0; r < 3; r++) {
             if (board[r][col].isScatter) {
               scatterAudio.currentTime = 0;
@@ -137,7 +136,7 @@ function animateSpin(board) {
 
           completed++;
           if (completed === 3) {
-            setTimeout(() => { spinning = false; resolve(); }, 250);
+            setTimeout(() => { spinning = false; resolve(); }, 200);
           }
         }
       });
@@ -315,9 +314,10 @@ export function init() {
     }
   });
 
-  // Initialize reel strips with placeholder content
+  // Initialize reel strips with visible symbols
   for (let col = 0; col < 3; col++) {
     const strip = document.querySelector(`#reel-${col} .reel-strip`);
+    strip.style.transform = 'translateY(0px)';
     for (let r = 0; r < 3; r++) {
       const cell = $(`cell-${r}-${col}`);
       cell.innerHTML = `<img src="assets/img/${ALL_IMGS[Math.floor(Math.random() * ALL_IMGS.length)]}">`;

@@ -88,7 +88,7 @@ body {
 
 .board { display: flex; gap: 6px; }
 .reel {
-  width: 110px; height: 336px; /* 3 cells × 110px + 2 gaps × 3px */
+  width: 110px; height: 336px;
   overflow: hidden;
   position: relative;
   border-radius: 8px;
@@ -98,7 +98,7 @@ body {
   flex-direction: column;
   gap: 3px;
   position: absolute;
-  bottom: 0; left: 0; right: 0;
+  top: 0; left: 0; right: 0;
   will-change: transform;
 }
 .cell {
