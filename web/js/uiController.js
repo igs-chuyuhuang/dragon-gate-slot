@@ -284,6 +284,7 @@ export function init() {
 
   // Hotkeys
   document.addEventListener('keydown', e => {
+    console.log('[KEY]', e.key, e.code);
     if (e.ctrlKey || e.altKey || e.metaKey) return;
     if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
     if ((e.key === 'f' || e.key === 'F') && !gm.fg.active && !spinning) {
@@ -292,11 +293,26 @@ export function init() {
       updateUI();
     }
     // Debug hotkeys
-    if (e.key === 't' || e.key === 'T') { console.log('[DEBUG] 穿門特效 row=1 mult=4'); playGateThrough(1, 4); }
-    if (e.key === 'w' || e.key === 'W') { console.log('[DEBUG] 碰壁特效 row=1'); playWallHit(1); }
-    if (e.key === 'c' || e.key === 'C') { console.log('[DEBUG] Combo 5連擊'); resetCombo(); for (let i = 0; i < 5; i++) setTimeout(() => registerThrough(1, 2 + i), i * 300); }
-    if (e.key === 'b' || e.key === 'B') { console.log('[DEBUG] Big Win DRAGON級'); playBigWin(gm.bet * 80, gm.bet); }
-    if (e.key === 'j' || e.key === 'J') { console.log('[DEBUG] JP Win (使用 Big Win 最高級模擬)'); playBigWin(gm.bet * 100, gm.bet); }
+    if (e.key === 't' || e.key === 'T') {
+      console.log('[DEBUG] 穿門特效 row=1 mult=4');
+      try { playGateThrough(1, 4); } catch (err) { console.error('[DEBUG T]', err); }
+    }
+    if (e.key === 'w' || e.key === 'W') {
+      console.log('[DEBUG] 碰壁特效 row=1');
+      try { playWallHit(1); } catch (err) { console.error('[DEBUG W]', err); }
+    }
+    if (e.key === 'c' || e.key === 'C') {
+      console.log('[DEBUG] Combo 5連擊');
+      try { resetCombo(); for (let i = 0; i < 5; i++) setTimeout(() => { try { registerThrough(1, 2 + i); } catch (err) { console.error('[DEBUG C]', err); } }, i * 300); } catch (err) { console.error('[DEBUG C]', err); }
+    }
+    if (e.key === 'b' || e.key === 'B') {
+      console.log('[DEBUG] Big Win DRAGON級');
+      try { playBigWin(gm.bet * 80, gm.bet); } catch (err) { console.error('[DEBUG B]', err); }
+    }
+    if (e.key === 'j' || e.key === 'J') {
+      console.log('[DEBUG] JP Win');
+      try { playBigWin(gm.bet * 100, gm.bet); } catch (err) { console.error('[DEBUG J]', err); }
+    }
   });
 
   // F. Scatter debug hotkey
@@ -313,4 +329,6 @@ export function init() {
   }
 
   updateUI();
+  console.log('[INIT] uiController loaded. Debug keys: T W C B J F S');
+  console.log('[INIT] Functions:', { playGateThrough, playWallHit, registerThrough, playBigWin });
 }
