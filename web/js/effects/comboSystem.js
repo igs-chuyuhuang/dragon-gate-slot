@@ -129,18 +129,11 @@ function flashWhiteGold() {
 }
 
 async function spawnShockwave() {
-  let pixi;
-  try { pixi = await getPixi(); } catch { return; }
-  if (!pixi || !pixi.PIXI) return;
-  const { app, PIXI } = pixi;
-  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-  const ring = new PIXI.Graphics();
-  ring.lineStyle(4, 0xffd700, 1);
-  ring.drawCircle(0, 0, 15);
-  ring.position.set(cx, cy);
-  app.stage.addChild(ring);
-  anime({ targets: ring.scale, x: [1, 12], y: [1, 12], duration: 500, easing: 'easeOutQuad' });
-  anime({ targets: ring, alpha: [1, 0], duration: 500, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(ring); ring.destroy(); } });
+  const el = document.createElement('img');
+  el.src = 'assets/img/effects/shockwave.png';
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.3);width:250px;height:250px;z-index:910;pointer-events:none';
+  document.body.appendChild(el);
+  anime({ targets: el, scale: [0.3, 3], opacity: [1, 0], duration: 500, easing: 'easeOutQuad', complete: () => el.remove() });
 }
 
 async function spawnComboSparks(count) {
@@ -148,19 +141,21 @@ async function spawnComboSparks(count) {
   try { pixi = await getPixi(); } catch { return; }
   if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
+  const sparkTex = PIXI.Texture.from('assets/img/effects/spark.png');
   const cx = window.innerWidth / 2, cy = window.innerHeight * 0.4;
 
   for (let i = 0; i < count; i++) {
-    const g = new PIXI.Graphics();
-    g.beginFill([0xffd700, 0xff6b35, 0xfffacd, 0xff4444][i % 4]);
-    g.drawCircle(0, 0, 1.5 + Math.random() * 3);
-    g.endFill();
-    g.position.set(cx + (Math.random() - 0.5) * 60, cy);
-    app.stage.addChild(g);
+    const s = new PIXI.Sprite(sparkTex);
+    s.anchor.set(0.5);
+    s.width = 10 + Math.random() * 10;
+    s.height = s.width;
+    s.position.set(cx + (Math.random() - 0.5) * 60, cy);
+    s.rotation = Math.random() * Math.PI * 2;
+    app.stage.addChild(s);
     const angle = Math.random() * Math.PI * 2;
     const dist = 40 + Math.random() * 120;
-    anime({ targets: g.position, x: g.position.x + Math.cos(angle) * dist, y: g.position.y + Math.sin(angle) * dist, duration: 300 + Math.random() * 300, easing: 'easeOutQuad' });
-    anime({ targets: g, alpha: 0, duration: 500, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(g); g.destroy(); } });
+    anime({ targets: s.position, x: s.position.x + Math.cos(angle) * dist, y: s.position.y + Math.sin(angle) * dist, duration: 300 + Math.random() * 300, easing: 'easeOutQuad' });
+    anime({ targets: s, alpha: 0, duration: 500, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(s); s.destroy(); } });
   }
 }
 

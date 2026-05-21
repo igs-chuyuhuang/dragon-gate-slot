@@ -44,7 +44,7 @@ export function playJpReveal(score, jpResult) {
           gateEl.style.bottom = gate.pos + '%';
           gateEl.style.borderColor = gate.color;
           gateEl.style.color = gate.color;
-          gateEl.innerHTML = `<span>${gate.label}</span>`;
+          gateEl.innerHTML = `<img src="assets/img/effects/gate_frame.png" class="jp-gate-img" style="filter:drop-shadow(0 0 4px ${gate.color})"><span>${gate.label}</span>`;
           track.appendChild(gateEl);
           anime({ targets: gateEl, scaleX: [0, 1], opacity: [0, 1], duration: 300, easing: 'easeOutBack' });
         }, i * 250);
@@ -197,42 +197,28 @@ function showResult(overlay, scoreDisplay, score, jpResult, resolve) {
 }
 
 function showPerfectText(overlay) {
-  const el = document.createElement('div');
+  const el = document.createElement('img');
+  el.src = 'assets/img/effects/perfect_badge.png';
   el.className = 'jp-perfect-text';
-  el.textContent = 'PERFECT!';
   overlay.appendChild(el);
-  // Ghost trail
-  for (let i = 0; i < 4; i++) {
-    const ghost = el.cloneNode(true);
-    ghost.style.opacity = 0.4 - i * 0.08;
-    ghost.style.filter = 'blur(2px)';
-    overlay.appendChild(ghost);
-    anime({ targets: ghost, scale: [0.5, 1.5 + i * 0.2], opacity: 0, duration: 600, delay: i * 50, easing: 'easeOutQuad', complete: () => ghost.remove() });
-  }
   anime({ targets: el, scale: [0.2, 1.4, 1.1], opacity: [0, 1], duration: 600, easing: 'easeOutElastic(1, 0.4)' });
   setTimeout(() => { anime({ targets: el, opacity: 0, scale: 0.9, duration: 400, easing: 'easeInQuad', complete: () => el.remove() }); }, 1800);
 }
 
 function showDragonShadow(overlay) {
-  const el = document.createElement('div');
+  const el = document.createElement('img');
+  el.src = 'assets/img/effects/dragon_gold.png';
   el.className = 'jp-dragon-shadow';
   overlay.appendChild(el);
-  anime({ targets: el, translateX: ['-120%', '120%'], opacity: [0, 0.5, 0], duration: 1000, easing: 'easeInOutQuad', complete: () => el.remove() });
+  anime({ targets: el, translateX: ['-120%', '120%'], opacity: [0, 0.7, 0], duration: 1000, easing: 'easeInOutQuad', complete: () => el.remove() });
 }
 
 async function spawnPerfectShockwave() {
-  let pixi;
-  try { pixi = await getPixi(); } catch { return; }
-  if (!pixi || !pixi.PIXI) return;
-  const { app, PIXI } = pixi;
-  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-  const ring = new PIXI.Graphics();
-  ring.lineStyle(4, 0xffd700, 1);
-  ring.drawCircle(0, 0, 15);
-  ring.position.set(cx, cy);
-  app.stage.addChild(ring);
-  anime({ targets: ring.scale, x: [1, 14], y: [1, 14], duration: 600, easing: 'easeOutQuad' });
-  anime({ targets: ring, alpha: [1, 0], duration: 600, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(ring); ring.destroy(); } });
+  const el = document.createElement('img');
+  el.src = 'assets/img/effects/shockwave.png';
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.2);width:300px;height:300px;z-index:1201;pointer-events:none;opacity:1';
+  document.body.appendChild(el);
+  anime({ targets: el, scale: [0.2, 3], opacity: [1, 0], duration: 600, easing: 'easeOutQuad', complete: () => el.remove() });
 }
 
 async function spawnCoinRain(count, duration) {
@@ -240,24 +226,27 @@ async function spawnCoinRain(count, duration) {
   try { pixi = await getPixi(); } catch { return; }
   if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
+  const texture = PIXI.Texture.from('assets/img/effects/coin_gold.png');
 
   for (let i = 0; i < count; i++) {
-    const g = new PIXI.Graphics();
-    g.beginFill([0xffd700, 0xffaa00, 0xfffacd][i % 3]);
-    g.drawCircle(0, 0, 3 + Math.random() * 3);
-    g.endFill();
-    g.position.set(Math.random() * window.innerWidth, -10);
-    app.stage.addChild(g);
+    const coin = new PIXI.Sprite(texture);
+    coin.anchor.set(0.5);
+    coin.width = 16 + Math.random() * 12;
+    coin.height = coin.width;
+    coin.position.set(Math.random() * window.innerWidth, -20);
+    coin.rotation = Math.random() * Math.PI;
+    app.stage.addChild(coin);
 
     anime({
-      targets: g.position,
-      y: window.innerHeight + 20,
-      x: g.position.x + (Math.random() - 0.5) * 80,
+      targets: coin.position,
+      y: window.innerHeight + 30,
+      x: coin.position.x + (Math.random() - 0.5) * 80,
       duration: 1000 + Math.random() * 1000,
       delay: Math.random() * (duration * 0.6),
       easing: 'easeInQuad',
-      complete: () => { app.stage.removeChild(g); g.destroy(); }
+      complete: () => { app.stage.removeChild(coin); coin.destroy(); }
     });
+    anime({ targets: coin, rotation: coin.rotation + Math.random() * 4, duration: 1500, easing: 'linear' });
   }
 }
 

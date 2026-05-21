@@ -52,12 +52,16 @@ export function playWallHit(row) {
   mid.classList.add('chromatic');
   setTimeout(() => mid.classList.remove('chromatic'), 500);
 
-  // 6. Crack effect (expanded, 700ms)
+  // 6. Crack effect (expanded, 700ms) using crack.png
   setTimeout(() => {
     crackAudio.currentTime = 0;
     crackAudio.play().catch(() => {});
-    mid.classList.add('cracked-large');
-    setTimeout(() => mid.classList.remove('cracked-large'), 700);
+    const crackImg = document.createElement('img');
+    crackImg.src = 'assets/img/effects/crack.png';
+    crackImg.className = 'crack-img';
+    mid.style.position = 'relative';
+    mid.appendChild(crackImg);
+    anime({ targets: crackImg, scale: [0.5, 1.1], opacity: [1, 0], duration: 700, easing: 'easeOutQuad', complete: () => crackImg.remove() });
   }, 120);
 
   // 7. Debris particles

@@ -103,28 +103,29 @@ async function spawnSideBurst(count) {
 }
 
 function spawnCoin(app, PIXI, startX, startY, dir, i) {
-  const g = new PIXI.Graphics();
-  const colors = [0xffd700, 0xff6b35, 0xfffacd, 0xffaa00];
-  g.beginFill(colors[i % 4]);
-  g.drawCircle(0, 0, 3 + Math.random() * 4);
-  g.endFill();
-  g.position.set(startX, startY);
-  app.stage.addChild(g);
+  const texture = PIXI.Texture.from('assets/img/effects/coin_gold.png');
+  const coin = new PIXI.Sprite(texture);
+  coin.anchor.set(0.5);
+  coin.width = 14 + Math.random() * 10;
+  coin.height = coin.width;
+  coin.position.set(startX, startY);
+  coin.rotation = Math.random() * Math.PI;
+  app.stage.addChild(coin);
 
   const tx = startX + dir * (100 + Math.random() * 200);
   const ty = startY + (Math.random() - 0.5) * 150 - 50;
 
   anime({
-    targets: g.position,
+    targets: coin.position,
     x: tx, y: [startY, ty, ty + 100],
     duration: 1200 + Math.random() * 600,
     delay: Math.random() * 300,
     easing: 'easeOutQuad'
   });
   anime({
-    targets: g, alpha: 0,
+    targets: coin, alpha: 0,
     duration: 1500, delay: Math.random() * 300,
     easing: 'easeInQuad',
-    complete: () => { app.stage.removeChild(g); g.destroy(); }
+    complete: () => { app.stage.removeChild(coin); coin.destroy(); }
   });
 }

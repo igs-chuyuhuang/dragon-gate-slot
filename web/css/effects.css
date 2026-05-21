@@ -83,9 +83,13 @@
 }
 .cell.cracked-large::after {
   content: ''; position: absolute; inset: -4px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5 L47 25 L55 35 L42 50 L58 60 L45 75 L50 95' stroke='%23e94560' stroke-width='2.5' fill='none'/%3E%3Cpath d='M55 35 L68 42 L72 55' stroke='%23e94560' stroke-width='2' fill='none'/%3E%3Cpath d='M42 50 L30 55 L25 65' stroke='%23e94560' stroke-width='2' fill='none'/%3E%3Cpath d='M47 25 L35 30' stroke='%23e94560' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;
+  background: url('assets/img/effects/crack.png') center/contain no-repeat;
   opacity: 0.9; pointer-events: none;
   animation: crack-expand 700ms ease-out forwards;
+}
+.crack-img {
+  position: absolute; inset: -8px; width: calc(100% + 16px); height: calc(100% + 16px);
+  object-fit: contain; pointer-events: none; z-index: 5;
 }
 @keyframes crack-expand { 0% { transform: scale(0.5); opacity: 1; } 70% { opacity: 0.8; } 100% { transform: scale(1.1); opacity: 0; } }
 
@@ -223,21 +227,20 @@
   display: flex; align-items: center; justify-content: center;
   transform-origin: center;
 }
+.jp-gate-img { width: 100%; height: 24px; object-fit: contain; }
 .jp-gate span {
   position: absolute; right: calc(100% + 8px);
   font-size: 11px; font-weight: bold; white-space: nowrap;
 }
 .jp-tier-label { font-size: 48px; font-weight: 900; text-shadow: 0 0 20px currentColor; }
 .jp-perfect-text {
-  position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);
-  font-size: 56px; font-weight: 900; color: #ffd700;
-  text-shadow: 0 0 20px #ffd700, 0 0 40px #ff6b35, 2px 2px 0 #000;
-  -webkit-text-stroke: 2px rgba(0,0,0,0.5);
+  position: absolute; top: 28%; left: 50%; transform: translate(-50%, -50%);
+  width: 220px; max-width: 60vw; height: auto;
   z-index: 10; pointer-events: none;
 }
 .jp-dragon-shadow {
-  position: absolute; inset: 0;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 150'%3E%3Cpath d='M150 20C100 30 60 60 80 100C100 140 150 130 150 130S200 140 220 100C240 60 200 30 150 20Z' fill='rgba(255,215,0,0.2)'/%3E%3C/svg%3E") center/50% no-repeat;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 300px; max-width: 70vw; height: auto; opacity: 0;
   pointer-events: none;
 }
 .jp-payout-number {

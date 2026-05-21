@@ -152,57 +152,42 @@ async function spawnImpactParticles(cx, cy) {
   try { pixi = await getPixi(); } catch { return; }
   if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
+  const sparkTex = PIXI.Texture.from('assets/img/effects/spark.png');
 
-  // Small sparks (40)
-  for (let i = 0; i < 40; i++) {
-    const g = new PIXI.Graphics();
-    g.beginFill([0xffd700, 0xff6b35, 0xfffacd][i % 3]);
-    g.drawCircle(0, 0, 1.5 + Math.random() * 2.5);
-    g.endFill();
-    g.position.set(cx, cy);
-    app.stage.addChild(g);
+  // Sparks (60) using spark.png
+  for (let i = 0; i < 60; i++) {
+    const s = new PIXI.Sprite(sparkTex);
+    s.anchor.set(0.5);
+    s.width = 8 + Math.random() * 12;
+    s.height = s.width;
+    s.position.set(cx, cy);
+    s.rotation = Math.random() * Math.PI * 2;
+    app.stage.addChild(s);
     const angle = Math.random() * Math.PI * 2;
-    const dist = 60 + Math.random() * 120;
-    anime({ targets: g.position, x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist, duration: 300 + Math.random() * 200, easing: 'easeOutQuad' });
-    anime({ targets: g, alpha: 0, duration: 450, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(g); g.destroy(); } });
+    const dist = 50 + Math.random() * 130;
+    anime({ targets: s.position, x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist, duration: 300 + Math.random() * 250, easing: 'easeOutQuad' });
+    anime({ targets: s, alpha: 0, rotation: s.rotation + Math.random() * 2, duration: 450, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(s); s.destroy(); } });
   }
 
-  // Long streaks (20)
+  // Gold debris (20) using spark.png stretched
   for (let i = 0; i < 20; i++) {
-    const g = new PIXI.Graphics();
-    g.beginFill(0xffd700);
-    g.drawRect(-1, -8, 2, 16);
-    g.endFill();
-    g.position.set(cx, cy);
-    const angle = Math.random() * Math.PI * 2;
-    g.rotation = angle;
-    app.stage.addChild(g);
-    const dist = 80 + Math.random() * 100;
-    anime({ targets: g.position, x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist, duration: 250 + Math.random() * 150, easing: 'easeOutQuad' });
-    anime({ targets: g, alpha: 0, duration: 350, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(g); g.destroy(); } });
-  }
-
-  // Shockwave ring (1)
-  const ring = new PIXI.Graphics();
-  ring.lineStyle(3, 0xffd700, 1);
-  ring.drawCircle(0, 0, 10);
-  ring.position.set(cx, cy);
-  app.stage.addChild(ring);
-  anime({ targets: ring.scale, x: [1, 8], y: [1, 8], duration: 400, easing: 'easeOutQuad' });
-  anime({ targets: ring, alpha: [1, 0], duration: 400, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(ring); ring.destroy(); } });
-
-  // Gold debris (20)
-  for (let i = 0; i < 20; i++) {
-    const g = new PIXI.Graphics();
-    g.beginFill(0xffd700);
-    g.drawRect(0, 0, 3 + Math.random() * 4, 2 + Math.random() * 3);
-    g.endFill();
-    g.position.set(cx, cy);
-    g.rotation = Math.random() * Math.PI;
-    app.stage.addChild(g);
+    const s = new PIXI.Sprite(sparkTex);
+    s.anchor.set(0.5);
+    s.width = 6 + Math.random() * 8;
+    s.height = 3 + Math.random() * 4;
+    s.position.set(cx, cy);
+    s.rotation = Math.random() * Math.PI;
+    app.stage.addChild(s);
     const angle = Math.random() * Math.PI * 2;
     const dist = 50 + Math.random() * 80;
-    anime({ targets: g.position, x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist + 30, duration: 500 + Math.random() * 300, easing: 'easeOutQuad' });
-    anime({ targets: g, alpha: 0, rotation: g.rotation + Math.random() * 2, duration: 600, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(g); g.destroy(); } });
+    anime({ targets: s.position, x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist + 30, duration: 500 + Math.random() * 300, easing: 'easeOutQuad' });
+    anime({ targets: s, alpha: 0, duration: 600, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(s); s.destroy(); } });
   }
+
+  // Shockwave ring using DOM img
+  const ring = document.createElement('img');
+  ring.src = 'assets/img/effects/shockwave.png';
+  ring.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;width:60px;height:60px;transform:translate(-50%,-50%) scale(1);z-index:910;pointer-events:none`;
+  document.body.appendChild(ring);
+  anime({ targets: ring, scale: [1, 5], opacity: [1, 0], duration: 400, easing: 'easeOutQuad', complete: () => ring.remove() });
 }
