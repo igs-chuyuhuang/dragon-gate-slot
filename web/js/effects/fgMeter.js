@@ -209,7 +209,7 @@ export function initFgMeterDebug(gm) {
     const targetScore = scores[e.key];
     showFgMeter();
 
-    // Animate through gates sequentially
+    // Quick animate through gates
     const steps = [];
     if (targetScore >= 60) steps.push(65);
     if (targetScore >= 130) steps.push(135);
@@ -217,14 +217,14 @@ export function initFgMeterDebug(gm) {
     steps.push(targetScore);
 
     for (const s of steps) {
-      await delay(600);
+      await delay(300);
       updateFgMeter(s);
     }
 
-    // Wait for effects to finish, then JP reveal
-    await delay(1500);
+    // Quickly transition to JP reveal
+    await delay(500);
     hideFgMeter();
-    await delay(400);
+    await delay(200);
 
     // Simulate jpResult
     const jpResult = gm.jp.evalJpGate(targetScore);

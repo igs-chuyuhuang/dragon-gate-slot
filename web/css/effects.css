@@ -13,6 +13,7 @@
   z-index: 960; pointer-events: none;
   white-space: nowrap;
   max-width: 90vw; text-align: center;
+  overflow: visible;
 }
 .vfx-text-ghost {
   position: fixed; left: 50%; top: 32%;
@@ -177,15 +178,15 @@
 
 /* === Mobile === */
 @media (max-width: 480px) {
-  .vfx-text { font-size: 36px !important; max-width: 88vw; }
-  .vfx-text-ghost { font-size: 36px !important; }
-  .vfx-countup { font-size: 40px !important; }
-  .jp-score-display { font-size: 28px; }
-  .jp-bar-container { height: 45vh; }
-  .fg-meter { right: 4px; width: 36px; max-height: 260px; }
+  .vfx-text { font-size: clamp(24px, 8vw, 36px) !important; max-width: 88vw; }
+  .vfx-text-ghost { font-size: clamp(24px, 8vw, 36px) !important; }
+  .vfx-countup { font-size: clamp(32px, 10vw, 40px) !important; }
+  .jp-score-display { font-size: 24px; }
+  .jp-bar-container { height: 40vh; }
+  .fg-meter { right: 4px; width: 36px; max-height: 240px; }
   .fg-meter-track { width: 24px; }
   .fg-meter-label { font-size: 8px; }
-  .fg-title-burst { font-size: 32px; }
-  .sc-hint-text { font-size: 24px; }
+  .fg-title-burst { font-size: 28px; }
+  .sc-hint-text { font-size: 22px; }
   .bigwin-overlay { padding: 16px; }
 }

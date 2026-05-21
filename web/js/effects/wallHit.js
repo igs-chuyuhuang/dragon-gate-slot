@@ -6,18 +6,20 @@ import { playLayered } from './sfxBus.js';
 
 export async function playWallHit(row) {
   const cells = [0, 1, 2].map(c => document.getElementById(`cell-${row}-${c}`));
+  if (!cells[1]) return; // guard
   const [left, mid, right] = cells;
   const midRect = mid.getBoundingClientRect();
   const cx = midRect.left + midRect.width / 2;
   const cy = midRect.top + midRect.height / 2;
 
-  // === ANTICIPATION (100ms) ===
-  anime({ targets: mid, backgroundColor: '#5c1a1a', boxShadow: '0 0 10px 4px rgba(233,69,96,0.4)', duration: 100, easing: 'easeOutQuad' });
+  // === ANTICIPATION (60ms) — immediate red flash ===
+  anime({ targets: mid, backgroundColor: '#5c1a1a', boxShadow: '0 0 14px 6px rgba(233,69,96,0.5)', duration: 60, easing: 'easeOutQuad' });
+  flashScreen('#e94560', 0.12, 120); // immediate so screenshot catches it
 
-  await hitStop(100);
+  await hitStop(60);
 
-  // === HIT STOP (80ms) ===
-  await hitStop(80);
+  // === HIT STOP (60ms) ===
+  await hitStop(60);
 
   // === IMPACT (300ms) ===
   playLayered([{ name: 'wall_hit' }, { name: 'crack', delay: 80, volume: 0.7 }]);

@@ -7,19 +7,21 @@ import { playLayered } from './sfxBus.js';
 
 export async function playGateThrough(row, mult) {
   const cells = [0, 1, 2].map(c => document.getElementById(`cell-${row}-${c}`));
+  if (!cells[1]) return; // guard: cells must exist
   const midRect = cells[1].getBoundingClientRect();
   const cx = midRect.left + midRect.width / 2;
   const cy = midRect.top + midRect.height / 2;
 
-  // === ANTICIPATION (200ms) ===
+  // === ANTICIPATION (80ms) — immediate visual ===
   const unfocus = focusRow(row);
-  const dim = dimBackground(0.35, 150);
-  anime({ targets: cells, backgroundColor: ['#16213e', '#3a2800'], boxShadow: ['0 0 0px transparent', '0 0 12px 4px rgba(255,215,0,0.3)'], duration: 200, easing: 'easeOutQuad' });
+  dimBackground(0.35, 80);
+  anime({ targets: cells, backgroundColor: ['#16213e', '#3a2800'], boxShadow: ['0 0 0px transparent', '0 0 16px 6px rgba(255,215,0,0.5)'], duration: 80, easing: 'easeOutQuad' });
+  flashScreen('#ffd700', 0.15, 150); // immediate subtle flash so screenshot catches it
 
-  await hitStop(200);
+  await hitStop(80);
 
-  // === HIT STOP (100ms) ===
-  await hitStop(100);
+  // === HIT STOP (80ms) ===
+  await hitStop(80);
 
   // === IMPACT (300ms) ===
   playLayered([{ name: 'gate_through' }, { name: 'score_fly', delay: 200, volume: 0.5 }]);

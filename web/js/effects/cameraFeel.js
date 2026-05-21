@@ -11,17 +11,19 @@ export function hitStop(ms = 80) {
 export function shakeBoard(intensity = 8, duration = 200) {
   const b = board();
   if (!b) return;
-  const steps = Math.max(6, Math.ceil(duration / 30));
+  // Use longer keyframes so shake is visible in 150ms capture intervals
+  const steps = Math.max(8, Math.ceil(duration / 25));
   const kfX = [], kfY = [];
   for (let i = 0; i < steps; i++) {
-    const decay = 1 - (i / steps) * 0.6;
+    const decay = 1 - (i / steps) * 0.5; // slower decay = visible longer
     const angle = Math.random() * Math.PI * 2;
-    kfX.push({ value: Math.cos(angle) * intensity * decay, duration: 30 });
-    kfY.push({ value: Math.sin(angle) * intensity * decay * 0.6, duration: 30 });
+    kfX.push({ value: Math.round(Math.cos(angle) * intensity * decay), duration: 25 });
+    kfY.push({ value: Math.round(Math.sin(angle) * intensity * decay * 0.7), duration: 25 });
   }
-  kfX.push({ value: 0, duration: 30 });
-  kfY.push({ value: 0, duration: 30 });
-  anime({ targets: b, translateX: kfX, translateY: kfY, easing: 'easeOutQuad' });
+  kfX.push({ value: 0, duration: 40 });
+  kfY.push({ value: 0, duration: 40 });
+  anime.remove(b); // clear any existing shake
+  anime({ targets: b, translateX: kfX, translateY: kfY, easing: 'linear' });
 }
 
 export function flashScreen(color = '#ffd700', alpha = 0.4, duration = 250) {
