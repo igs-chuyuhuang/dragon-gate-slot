@@ -104,14 +104,26 @@ body {
 .cell {
   width: 110px; height: 110px;
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, #0d1525, #162040);
+  background: linear-gradient(180deg, #1a2540, #1e2d50);
   border: 2px solid #2a4a7a;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
   flex-shrink: 0;
+  position: relative;
 }
-.cell img { width: 88%; height: 88%; object-fit: contain; }
+.cell img { width: 88%; height: 88%; object-fit: contain; filter: brightness(1.2); }
+.cell-label {
+  position: absolute;
+  top: 3px; left: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 4px rgba(0,0,0,0.8);
+  z-index: 2;
+  pointer-events: none;
+  line-height: 1;
+}
 .cell.scatter { border-color: #ffd700; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(255,215,0,0.5); }
 .cell.stop-bounce { animation: bounce 0.5s ease-out; }
 
