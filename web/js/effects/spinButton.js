@@ -1,11 +1,12 @@
 // spinButton.js — 三階段蓄力 + 強化釋放
+// 光暈用獨立 overlay div，release 時直接 remove，100% 不殘留
 import { anime, getPixi } from '../gameFeel.js';
 
-let chargeAnim = null;
-let stageAnims = [];
 let chargeStart = 0;
 let stage = 0;
 let particleInterval = null;
+let glowEl = null;
+let rafId = null;
 
 const chargeAudio = new Audio('assets/sfx/spin_charge.mp3');
 const releaseAudio = new Audio('assets/sfx/spin_release.mp3');
@@ -22,105 +23,94 @@ export function initSpinButton(btnEl) {
     chargeAudio.currentTime = 0;
     chargeAudio.play().catch(() => {});
 
-    // Stage 1: 0~300ms — shrink + outer glow
-    anime({ targets: btnEl, scale: 0.88, duration: 300, easing: 'easeOutCubic' });
-    chargeAnim = anime({
-      targets: btnEl,
-      boxShadow: ['0 0 0px #ffd700', '0 0 16px 6px #ffd700'],
-      duration: 300, easing: 'easeInQuad'
-    });
+    // Create glow overlay (positioned behind button)
+    if (glowEl) glowEl.remove();
+    glowEl = document.createElement('div');
+    glowEl.className = 'spin-glow';
+    btnEl.parentElement.style.position = 'relative';
+    btnEl.insertAdjacentElement('beforebegin', glowEl);
 
-    // Progressive shake + stage upgrades
+    // Shrink button
+    btnEl.classList.add('spin-charging');
+
+    // Progressive tick
     const tick = () => {
       if (!chargeStart) return;
       const elapsed = Date.now() - chargeStart;
-      // Volume fade in
       chargeAudio.volume = Math.min(0.7, elapsed / 1200);
 
-      if (elapsed > 300 && stage < 1) {
-        stage = 1;
-        enterStage1(btnEl, board);
-      }
+      if (elapsed > 300 && stage < 1) { stage = 1; board.classList.add('charge-stage1'); }
       if (elapsed > 800 && stage < 2) {
         stage = 2;
-        enterStage2(btnEl, board);
+        board.classList.add('charge-stage2');
+        if (!particleInterval) particleInterval = setInterval(() => spawnConvergingParticle(btnEl), 80);
       }
-      // Progressive shake
+
+      // Progressive shake on button
       const shakeAmp = stage === 0 ? 2 : stage === 1 ? Math.min(5, 2 + (elapsed - 300) / 200) : 5;
       btnEl.style.transform = `scale(${stage === 0 ? 0.88 : 0.85}) translateX(${(Math.random() - 0.5) * shakeAmp * 2}px)`;
 
-      requestAnimationFrame(tick);
+      // Glow intensity (CSS variable drives the size)
+      if (glowEl) {
+        const intensity = Math.min(1, elapsed / 800);
+        glowEl.style.opacity = intensity;
+        glowEl.style.transform = `scale(${1 + intensity * 0.3})`;
+      }
+
+      rafId = requestAnimationFrame(tick);
     };
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
   });
 
   const release = () => {
     if (!chargeStart) return;
-    const elapsed = Date.now() - chargeStart;
     chargeStart = 0;
     chargeAudio.pause();
-    if (chargeAnim) { chargeAnim.pause(); chargeAnim = null; }
-    stageAnims.forEach(a => a.pause());
-    stageAnims = [];
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     if (particleInterval) { clearInterval(particleInterval); particleInterval = null; }
 
-    // Clean up stage effects
-    board.classList.remove('charge-stage1', 'charge-stage2');
-    document.querySelectorAll('.energy-line').forEach(e => e.remove());
+    // === NUCLEAR CLEANUP: remove glow overlay entirely ===
+    if (glowEl) { glowEl.remove(); glowEl = null; }
 
-    // Release: hit stop 80ms → flash → bounce
+    // Remove all CSS classes
+    board.classList.remove('charge-stage1', 'charge-stage2');
+    btnEl.classList.remove('spin-charging');
+
+    // Reset button inline styles completely
     anime.remove(btnEl);
-    btnEl.style.transform = `scale(${elapsed > 300 ? 0.85 : 0.88})`;
-    btnEl.style.boxShadow = '0 0 0px transparent';
+    btnEl.style.transform = '';
+    btnEl.style.boxShadow = '';
+    btnEl.style.filter = '';
 
     releaseAudio.currentTime = 0;
     releaseAudio.play().catch(() => {});
 
-    // Hit stop freeze
+    // Hit stop 80ms → flash → bounce
     setTimeout(() => {
-      // Radial flash
       const flash = document.createElement('div');
       flash.className = 'spin-release-flash';
       document.body.appendChild(flash);
-      anime({ targets: flash, opacity: [0.6, 0], scale: [0.5, 2.5], duration: 300, easing: 'easeOutExpo', complete: () => flash.remove() });
+      anime({ targets: flash, opacity: [0.6, 0], scale: [0.5, 2], duration: 250, easing: 'easeOutExpo', complete: () => flash.remove() });
 
-      // Bounce back
       anime({
         targets: btnEl,
         scale: [1.18, 0.96, 1],
-        translateX: 0,
-        boxShadow: '0 0 0px transparent',
         duration: 350,
         easing: 'easeOutElastic(1, 0.5)'
       });
     }, 80);
+
+    // Final insurance: force-clear everything after 500ms
+    setTimeout(() => {
+      btnEl.style.boxShadow = '';
+      btnEl.style.filter = '';
+      if (glowEl) { glowEl.remove(); glowEl = null; }
+    }, 500);
   };
 
   btnEl.addEventListener('pointerup', release);
   btnEl.addEventListener('pointerleave', release);
-}
-
-function enterStage1(btnEl, board) {
-  board.classList.add('charge-stage1');
-  const a = anime({
-    targets: btnEl,
-    boxShadow: ['0 0 0px #ffd700', '0 0 30px 12px #ffd700'],
-    duration: 300, easing: 'easeOutQuad'
-  });
-  stageAnims.push(a);
-}
-
-function enterStage2(btnEl, board) {
-  board.classList.add('charge-stage2');
-  const a = anime({
-    targets: btnEl,
-    boxShadow: ['0 0 30px 12px #ffd700', '0 0 40px 16px #fffacd'],
-    duration: 300, easing: 'easeOutQuad'
-  });
-  stageAnims.push(a);
-
-  // Spawn converging particles
-  particleInterval = setInterval(() => spawnConvergingParticle(btnEl), 80);
+  btnEl.addEventListener('pointercancel', release);
 }
 
 async function spawnConvergingParticle(btnEl) {
