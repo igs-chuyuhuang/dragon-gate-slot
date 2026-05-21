@@ -63,8 +63,22 @@
 | UI-04 | Spin 按鈕 | 256×256 | ✅ | `assets/UI-04_spin_btn.png` |
 | UI-05 | 贏分框（Win popup） | 640×480 | ✅ | `assets/UI-05_win_frame.png` |
 
+
+
+## 特效素材（web/assets/img/effects/）
+
+| 編號 | 名稱 | 尺寸 | 狀態 | 檔案 |
+|------|------|------|------|------|
+| FX-01 | 金龍（PERFECT 飛行） | 512×256 | ✅ | `web/assets/img/effects/dragon_gold.png` |
+| FX-02 | 金幣（粒子用） | 64×64 | ✅ | `web/assets/img/effects/coin_gold.png` |
+| FX-03 | 火花/光點（粒子用） | 32×32 | ✅ | `web/assets/img/effects/spark.png` |
+| FX-04 | Shockwave 環 | 256×256 | ✅ | `web/assets/img/effects/shockwave.png` |
+| FX-05 | 碰壁裂痕 | 128×128 | ✅ | `web/assets/img/effects/crack.png` |
+| FX-06 | 龍門框（JP 儀式） | 128×512 | ✅ | `web/assets/img/effects/gate_frame.png` |
+| FX-07 | PERFECT 文字 badge | 256×128 | ✅ | `web/assets/img/effects/perfect_badge.png` |
+
 ## 統計
 
-- 總素材數：24 張
-- 已完成：24 張（100%）
+- 總素材數：31 張（美術 24 + 特效 7）
+- 已完成：31 張（100%）
 - 待製作：0 張
