@@ -49,6 +49,7 @@ export class JpSystem {
     else if (distPct <= 0.67) payout = prizeBase * 0.30;
     else payout = prizeBase * 0.10;
     this.pools[tier] = Math.max(0, this.pools[tier] - payout);
-    return { tier, payout, msg: `${tier.toUpperCase()} 門內 (距中心${Math.abs(score - center)})` };
+    const segment = distPct <= 0.33 ? '近段' : distPct <= 0.67 ? '中段' : '遠段';
+    return { tier, payout, msg: `${tier.toUpperCase()} ${segment}` };
   }
 }
