@@ -3,6 +3,7 @@ import { GameManager } from './gameManager.js';
 import { initSpinButton } from './effects/spinButton.js';
 import { registerThrough, resetCombo } from './effects/comboSystem.js';
 import { playWallHit } from './effects/wallHit.js';
+import { playGateThrough } from './effects/gateThrough.js';
 import { anime } from './gameFeel.js';
 import { onSpinStart, onColumnStop, onSpinEnd } from './effects/reelStop.js';
 import { revealScatters, initScatterDebug } from './effects/scatterReveal.js';
@@ -283,12 +284,19 @@ export function init() {
 
   // Hotkeys
   document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
     if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
     if ((e.key === 'f' || e.key === 'F') && !gm.fg.active && !spinning) {
       gm.triggerFreeGame();
       $('results').innerHTML = '<div class="row-result r-sc">🐉 Free Game 觸發！（測試）</div>';
       updateUI();
     }
+    // Debug hotkeys
+    if (e.key === 't' || e.key === 'T') { console.log('[DEBUG] 穿門特效 row=1 mult=4'); playGateThrough(1, 4); }
+    if (e.key === 'w' || e.key === 'W') { console.log('[DEBUG] 碰壁特效 row=1'); playWallHit(1); }
+    if (e.key === 'c' || e.key === 'C') { console.log('[DEBUG] Combo 5連擊'); resetCombo(); for (let i = 0; i < 5; i++) setTimeout(() => registerThrough(1, 2 + i), i * 300); }
+    if (e.key === 'b' || e.key === 'B') { console.log('[DEBUG] Big Win DRAGON級'); playBigWin(gm.bet * 80, gm.bet); }
+    if (e.key === 'j' || e.key === 'J') { console.log('[DEBUG] JP Win (使用 Big Win 最高級模擬)'); playBigWin(gm.bet * 100, gm.bet); }
   });
 
   // F. Scatter debug hotkey
