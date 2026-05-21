@@ -296,3 +296,42 @@
   .fg-meter-track { width: 24px; }
   .fg-meter-label { font-size: 8px; }
 }
+
+/* === VFX Typography === */
+.vfx-text {
+  position: fixed; left: 50%; top: 32%;
+  transform: translate(-50%, -50%);
+  font-size: 48px; font-weight: 900;
+  background: linear-gradient(180deg, var(--vfx-color, #ffd700), #ff8c00);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  -webkit-text-stroke: 2px #000;
+  filter: drop-shadow(0 0 10px var(--vfx-color, #ffd700)) drop-shadow(0 0 20px #ff8c00) drop-shadow(0 4px 8px rgba(0,0,0,0.8));
+  z-index: 960; pointer-events: none;
+  white-space: nowrap;
+}
+.vfx-text-ghost {
+  position: fixed; left: 50%; top: 32%;
+  transform: translate(-50%, -50%);
+  font-size: 48px; font-weight: 900;
+  color: var(--vfx-color, #ffd700);
+  -webkit-text-stroke: 2px #000;
+  z-index: 959; pointer-events: none;
+  white-space: nowrap;
+}
+.vfx-countup {
+  position: relative; left: auto; top: auto; transform: none;
+  -webkit-text-fill-color: #fff;
+  background: none; -webkit-background-clip: unset;
+  filter: drop-shadow(0 0 12px #ffd700);
+}
+
+/* === Combo Burning Border === */
+.combo-burning {
+  animation: burning-border 300ms ease-in-out infinite alternate !important;
+  box-shadow: 0 0 20px 8px rgba(255,107,53,0.6), inset 0 0 15px rgba(255,215,0,0.3) !important;
+}
+@keyframes burning-border {
+  from { box-shadow: 0 0 20px 8px rgba(255,107,53,0.6), inset 0 0 15px rgba(255,215,0,0.3); }
+  to { box-shadow: 0 0 30px 12px rgba(255,69,0,0.7), inset 0 0 20px rgba(255,215,0,0.4); }
+}
