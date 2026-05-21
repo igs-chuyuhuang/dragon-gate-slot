@@ -1,0 +1,26 @@
+{
+  "name": "dragon-gate-slot",
+  "version": "1.0.0",
+  "description": "AI Agent 輔助遊戲開發專案",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igs-chuyuhuang/dragon-gate-slot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/igs-chuyuhuang/dragon-gate-slot/issues"
+  },
+  "homepage": "https://github.com/igs-chuyuhuang/dragon-gate-slot#readme",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
