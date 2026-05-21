@@ -3,6 +3,10 @@ import { GameManager } from './gameManager.js';
 import { initSpinButton } from './effects/spinButton.js';
 import { registerThrough, resetCombo } from './effects/comboSystem.js';
 import { playWallHit } from './effects/wallHit.js';
+import { onSpinStart, onColumnStop, onSpinEnd } from './effects/reelStop.js';
+import { revealScatters, initScatterDebug } from './effects/scatterReveal.js';
+import { playFreeGameTransition } from './effects/freeGameTransition.js';
+import { playBigWin } from './effects/bigWin.js';
 
 const gm = new GameManager();
 const $ = id => document.getElementById(id);
@@ -33,6 +37,8 @@ function updateUI() {
 function animateSpin(board) {
   return new Promise(resolve => {
     spinning = true;
+    onSpinStart(); // B. vignette + motion blur
+
     const names = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
     const intervals = [];
     for (let r = 0; r < 3; r++)
@@ -42,6 +48,7 @@ function animateSpin(board) {
         const iv = setInterval(() => { el.textContent = names[Math.floor(Math.random() * 13)]; }, 60);
         intervals.push({ r, c, iv, el });
       }
+
     const stopCol = (col, delay) => setTimeout(() => {
       intervals.filter(x => x.c === col).forEach(x => {
         clearInterval(x.iv);
@@ -49,8 +56,11 @@ function animateSpin(board) {
         x.el.textContent = cellToString(cell);
         x.el.className = 'cell stop-bounce' + (cell.isScatter ? ' scatter sc-flash' : '');
       });
-      if (col === 2) setTimeout(() => { spinning = false; resolve(); }, 250);
+      onColumnStop(col); // B. column impact
+
+      if (col === 2) setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 300);
     }, delay);
+
     stopCol(0, 800);
     stopCol(1, 1200);
     stopCol(2, 1600);
@@ -63,12 +73,12 @@ async function doSpin() {
   const result = gm.executeSpin();
   if (!result) return;
   await animateSpin(result.board);
-  showResult(result);
+  await showResult(result);
   updateUI();
   return result;
 }
 
-function showResult(result) {
+async function showResult(result) {
   const winEl = $('win');
   const resEl = $('results');
 
@@ -88,8 +98,18 @@ function showResult(result) {
     resEl.innerHTML = html;
     winEl.textContent = result.fgDone && result.jpResult ? `+${fmt(result.jpResult.payout)}` : '-';
     winEl.className = result.jpResult && result.jpResult.payout > 0 ? 'win-positive' : '';
+
+    // H. Big Win on FG end
+    if (result.fgDone && result.jpResult && result.jpResult.payout > 0) {
+      await playBigWin(result.jpResult.payout, gm.bet);
+    }
   } else {
-    // 特效觸發
+    // F. Scatter reveal (if any scatters)
+    if (result.scatterCount > 0) {
+      await revealScatters(result.board, result.scatterCount);
+    }
+
+    // C/D/E. 特效觸發
     let hasThrough = false;
     result.judgments.forEach(j => {
       if (j.type === 'through') { registerThrough(j.row, j.mult); hasThrough = true; }
@@ -116,7 +136,6 @@ function showResult(result) {
         default:
           cls = 'r-miss'; text = `✗ 未穿`;
       }
-      // Check for scatter in row
       const rowCells = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]];
       const hasSC = rowCells.some(c => c.isScatter);
       if (hasSC) { cls = 'r-sc'; text = `🐉 龍符號（不判定）`; }
@@ -135,29 +154,20 @@ function showResult(result) {
     if (result.totalPayout > 0) winEl.classList.add('win-positive', 'win-countup');
     else if (result.totalPayout < 0) winEl.classList.add('win-negative');
 
-    // #7 慶祝動畫
-    if (result.totalPayout > 0) {
-      const hasHighMult = result.judgments.some(j => j.type === 'through' && j.mult >= 4);
-      if (hasHighMult) showCelebration();
+    // H. Big Win check (normal mode)
+    if (result.totalPayout > gm.bet * 10) {
+      await playBigWin(result.totalPayout, gm.bet);
     }
-    if (result.fgTriggered) showFGOverlay();
+
+    // G. Free Game transition
+    if (result.fgTriggered) {
+      const scCells = [];
+      for (let r = 0; r < 3; r++)
+        for (let c = 0; c < 3; c++)
+          if (result.board[r][c].isScatter) scCells.push({ r, c });
+      await playFreeGameTransition(scCells);
+    }
   }
-}
-
-function showCelebration() {
-  document.querySelector('.celebrate-overlay')?.remove();
-  const el = document.createElement('div');
-  el.className = 'celebrate-overlay';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2500);
-}
-
-function showFGOverlay() {
-  const el = document.createElement('div');
-  el.className = 'fg-trigger-overlay';
-  el.innerHTML = '<span>🐉 Free Game！</span>';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2200);
 }
 
 async function autoSpin() {
@@ -181,12 +191,11 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 export function init() {
   $('spin-btn').addEventListener('click', doSpin);
-  initSpinButton($('spin-btn'));
+  initSpinButton($('spin-btn')); // A. Spin charge
   $('auto-btn').addEventListener('click', autoSpin);
   $('bet-up').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex + 1); updateUI(); } });
   $('bet-down').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex - 1); updateUI(); } });
 
-  // 自動按鈕組
   document.querySelectorAll('.auto-preset').forEach(btn => {
     btn.addEventListener('click', () => {
       autoCount = parseInt(btn.dataset.count);
@@ -195,15 +204,18 @@ export function init() {
     });
   });
 
-  // #2 空白鍵 = SPIN
+  // Hotkeys
   document.addEventListener('keydown', e => {
     if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
     if ((e.key === 'f' || e.key === 'F') && !gm.fg.active && !spinning) {
       gm.triggerFreeGame();
-      $('results').innerHTML = '<div class="row-result r-sc">🐉 Free Game 觸發！（測試）</div><div class="row-result">按 SPIN 開始</div>';
+      $('results').innerHTML = '<div class="row-result r-sc">🐉 Free Game 觸發！（測試）</div>';
       updateUI();
     }
   });
+
+  // F. Scatter debug hotkey
+  initScatterDebug();
 
   updateUI();
 }
