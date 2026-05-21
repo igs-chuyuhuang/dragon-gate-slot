@@ -34,17 +34,21 @@ export class JpSystem {
 
   _calc(tier, score, center, lo, hi) {
     const pool = this.pools[tier];
+    const seed = [50, 200, 1000][['basic', 'major', 'grand'].indexOf(tier)] * this.bet;
     if (score === center) {
       const payout = pool * 3;
-      this.pools[tier] = [50, 200, 1000][['basic', 'major', 'grand'].indexOf(tier)] * this.bet;
+      this.pools[tier] = seed;
       return { tier, payout, msg: `🎯 精準命中 ${tier.toUpperCase()} 中心！×3` };
     }
-    // Distance-based payout
-    const dist = Math.abs(score - center);
-    const maxDist = Math.max(center - lo, hi - center);
-    const ratio = 1 - dist / maxDist;
-    const payout = pool / 9 * ratio;
+    // Segmented payout based on distance percentage
+    const halfWidth = (hi - lo) / 2;
+    const distPct = Math.abs(score - center) / halfWidth;
+    const prizeBase = pool / 7;
+    let payout;
+    if (distPct <= 0.33) payout = prizeBase * 0.60;
+    else if (distPct <= 0.67) payout = prizeBase * 0.30;
+    else payout = prizeBase * 0.10;
     this.pools[tier] = Math.max(0, this.pools[tier] - payout);
-    return { tier, payout, msg: `${tier.toUpperCase()} 門內 (距中心${dist})` };
+    return { tier, payout, msg: `${tier.toUpperCase()} 門內 (距中心${Math.abs(score - center)})` };
   }
 }
