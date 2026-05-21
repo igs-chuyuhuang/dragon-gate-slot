@@ -2,7 +2,7 @@ const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
 
-const GAME_URL = 'file://' + path.resolve(__dirname, '../web/index.html');
+const GAME_URL = 'https://igs-chuyuhuang.github.io/dragon-gate-slot/web/';
 const SCREENSHOT_DIR = path.resolve(__dirname, 'screenshots');
 
 async function run() {
@@ -10,8 +10,13 @@ async function run() {
 
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+
+  // Error monitoring
+  page.on('console', msg => { if (msg.type() === 'error') console.log('[PAGE ERROR]', msg.text()); });
+  page.on('pageerror', err => console.log('[PAGE CRASH]', err.message));
+
   await page.goto(GAME_URL);
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(5000); // 等 CDN 載入
 
   // 初始畫面
   await page.screenshot({ path: `${SCREENSHOT_DIR}/00_initial.png` });
@@ -40,7 +45,7 @@ async function run() {
   // 桌面版
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto(GAME_URL);
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(5000);
   await page.screenshot({ path: `${SCREENSHOT_DIR}/09_desktop_initial.png` });
   await page.keyboard.press('t');
   await page.waitForTimeout(500);
