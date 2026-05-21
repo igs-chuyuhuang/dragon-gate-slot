@@ -76,11 +76,14 @@ export function updateFgMeter(score) {
 
 export function hideFgMeter() {
   if (!meterEl) return;
+  const el = meterEl;
+  meterEl = null; beamEl = null; hintEl = null; trackEl = null;
   anime({
-    targets: meterEl, opacity: 0, translateX: 20,
+    targets: el, opacity: 0, translateX: 20,
     duration: 300, easing: 'easeInQuad',
-    complete: () => { meterEl.remove(); meterEl = null; beamEl = null; hintEl = null; trackEl = null; }
+    complete: () => el.remove()
   });
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 500);
 }
 
 // === Differentiated breakthrough effects ===
@@ -223,9 +226,14 @@ export function initFgMeterDebug(gm) {
     hideFgMeter();
     await delay(400);
 
-    // Simulate jpResult (4/5 = perfect center hits)
+    // Simulate jpResult
     const jpResult = gm.jp.evalJpGate(targetScore);
     await playJpReveal(targetScore, jpResult);
+
+    // Safety: force cleanup any leftover overlays
+    setTimeout(() => {
+      document.querySelectorAll('.jp-reveal-overlay, .fg-meter, .bigwin-overlay').forEach(el => el.remove());
+    }, 500);
   });
 }
 

@@ -255,4 +255,10 @@ function cleanup(overlay, resolve) {
     targets: overlay, opacity: 0, duration: 400, easing: 'easeInQuad',
     complete: () => { overlay.remove(); resolve(); }
   });
+  // Safety: force remove after 1s no matter what
+  setTimeout(() => {
+    if (overlay.parentNode) overlay.remove();
+    document.querySelectorAll('.jp-reveal-overlay, .fg-meter').forEach(el => el.remove());
+  }, 1000);
+}
 }
