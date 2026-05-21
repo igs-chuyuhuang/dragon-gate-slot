@@ -4,6 +4,10 @@ import { initSpinButton } from './effects/spinButton.js';
 import { registerThrough, resetCombo } from './effects/comboSystem.js';
 import { playWallHit } from './effects/wallHit.js';
 import { anime } from './gameFeel.js';
+import { onSpinStart, onColumnStop, onSpinEnd } from './effects/reelStop.js';
+import { revealScatters, initScatterDebug } from './effects/scatterReveal.js';
+import { playFreeGameTransition } from './effects/freeGameTransition.js';
+import { playBigWin } from './effects/bigWin.js';
 
 const gm = new GameManager();
 const $ = id => document.getElementById(id);
@@ -65,7 +69,6 @@ const OVERSHOOT = 18; // px overshoot on stop
 function buildReelStrip(col, finalCells) {
   const strip = document.querySelector(`#reel-${col} .reel-strip`);
   strip.innerHTML = '';
-  // [20 random] + [3 final] = 23 total, top to bottom
   for (let i = 0; i < REEL_SYMBOLS; i++) {
     const div = document.createElement('div');
     div.className = 'cell';
@@ -83,23 +86,20 @@ function buildReelStrip(col, finalCells) {
   return strip;
 }
 
-// Target translateY to show final 3 symbols (index 20,21,22) in viewport
-// Viewport shows cells at top:0, so we need translateY = -(REEL_SYMBOLS * CELL_TOTAL)
 const TARGET_Y = -(REEL_SYMBOLS * CELL_TOTAL);
 
 function animateSpin(board) {
   return new Promise(resolve => {
     spinning = true;
+    onSpinStart(); // B. vignette + motion blur
 
     for (let col = 0; col < 3; col++) {
       const finalCells = [board[0][col], board[1][col], board[2][col]];
       const strip = buildReelStrip(col, finalCells);
-      // Start at top: show random symbols (translateY = 0)
       strip.style.transform = 'translateY(0px)';
     }
 
-    // Force reflow so initial position is applied before animation
-    document.querySelector('#reel-0 .reel-strip').offsetHeight;
+    document.querySelector('#reel-0 .reel-strip').offsetHeight; // force reflow
 
     const delays = [0, 250, 500];
     let completed = 0;
@@ -107,8 +107,6 @@ function animateSpin(board) {
     for (let col = 0; col < 3; col++) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
 
-      // Animate: scroll down from top (0) to target (negative = showing finals)
-      // Keyframes: fast scroll → overshoot → bounce back
       anime({
         targets: strip,
         translateY: [
@@ -126,6 +124,8 @@ function animateSpin(board) {
             c.classList.add('stop-bounce');
           });
 
+          onColumnStop(col); // B. column impact
+
           for (let r = 0; r < 3; r++) {
             if (board[r][col].isScatter) {
               scatterAudio.currentTime = 0;
@@ -136,30 +136,11 @@ function animateSpin(board) {
 
           completed++;
           if (completed === 3) {
-            setTimeout(() => { spinning = false; resolve(); }, 200);
+            setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 200);
           }
         }
       });
     }
-  });
-}
-
-// === Free Game Transition ===
-function showFGTransition() {
-  return new Promise(resolve => {
-    const overlay = document.createElement('div');
-    overlay.className = 'fg-transition-overlay';
-    overlay.innerHTML = '<img src="assets/img/FG-01_free_game.png" alt="Free Game">';
-    document.body.appendChild(overlay);
-
-    const img = overlay.querySelector('img');
-    anime.set(overlay, { opacity: 0 });
-    anime.set(img, { scale: 0.5, opacity: 0 });
-
-    anime.timeline({ complete: () => { overlay.remove(); resolve(); } })
-      .add({ targets: overlay, opacity: [0, 1], duration: 400, easing: 'easeOutQuad' })
-      .add({ targets: img, scale: [0.5, 1.05, 1], opacity: [0, 1], duration: 800, easing: 'easeOutElastic(1, 0.6)' }, 0)
-      .add({ targets: overlay, opacity: 0, duration: 500, easing: 'easeInQuad', delay: 1500 });
   });
 }
 
@@ -169,18 +150,12 @@ async function doSpin() {
   const result = gm.executeSpin();
   if (!result) return;
   await animateSpin(result.board);
-  showResult(result);
+  await showResult(result);
   updateUI();
-
-  // FG transition after showing result
-  if (result.fgTriggered) {
-    await showFGTransition();
-  }
-
   return result;
 }
 
-function showResult(result) {
+async function showResult(result) {
   const winEl = $('win');
   const resEl = $('results');
 
@@ -200,8 +175,18 @@ function showResult(result) {
     resEl.innerHTML = html;
     winEl.textContent = result.fgDone && result.jpResult ? `+${fmt(result.jpResult.payout)}` : '-';
     winEl.className = result.jpResult && result.jpResult.payout > 0 ? 'win-positive' : '';
+
+    // H. Big Win on FG end
+    if (result.fgDone && result.jpResult && result.jpResult.payout > 0) {
+      await playBigWin(result.jpResult.payout, gm.bet);
+    }
   } else {
-    // 特效觸發
+    // F. Scatter reveal (if any scatters)
+    if (result.scatterCount > 0) {
+      await revealScatters(result.board, result.scatterCount);
+    }
+
+    // C/D/E. 特效觸發
     let hasThrough = false;
     result.judgments.forEach(j => {
       if (j.type === 'through') { registerThrough(j.row, j.mult); hasThrough = true; }
@@ -246,29 +231,20 @@ function showResult(result) {
     if (result.totalPayout > 0) winEl.classList.add('win-positive', 'win-countup');
     else if (result.totalPayout < 0) winEl.classList.add('win-negative');
 
-    if (result.totalPayout > 0) {
-      const hasHighMult = result.judgments.some(j => j.type === 'through' && j.mult >= 4);
-      if (hasHighMult) { showCelebration(); showWinPopup(result.totalPayout); }
-      else if (result.totalPayout >= gm.bet * 5) { showWinPopup(result.totalPayout); }
+    // H. Big Win check (normal mode)
+    if (result.totalPayout > gm.bet * 10) {
+      await playBigWin(result.totalPayout, gm.bet);
+    }
+
+    // G. Free Game transition
+    if (result.fgTriggered) {
+      const scCells = [];
+      for (let r = 0; r < 3; r++)
+        for (let c = 0; c < 3; c++)
+          if (result.board[r][c].isScatter) scCells.push({ r, c });
+      await playFreeGameTransition(scCells);
     }
   }
-}
-
-function showCelebration() {
-  document.querySelector('.celebrate-overlay')?.remove();
-  const el = document.createElement('div');
-  el.className = 'celebrate-overlay';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2500);
-}
-
-function showWinPopup(amount) {
-  const popup = $('win-popup');
-  const amountEl = $('win-popup-amount');
-  amountEl.textContent = fmt(amount);
-  popup.style.display = 'flex';
-  popup.onclick = () => { popup.style.display = 'none'; };
-  setTimeout(() => { popup.style.display = 'none'; }, 3000);
 }
 
 async function autoSpin() {
@@ -292,7 +268,7 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 export function init() {
   $('spin-btn').addEventListener('click', doSpin);
-  initSpinButton($('spin-btn'));
+  initSpinButton($('spin-btn')); // A. Spin charge
   $('auto-btn').addEventListener('click', autoSpin);
   $('bet-up').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex + 1); updateUI(); } });
   $('bet-down').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex - 1); updateUI(); } });
@@ -305,14 +281,18 @@ export function init() {
     });
   });
 
+  // Hotkeys
   document.addEventListener('keydown', e => {
     if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
     if ((e.key === 'f' || e.key === 'F') && !gm.fg.active && !spinning) {
       gm.triggerFreeGame();
-      $('results').innerHTML = '<div class="row-result r-sc">🐉 Free Game 觸發！（測試）</div><div class="row-result">按 SPIN 開始</div>';
+      $('results').innerHTML = '<div class="row-result r-sc">🐉 Free Game 觸發！（測試）</div>';
       updateUI();
     }
   });
+
+  // F. Scatter debug hotkey
+  initScatterDebug();
 
   // Initialize reel strips with visible symbols
   for (let col = 0; col < 3; col++) {
