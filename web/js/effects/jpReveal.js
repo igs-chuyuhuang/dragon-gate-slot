@@ -261,4 +261,3 @@ function cleanup(overlay, resolve) {
     document.querySelectorAll('.jp-reveal-overlay, .fg-meter').forEach(el => el.remove());
   }, 1000);
 }
-}
