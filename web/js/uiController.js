@@ -3,6 +3,8 @@ import { GameManager } from './gameManager.js';
 import { initSpinButton } from './effects/spinButton.js';
 import { registerThrough, resetCombo } from './effects/comboSystem.js';
 import { playWallHit } from './effects/wallHit.js';
+import { playGateThrough } from './effects/gateThrough.js';
+import { anime } from './gameFeel.js';
 import { onSpinStart, onColumnStop, onSpinEnd } from './effects/reelStop.js';
 import { revealScatters, initScatterDebug } from './effects/scatterReveal.js';
 import { playFreeGameTransition } from './effects/freeGameTransition.js';
@@ -16,13 +18,37 @@ let autoSpins = 0;
 let autoStopped = false;
 let autoCount = 10;
 
+// Card value → image file mapping
+const CARD_IMG = {
+  1: 'CD-01_ace.png', 2: 'CD-05_num2.png', 3: 'CD-06_num3.png',
+  4: 'CD-07_num4.png', 5: 'CD-08_num5.png', 6: 'CD-09_num6.png',
+  7: 'CD-10_num7.png', 8: 'CD-11_num8.png', 9: 'CD-12_num9.png',
+  10: 'CD-13_num10.png', 11: 'CD-04_jack.png', 12: 'CD-03_queen.png', 13: 'CD-02_king.png'
+};
+const SC_IMG = 'SC-01_scatter_dragon.png';
+const ALL_IMGS = Object.values(CARD_IMG);
+
+// Audio
+const scatterAudio = new Audio('assets/sfx/dragon_roar.mp3');
+scatterAudio.volume = 0.6;
+
+function cellToImg(cell) {
+  const src = cell.isScatter ? SC_IMG : CARD_IMG[cell.value];
+  return `<img src="assets/img/${src}" alt="${cellToString(cell)}">`;
+}
+
+function randomImg() {
+  return ALL_IMGS[Math.floor(Math.random() * ALL_IMGS.length)];
+}
+
 function fmt(n) { return Math.round(n).toLocaleString(); }
 
 function updateUI() {
   $('balance').textContent = fmt(gm.balance);
   $('bet').textContent = fmt(gm.bet);
   $('spin-btn').disabled = spinning || !gm.canSpin();
-  $('spin-btn').textContent = gm.fg.active ? `FG SPIN (${gm.fg.spinsLeft})` : 'SPIN';
+  const label = $('spin-btn').querySelector('.spin-label');
+  if (label) label.textContent = gm.fg.active ? `FG (${gm.fg.spinsLeft})` : 'SPIN';
   $('jp-basic').textContent = fmt(gm.jp.pools.basic);
   $('jp-major').textContent = fmt(gm.jp.pools.major);
   $('jp-grand').textContent = fmt(gm.jp.pools.grand);
@@ -35,36 +61,88 @@ function updateUI() {
   $('auto-btn').textContent = autoSpins > 0 ? `停止 (${autoSpins})` : '自動';
 }
 
+// === Real Reel Scrolling Animation ===
+const CELL_H = 110;
+const GAP = 3;
+const CELL_TOTAL = CELL_H + GAP; // 113px per cell
+const REEL_SYMBOLS = 20; // random symbols before final 3
+const OVERSHOOT = 18; // px overshoot on stop
+
+function buildReelStrip(col, finalCells) {
+  const strip = document.querySelector(`#reel-${col} .reel-strip`);
+  strip.innerHTML = '';
+  for (let i = 0; i < REEL_SYMBOLS; i++) {
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+    strip.appendChild(div);
+  }
+  for (let r = 0; r < 3; r++) {
+    const cell = finalCells[r];
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.id = `cell-${r}-${col}`;
+    div.innerHTML = cellToImg(cell);
+    strip.appendChild(div);
+  }
+  return strip;
+}
+
+const TARGET_Y = -(REEL_SYMBOLS * CELL_TOTAL);
+
 function animateSpin(board) {
   return new Promise(resolve => {
     spinning = true;
     onSpinStart(); // B. vignette + motion blur
 
-    const names = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-    const intervals = [];
-    for (let r = 0; r < 3; r++)
-      for (let c = 0; c < 3; c++) {
-        const el = $(`cell-${r}-${c}`);
-        el.className = 'cell rolling';
-        const iv = setInterval(() => { el.textContent = names[Math.floor(Math.random() * 13)]; }, 60);
-        intervals.push({ r, c, iv, el });
-      }
+    for (let col = 0; col < 3; col++) {
+      const finalCells = [board[0][col], board[1][col], board[2][col]];
+      const strip = buildReelStrip(col, finalCells);
+      strip.style.transform = 'translateY(0px)';
+    }
 
-    const stopCol = (col, delay) => setTimeout(() => {
-      intervals.filter(x => x.c === col).forEach(x => {
-        clearInterval(x.iv);
-        const cell = board[x.r][x.c];
-        x.el.textContent = cellToString(cell);
-        x.el.className = 'cell stop-bounce' + (cell.isScatter ? ' scatter sc-flash' : '');
+    document.querySelector('#reel-0 .reel-strip').offsetHeight; // force reflow
+
+    const delays = [0, 250, 500];
+    let completed = 0;
+
+    for (let col = 0; col < 3; col++) {
+      const strip = document.querySelector(`#reel-${col} .reel-strip`);
+
+      anime({
+        targets: strip,
+        translateY: [
+          { value: TARGET_Y - OVERSHOOT, duration: 800 + col * 200, easing: 'easeInOutQuad' },
+          { value: TARGET_Y, duration: 250, easing: 'easeOutBounce' }
+        ],
+        delay: delays[col],
+        complete: () => {
+          const cells = strip.querySelectorAll('.cell');
+          const finalCells = Array.from(cells).slice(-3);
+          finalCells.forEach(c => {
+            if (board.some((row, r) => row[col].isScatter && c.id === `cell-${r}-${col}`)) {
+              c.classList.add('scatter', 'sc-flash');
+            }
+            c.classList.add('stop-bounce');
+          });
+
+          onColumnStop(col); // B. column impact
+
+          for (let r = 0; r < 3; r++) {
+            if (board[r][col].isScatter) {
+              scatterAudio.currentTime = 0;
+              scatterAudio.play().catch(() => {});
+              break;
+            }
+          }
+
+          completed++;
+          if (completed === 3) {
+            setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 200);
+          }
+        }
       });
-      onColumnStop(col); // B. column impact
-
-      if (col === 2) setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 300);
-    }, delay);
-
-    stopCol(0, 800);
-    stopCol(1, 1200);
-    stopCol(2, 1600);
+    }
   });
 }
 
@@ -207,16 +285,51 @@ export function init() {
 
   // Hotkeys
   document.addEventListener('keydown', e => {
+    console.log('[KEY]', e.key, e.code);
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
     if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
     if ((e.key === 'f' || e.key === 'F') && !gm.fg.active && !spinning) {
       gm.triggerFreeGame();
       $('results').innerHTML = '<div class="row-result r-sc">🐉 Free Game 觸發！（測試）</div>';
       updateUI();
     }
+    // Debug hotkeys
+    if (e.key === 't' || e.key === 'T') {
+      console.log('[DEBUG] 穿門特效 row=1 mult=4');
+      try { playGateThrough(1, 4); } catch (err) { console.error('[DEBUG T]', err); }
+    }
+    if (e.key === 'w' || e.key === 'W') {
+      console.log('[DEBUG] 碰壁特效 row=1');
+      try { playWallHit(1); } catch (err) { console.error('[DEBUG W]', err); }
+    }
+    if (e.key === 'c' || e.key === 'C') {
+      console.log('[DEBUG] Combo 5連擊');
+      try { resetCombo(); for (let i = 0; i < 5; i++) setTimeout(() => { try { registerThrough(1, 2 + i); } catch (err) { console.error('[DEBUG C]', err); } }, i * 300); } catch (err) { console.error('[DEBUG C]', err); }
+    }
+    if (e.key === 'b' || e.key === 'B') {
+      console.log('[DEBUG] Big Win DRAGON級');
+      try { playBigWin(gm.bet * 80, gm.bet); } catch (err) { console.error('[DEBUG B]', err); }
+    }
+    if (e.key === 'j' || e.key === 'J') {
+      console.log('[DEBUG] JP Win');
+      try { playBigWin(gm.bet * 100, gm.bet); } catch (err) { console.error('[DEBUG J]', err); }
+    }
   });
 
   // F. Scatter debug hotkey
   initScatterDebug();
 
+  // Initialize reel strips with visible symbols
+  for (let col = 0; col < 3; col++) {
+    const strip = document.querySelector(`#reel-${col} .reel-strip`);
+    strip.style.transform = 'translateY(0px)';
+    for (let r = 0; r < 3; r++) {
+      const cell = $(`cell-${r}-${col}`);
+      cell.innerHTML = `<img src="assets/img/${ALL_IMGS[Math.floor(Math.random() * ALL_IMGS.length)]}">`;
+    }
+  }
+
   updateUI();
+  console.log('[INIT] uiController loaded. Debug keys: T W C B J F S');
+  console.log('[INIT] Functions:', { playGateThrough, playWallHit, registerThrough, playBigWin });
 }
