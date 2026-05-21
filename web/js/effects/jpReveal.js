@@ -1,33 +1,26 @@
-// jpReveal.js — JP 開獎儀式：暗場 → 三道門 → 光柱上升 → 命中/未命中
+// jpReveal.js — JP 開獎儀式：layered VFX, Graphics particles, no images
 import { anime, getPixi } from '../gameFeel.js';
 
 const drumRoll = new Audio('assets/sfx/drum_roll.mp3');
 const gateOpen = new Audio('assets/sfx/gate_open.mp3');
 const jpWin = new Audio('assets/sfx/jp_win.mp3');
-const coinCount = new Audio('assets/sfx/coin_count.mp3');
 const dragonRoar = new Audio('assets/sfx/dragon_roar.mp3');
+const coinCount = new Audio('assets/sfx/coin_count.mp3');
 coinCount.loop = true;
 
-// Gate positions as % of bar height (0=bottom, 100=top)
 const GATES = [
   { tier: 'basic', lo: 60, hi: 120, pos: 25, color: '#4488ff', label: 'BASIC' },
   { tier: 'major', lo: 130, hi: 200, pos: 55, color: '#ff8c00', label: 'MAJOR' },
   { tier: 'grand', lo: 210, hi: 320, pos: 85, color: '#dc143c', label: 'GRAND' },
 ];
 
+let knockedGates = new Set();
+
 export function playJpReveal(score, jpResult) {
   return new Promise(resolve => {
-    // === 1. Dark overlay + score display ===
     const overlay = document.createElement('div');
     overlay.className = 'jp-reveal-overlay';
-    overlay.innerHTML = `
-      <div class="jp-score-display">${score} 分</div>
-      <div class="jp-bar-container">
-        <div class="jp-bar-track">
-          <div class="jp-beam"></div>
-        </div>
-      </div>
-    `;
+    overlay.innerHTML = `<div class="jp-score-display">${score} 分</div><div class="jp-bar-container"><div class="jp-bar-track"><div class="jp-beam"></div></div></div>`;
     document.body.appendChild(overlay);
     anime({ targets: overlay, opacity: [0, 1], duration: 400, easing: 'easeOutQuad' });
 
@@ -35,230 +28,174 @@ export function playJpReveal(score, jpResult) {
     const track = overlay.querySelector('.jp-bar-track');
     const scoreDisplay = overlay.querySelector('.jp-score-display');
 
-    // === 2. Gates appear sequentially ===
+    // Gates appear
     setTimeout(() => {
       GATES.forEach((gate, i) => {
         setTimeout(() => {
-          const gateEl = document.createElement('div');
-          gateEl.className = 'jp-gate';
-          gateEl.style.bottom = gate.pos + '%';
-          gateEl.style.borderColor = gate.color;
-          gateEl.style.color = gate.color;
-          gateEl.innerHTML = `<img src="assets/img/effects/gate_frame.png" class="jp-gate-img" style="filter:drop-shadow(0 0 4px ${gate.color})"><span>${gate.label}</span>`;
-          track.appendChild(gateEl);
-          anime({ targets: gateEl, scaleX: [0, 1], opacity: [0, 1], duration: 300, easing: 'easeOutBack' });
+          const el = document.createElement('div');
+          el.className = 'jp-gate';
+          el.style.bottom = gate.pos + '%';
+          el.style.borderColor = gate.color;
+          el.style.color = gate.color;
+          el.innerHTML = `<span>${gate.label}</span>`;
+          track.appendChild(el);
+          anime({ targets: el, scaleX: [0, 1], opacity: [0, 1], duration: 300, easing: 'easeOutBack' });
         }, i * 250);
       });
     }, 500);
 
-    // === 3. Beam rises (after gates appear) ===
-    const targetPercent = scoreToPercent(score);
+    // Beam rises
+    knockedGates.clear();
+    const targetPct = Math.min(95, (score / 320) * 95);
     setTimeout(() => {
       drumRoll.currentTime = 0;
       drumRoll.play().catch(() => {});
-
-      // Beam rises: fast start, slow near target (easeOutExpo)
       anime({
-        targets: beam,
-        height: [0, targetPercent + '%'],
-        duration: 2500,
-        easing: 'easeOutExpo',
-        update: (anim) => {
-          const currentH = parseFloat(beam.style.height) || 0;
-          // Check gate crossings for knock effect
-          GATES.forEach(gate => {
-            const gatePercent = gate.pos;
-            if (currentH >= gatePercent - 1 && currentH <= gatePercent + 1) {
-              knockGate(track, gate);
-            }
-          });
+        targets: beam, height: [0, targetPct + '%'], duration: 2500, easing: 'easeOutExpo',
+        update: () => {
+          const h = parseFloat(beam.style.height) || 0;
+          GATES.forEach(g => { if (h >= g.pos - 1 && h <= g.pos + 1 && !knockedGates.has(g.tier)) { knockedGates.add(g.tier); knockGate(g); } });
         },
-        complete: () => {
-          drumRoll.pause();
-          // === 4. Hit or miss ===
-          setTimeout(() => showResult(overlay, scoreDisplay, score, jpResult, resolve), 300);
-        }
+        complete: () => { drumRoll.pause(); setTimeout(() => showHitResult(overlay, scoreDisplay, jpResult, resolve), 300); }
       });
     }, 1400);
   });
 }
 
-function scoreToPercent(score) {
-  // Map score 0~320 to 0~95% of bar
-  return Math.min(95, (score / 320) * 95);
-}
-
-let knockedGates = new Set();
-function knockGate(track, gate) {
-  if (knockedGates.has(gate.tier)) return;
-  knockedGates.add(gate.tier);
-
+function knockGate(gate) {
   gateOpen.currentTime = 0;
   gateOpen.play().catch(() => {});
-
-  const gateEl = track.querySelector(`.jp-gate[style*="bottom: ${gate.pos}%"]`) ||
-    [...track.querySelectorAll('.jp-gate')].find(el => el.style.bottom === gate.pos + '%');
-  if (gateEl) {
-    anime({
-      targets: gateEl,
-      translateX: [{ value: -4, duration: 30 }, { value: 4, duration: 30 }, { value: -2, duration: 30 }, { value: 0, duration: 30 }]
-    });
-  }
-  // Board shake
-  anime({
-    targets: document.querySelector('.board'),
-    translateY: [{ value: -3, duration: 30 }, { value: 3, duration: 30 }, { value: 0, duration: 30 }]
-  });
+  anime({ targets: document.querySelector('.board'), translateY: [{ value: -3, duration: 30 }, { value: 3, duration: 30 }, { value: 0, duration: 30 }] });
 }
 
-function showResult(overlay, scoreDisplay, score, jpResult, resolve) {
-  knockedGates.clear();
-
+function showHitResult(overlay, scoreDisplay, jpResult, resolve) {
   if (!jpResult.tier || jpResult.payout <= 0) {
-    const beam = overlay.querySelector('.jp-beam');
-    anime({ targets: beam, opacity: [1, 0.3], duration: 500, easing: 'easeInQuad' });
     scoreDisplay.textContent = jpResult.msg;
     scoreDisplay.style.color = '#888';
-    setTimeout(() => cleanup(overlay, resolve), 1500);
+    setTimeout(() => cleanup(overlay, resolve), 1200);
     return;
   }
 
   const gate = GATES.find(g => g.tier === jpResult.tier) || GATES[0];
   const isPerfect = jpResult.perfect === true;
 
+  // === IMPACT LAYERS ===
   jpWin.currentTime = 0;
   jpWin.play().catch(() => {});
   if (isPerfect) { dragonRoar.currentTime = 0; dragonRoar.play().catch(() => {}); }
 
-  const beam = overlay.querySelector('.jp-beam');
-  beam.style.background = isPerfect ? '#ffd700' : gate.color;
-  anime({ targets: beam, opacity: [1, 0.6, 1], duration: 300, loop: isPerfect ? 5 : 3 });
-
-  // Screen flash (perfect = bigger)
-  const flash = document.createElement('div');
+  // Layer 1: Flash
   const flashAlpha = isPerfect ? 0.6 : 0.4;
+  const flash = document.createElement('div');
   flash.style.cssText = `position:absolute;inset:0;background:${isPerfect ? '#ffd700' : gate.color};opacity:${flashAlpha};pointer-events:none`;
   overlay.appendChild(flash);
-  anime({ targets: flash, opacity: [flashAlpha, 0], duration: isPerfect ? 700 : 500, easing: 'easeOutQuad', complete: () => flash.remove() });
+  anime({ targets: flash, opacity: [flashAlpha, 0], duration: isPerfect ? 600 : 400, easing: 'easeOutQuad', complete: () => flash.remove() });
 
-  // Shake (perfect = 2 seconds sustained)
+  // Layer 2: Shockwave(s)
+  spawnDomShockwave(isPerfect ? '#ffd700' : gate.color);
+  if (isPerfect) setTimeout(() => spawnDomShockwave('#ffd700'), 150);
+
+  // Layer 3: Board shake
   const board = document.querySelector('.board');
   if (isPerfect) {
-    const shakeLoop = anime({
-      targets: board,
-      translateX: [{ value: -6, duration: 40 }, { value: 6, duration: 40 }, { value: -4, duration: 40 }, { value: 4, duration: 40 }, { value: 0, duration: 40 }],
-      loop: 10, easing: 'easeInOutSine'
-    });
-    setTimeout(() => shakeLoop.pause(), 2000);
+    const shk = anime({ targets: board, translateX: [{ value: -6, duration: 40 }, { value: 6, duration: 40 }, { value: -4, duration: 40 }, { value: 4, duration: 40 }, { value: 0, duration: 40 }], loop: 10 });
+    setTimeout(() => shk.pause(), 2000);
   } else {
-    anime({ targets: board, translateX: [{ value: -8, duration: 30 }, { value: 8, duration: 30 }, { value: -5, duration: 30 }, { value: 5, duration: 30 }, { value: 0, duration: 40 }] });
+    anime({ targets: board, translateX: [{ value: -8, duration: 30 }, { value: 8, duration: 30 }, { value: -5, duration: 30 }, { value: 0, duration: 40 }] });
   }
 
-  // Perfect: PERFECT! text + dragon shadow + shockwave
+  // Layer 4: Particles burst
+  spawnBurstParticles(isPerfect ? 60 : 30);
+
+  // Layer 5: PERFECT text
   if (isPerfect) {
-    showPerfectText(overlay);
-    showDragonShadow(overlay);
-    spawnPerfectShockwave();
+    const pt = document.createElement('div');
+    pt.textContent = 'PERFECT!';
+    pt.style.cssText = 'position:absolute;top:22%;left:50%;transform:translate(-50%,-50%);font-size:52px;font-weight:900;color:#ffd700;text-shadow:0 0 20px #ffd700,0 0 40px #ff6b35,2px 2px 0 #000;z-index:10;pointer-events:none';
+    overlay.appendChild(pt);
+    anime({ targets: pt, scale: [0.2, 1.4, 1.1], opacity: [0, 1], duration: 500, easing: 'easeOutElastic(1, 0.4)' });
+    setTimeout(() => anime({ targets: pt, opacity: 0, duration: 400, complete: () => pt.remove() }), 1800);
   }
 
-  // Tier label
-  scoreDisplay.innerHTML = `<div class="jp-tier-label" style="color:${gate.color}">${gate.label}${isPerfect ? ' <span style="color:#ffd700">PERFECT!</span>' : ''}</div>`;
-  anime({ targets: scoreDisplay.querySelector('.jp-tier-label'), scale: [0.3, 1.3, 1], duration: 600, easing: 'easeOutElastic(1, 0.4)' });
+  // === REWARD: Tier label + count-up ===
+  scoreDisplay.innerHTML = `<div style="font-size:48px;font-weight:900;color:${gate.color};text-shadow:0 0 20px ${gate.color}">${gate.label}</div>`;
+  anime({ targets: scoreDisplay.firstChild, scale: [0.3, 1.2, 1], duration: 500, easing: 'easeOutElastic(1, 0.4)' });
 
-  // Count-up (perfect = slower for suspense)
   setTimeout(() => {
     coinCount.currentTime = 0;
     coinCount.play().catch(() => {});
-
     const numEl = document.createElement('div');
-    numEl.className = 'jp-payout-number';
-    if (isPerfect) numEl.innerHTML = '0 <span style="font-size:28px;color:#ffd700">×3</span>';
-    else numEl.textContent = '0';
+    numEl.style.cssText = 'font-size:52px;font-weight:bold;color:#fff;text-shadow:0 0 12px #ffd700;pointer-events:none';
+    numEl.textContent = '0';
     overlay.appendChild(numEl);
 
+    // Ghost trail on number
     const counter = { val: 0 };
     anime({
       targets: counter, val: jpResult.payout,
-      duration: isPerfect ? 2500 : 1500,
-      easing: isPerfect ? 'easeInOutQuad' : 'easeOutExpo',
-      round: 1,
-      update: () => {
-        const txt = Math.round(counter.val).toLocaleString();
-        numEl.innerHTML = isPerfect ? `${txt} <span style="font-size:28px;color:#ffd700">×3</span>` : txt;
-      },
+      duration: isPerfect ? 2500 : 1500, easing: isPerfect ? 'easeInOutQuad' : 'easeOutExpo', round: 1,
+      update: () => { numEl.textContent = Math.round(counter.val).toLocaleString() + (isPerfect ? ' ×3' : ''); },
       complete: () => {
         coinCount.pause();
-        anime({ targets: numEl, scale: [1, 1.4, 1], duration: 400, easing: 'easeOutElastic(1, 0.5)' });
-        spawnCoinRain(isPerfect ? 80 : 40, isPerfect ? 2500 : 1500);
+        anime({ targets: numEl, scale: [1, 1.3, 1], duration: 300, easing: 'easeOutElastic(1, 0.5)' });
+        spawnCoinRain(isPerfect ? 80 : 40);
         setTimeout(() => cleanup(overlay, resolve), isPerfect ? 3500 : 2000);
       }
     });
   }, isPerfect ? 1000 : 700);
 }
 
-function showPerfectText(overlay) {
-  const el = document.createElement('img');
-  el.src = 'assets/img/effects/perfect_badge.png';
-  el.className = 'jp-perfect-text';
-  overlay.appendChild(el);
-  anime({ targets: el, scale: [0.2, 1.4, 1.1], opacity: [0, 1], duration: 600, easing: 'easeOutElastic(1, 0.4)' });
-  setTimeout(() => { anime({ targets: el, opacity: 0, scale: 0.9, duration: 400, easing: 'easeInQuad', complete: () => el.remove() }); }, 1800);
+function spawnDomShockwave(color) {
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  const sw = document.createElement('div');
+  sw.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;width:50px;height:50px;border-radius:50%;border:3px solid ${color};transform:translate(-50%,-50%);z-index:1201;pointer-events:none;box-shadow:0 0 8px ${color}`;
+  document.body.appendChild(sw);
+  anime({ targets: sw, scale: [1, 10], opacity: [1, 0], duration: 500, easing: 'easeOutQuad', complete: () => sw.remove() });
 }
 
-function showDragonShadow(overlay) {
-  const el = document.createElement('img');
-  el.src = 'assets/img/effects/dragon_gold.png';
-  el.className = 'jp-dragon-shadow';
-  overlay.appendChild(el);
-  anime({ targets: el, translateX: ['-120%', '120%'], opacity: [0, 0.7, 0], duration: 1000, easing: 'easeInOutQuad', complete: () => el.remove() });
-}
-
-async function spawnPerfectShockwave() {
-  const el = document.createElement('img');
-  el.src = 'assets/img/effects/shockwave.png';
-  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.2);width:300px;height:300px;z-index:1201;pointer-events:none;opacity:1';
-  document.body.appendChild(el);
-  anime({ targets: el, scale: [0.2, 3], opacity: [1, 0], duration: 600, easing: 'easeOutQuad', complete: () => el.remove() });
-}
-
-async function spawnCoinRain(count, duration) {
+async function spawnBurstParticles(count) {
   let pixi;
   try { pixi = await getPixi(); } catch { return; }
   if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
-  const texture = PIXI.Texture.from('assets/img/effects/coin_gold.png');
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
 
   for (let i = 0; i < count; i++) {
-    const coin = new PIXI.Sprite(texture);
-    coin.anchor.set(0.5);
-    coin.width = 16 + Math.random() * 12;
-    coin.height = coin.width;
-    coin.position.set(Math.random() * window.innerWidth, -20);
-    coin.rotation = Math.random() * Math.PI;
-    app.stage.addChild(coin);
+    const g = new PIXI.Graphics();
+    g.beginFill([0xffd700, 0xff6b35, 0xfffacd, 0xff4444][i % 4]);
+    g.drawCircle(0, 0, 2 + Math.random() * 3);
+    g.endFill();
+    g.position.set(cx, cy);
+    app.stage.addChild(g);
+    const a = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+    const d = 80 + Math.random() * 150;
+    anime({ targets: g.position, x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d, duration: 400 + Math.random() * 300, easing: 'easeOutQuad' });
+    anime({ targets: g, alpha: 0, duration: 600, delay: 100, easing: 'easeOutQuad', complete: () => { app.stage.removeChild(g); g.destroy(); } });
+  }
+}
 
-    anime({
-      targets: coin.position,
-      y: window.innerHeight + 30,
-      x: coin.position.x + (Math.random() - 0.5) * 80,
-      duration: 1000 + Math.random() * 1000,
-      delay: Math.random() * (duration * 0.6),
-      easing: 'easeInQuad',
-      complete: () => { app.stage.removeChild(coin); coin.destroy(); }
-    });
-    anime({ targets: coin, rotation: coin.rotation + Math.random() * 4, duration: 1500, easing: 'linear' });
+async function spawnCoinRain(count) {
+  let pixi;
+  try { pixi = await getPixi(); } catch { return; }
+  if (!pixi || !pixi.PIXI) return;
+  const { app, PIXI } = pixi;
+
+  for (let i = 0; i < count; i++) {
+    const g = new PIXI.Graphics();
+    g.beginFill([0xffd700, 0xffaa00, 0xfffacd][i % 3]);
+    g.drawCircle(0, 0, 4 + Math.random() * 3);
+    g.endFill();
+    g.position.set(Math.random() * window.innerWidth, -15);
+    app.stage.addChild(g);
+
+    const dur = 1000 + Math.random() * 1200;
+    const del = Math.random() * 800;
+    anime({ targets: g.position, y: window.innerHeight + 20, x: g.position.x + (Math.random() - 0.5) * 60, duration: dur, delay: del, easing: 'easeInQuad' });
+    anime({ targets: g, alpha: 0, duration: dur, delay: del + dur * 0.7, easing: 'easeInQuad', complete: () => { app.stage.removeChild(g); g.destroy(); } });
   }
 }
 
 function cleanup(overlay, resolve) {
-  anime({
-    targets: overlay, opacity: 0, duration: 400, easing: 'easeInQuad',
-    complete: () => { overlay.remove(); resolve(); }
-  });
-  // Safety: force remove after 1s no matter what
-  setTimeout(() => {
-    if (overlay.parentNode) overlay.remove();
-    document.querySelectorAll('.jp-reveal-overlay, .fg-meter').forEach(el => el.remove());
-  }, 1000);
-}
+  anime({ targets: overlay, opacity: 0, duration: 400, easing: 'easeInQuad', complete: () => { overlay.remove(); resolve(); } });
+  setTimeout(() => { if (overlay.parentNode) overlay.remove(); document.querySelectorAll('.jp-reveal-overlay').forEach(el => el.remove()); }, 1000);
 }
