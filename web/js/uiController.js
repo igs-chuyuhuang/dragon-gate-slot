@@ -93,6 +93,13 @@ function buildReelStrip(col, finalCells) {
   return strip;
 }
 
+function highlightRow(row, type) {
+  const cls = type === 'win' ? 'win-highlight' : 'wall-highlight';
+  const cells = [0, 1, 2].map(c => document.getElementById(`cell-${row}-${c}`));
+  cells.forEach(c => { if (c) c.classList.add(cls); });
+  setTimeout(() => cells.forEach(c => { if (c) c.classList.remove(cls); }), 1500);
+}
+
 const TARGET_Y = -(REEL_SYMBOLS * CELL_TOTAL);
 
 function animateSpin(board) {
@@ -108,7 +115,7 @@ function animateSpin(board) {
 
     document.querySelector('#reel-0 .reel-strip').offsetHeight; // force reflow
 
-    const delays = [0, 250, 500];
+    const delays = [0, 500, 250]; // left→right→middle (中間最後停，製造懸念)
     let completed = 0;
 
     for (let col = 0; col < 3; col++) {
@@ -200,8 +207,8 @@ async function showResult(result) {
     // C/D/E. 特效觸發
     let hasThrough = false;
     result.judgments.forEach(j => {
-      if (j.type === 'through') { registerThrough(j.row, j.mult); hasThrough = true; }
-      else if (j.type === 'wall') { playWallHit(j.row); }
+      if (j.type === 'through') { registerThrough(j.row, j.mult); hasThrough = true; highlightRow(j.row, 'win'); }
+      else if (j.type === 'wall') { playWallHit(j.row); highlightRow(j.row, 'wall'); }
     });
     if (!hasThrough) resetCombo();
 
