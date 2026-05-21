@@ -2,6 +2,7 @@
 import { anime, getPixi } from '../gameFeel.js';
 
 let chargeAnim = null;
+let stageAnims = [];
 let chargeStart = 0;
 let stage = 0;
 let particleInterval = null;
@@ -59,6 +60,8 @@ export function initSpinButton(btnEl) {
     chargeStart = 0;
     chargeAudio.pause();
     if (chargeAnim) { chargeAnim.pause(); chargeAnim = null; }
+    stageAnims.forEach(a => a.pause());
+    stageAnims = [];
     if (particleInterval) { clearInterval(particleInterval); particleInterval = null; }
 
     // Clean up stage effects
@@ -68,6 +71,7 @@ export function initSpinButton(btnEl) {
     // Release: hit stop 80ms → flash → bounce
     anime.remove(btnEl);
     btnEl.style.transform = `scale(${elapsed > 300 ? 0.85 : 0.88})`;
+    btnEl.style.boxShadow = '0 0 0px transparent';
 
     releaseAudio.currentTime = 0;
     releaseAudio.play().catch(() => {});
@@ -97,23 +101,23 @@ export function initSpinButton(btnEl) {
 }
 
 function enterStage1(btnEl, board) {
-  // Rotating ring + background dim
   board.classList.add('charge-stage1');
-  anime({
+  const a = anime({
     targets: btnEl,
-    boxShadow: '0 0 30px 12px #ffd700',
-    duration: 200, easing: 'easeOutQuad'
+    boxShadow: ['0 0 0px #ffd700', '0 0 30px 12px #ffd700'],
+    duration: 300, easing: 'easeOutQuad'
   });
+  stageAnims.push(a);
 }
 
 function enterStage2(btnEl, board) {
-  // Energy lines around board + particles converging to button
   board.classList.add('charge-stage2');
-  anime({
+  const a = anime({
     targets: btnEl,
-    boxShadow: '0 0 40px 16px #fffacd',
-    duration: 200, easing: 'easeOutQuad'
+    boxShadow: ['0 0 30px 12px #ffd700', '0 0 40px 16px #fffacd'],
+    duration: 300, easing: 'easeOutQuad'
   });
+  stageAnims.push(a);
 
   // Spawn converging particles
   particleInterval = setInterval(() => spawnConvergingParticle(btnEl), 80);
