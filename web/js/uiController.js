@@ -10,7 +10,7 @@ import { revealScatters, initScatterDebug } from './effects/scatterReveal.js';
 import { playFreeGameTransition } from './effects/freeGameTransition.js';
 import { playBigWin } from './effects/bigWin.js';
 import { playJpReveal } from './effects/jpReveal.js';
-import { showFgMeter, updateFgMeter, hideFgMeter } from './effects/fgMeter.js';
+import { showFgMeter, updateFgMeter, hideFgMeter, initFgMeterDebug } from './effects/fgMeter.js';
 
 const gm = new GameManager();
 const $ = id => document.getElementById(id);
@@ -325,6 +325,7 @@ export function init() {
 
   // F. Scatter debug hotkey
   initScatterDebug();
+  initFgMeterDebug(gm);
 
   // Initialize reel strips with visible symbols
   for (let col = 0; col < 3; col++) {
