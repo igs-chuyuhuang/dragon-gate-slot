@@ -237,16 +237,16 @@ async function spawnCoinRain(count, duration) {
     coin.rotation = Math.random() * Math.PI;
     app.stage.addChild(coin);
 
+    const dur = 1000 + Math.random() * 1000;
+    const del = Math.random() * (duration * 0.6);
     anime({
       targets: coin.position,
       y: window.innerHeight + 30,
       x: coin.position.x + (Math.random() - 0.5) * 80,
-      duration: 1000 + Math.random() * 1000,
-      delay: Math.random() * (duration * 0.6),
-      easing: 'easeInQuad',
-      complete: () => { app.stage.removeChild(coin); coin.destroy(); }
+      duration: dur, delay: del, easing: 'easeInQuad',
+      complete: () => { anime.remove(coin); app.stage.removeChild(coin); coin.destroy(); }
     });
-    anime({ targets: coin, rotation: coin.rotation + Math.random() * 4, duration: 1500, easing: 'linear' });
+    anime({ targets: coin, rotation: coin.rotation + Math.random() * 4, duration: dur + del, easing: 'linear' });
   }
 }
 
