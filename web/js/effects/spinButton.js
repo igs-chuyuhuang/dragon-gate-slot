@@ -126,6 +126,7 @@ function enterStage2(btnEl, board) {
 async function spawnConvergingParticle(btnEl) {
   let pixi;
   try { pixi = await getPixi(); } catch { return; }
+  if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
 
   const btnRect = btnEl.getBoundingClientRect();

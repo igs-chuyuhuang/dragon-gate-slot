@@ -68,6 +68,7 @@ export function playWallHit(row) {
 async function spawnDebris(cx, cy) {
   let pixi;
   try { pixi = await getPixi(); } catch { return; }
+  if (!pixi || !pixi.PIXI) return;
   const { app, PIXI } = pixi;
 
   for (let i = 0; i < 15; i++) {
