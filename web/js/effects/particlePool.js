@@ -28,6 +28,9 @@ function getTextures(PIXI) {
     smoke: createTex(24, ctx => { const g = ctx.createRadialGradient(12,12,0,12,12,12); g.addColorStop(0,'rgba(200,200,200,0.3)'); g.addColorStop(1,'rgba(100,100,100,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,24,24); }, PIXI),
     ring: createTex(32, ctx => { ctx.beginPath(); ctx.arc(16,16,13,0,Math.PI*2); ctx.strokeStyle='rgba(255,215,0,0.8)'; ctx.lineWidth=3; ctx.stroke(); }, PIXI),
     redSpark: createTex(16, ctx => { const g = ctx.createRadialGradient(8,8,0,8,8,8); g.addColorStop(0,'rgba(255,100,100,1)'); g.addColorStop(0.5,'rgba(233,69,96,0.6)'); g.addColorStop(1,'rgba(200,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,16,16); }, PIXI),
+    star: createTex(16, ctx => { ctx.fillStyle='#ffd700'; ctx.beginPath(); for(let i=0;i<5;i++){const a=Math.PI*2*i/5-Math.PI/2;ctx.lineTo(8+Math.cos(a)*7,8+Math.sin(a)*7);const b=a+Math.PI/5;ctx.lineTo(8+Math.cos(b)*3,8+Math.sin(b)*3);} ctx.closePath(); ctx.fill(); }, PIXI),
+    diamond: createTex(12, ctx => { ctx.fillStyle='#ffd700'; ctx.beginPath(); ctx.moveTo(6,0); ctx.lineTo(12,6); ctx.lineTo(6,12); ctx.lineTo(0,6); ctx.closePath(); ctx.fill(); }, PIXI, 12, 12),
+    triangle: createTex(10, ctx => { ctx.fillStyle='#ff8c00'; ctx.beginPath(); ctx.moveTo(5,0); ctx.lineTo(10,9); ctx.lineTo(0,9); ctx.closePath(); ctx.fill(); }, PIXI, 10, 10),
   };
   return textures;
 }

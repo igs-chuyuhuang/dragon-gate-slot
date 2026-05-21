@@ -1,4 +1,4 @@
-// wallHit.js — 碰壁 using VFX systems
+// wallHit.js — 碰壁：680ms total (100ms anticipation + 80ms hitStop + 300ms impact + 200ms settle)
 import { anime } from '../gameFeel.js';
 import { burst } from './particlePool.js';
 import { hitStop, shakeBoard, flashScreen, shockwaveDOM } from './cameraFeel.js';
@@ -11,30 +11,40 @@ export async function playWallHit(row) {
   const cx = midRect.left + midRect.width / 2;
   const cy = midRect.top + midRect.height / 2;
 
-  // === ANTICIPATION ===
-  anime({ targets: mid, backgroundColor: '#5c1a1a', duration: 60, easing: 'easeOutQuad' });
+  // === ANTICIPATION (100ms) ===
+  anime({ targets: mid, backgroundColor: '#5c1a1a', boxShadow: '0 0 10px 4px rgba(233,69,96,0.4)', duration: 100, easing: 'easeOutQuad' });
 
   await hitStop(100);
 
-  // === IMPACT ===
+  // === HIT STOP (80ms) ===
+  await hitStop(80);
+
+  // === IMPACT (300ms) ===
   playLayered([{ name: 'wall_hit' }, { name: 'crack', delay: 80, volume: 0.7 }]);
-  flashScreen('#e94560', 0.3, 300);
-  shakeBoard(10, 220);
+
+  // Red flash
+  flashScreen('#e94560', 0.35, 300);
+
+  // Board shake 10px
+  shakeBoard(10, 150);
 
   // Red vignette
   const vig = document.createElement('div');
-  vig.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(233,69,96,0.35) 100%);z-index:898;pointer-events:none';
+  vig.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(233,69,96,0.4) 100%);z-index:898;pointer-events:none';
   document.body.appendChild(vig);
-  anime({ targets: vig, opacity: [0.6, 0], duration: 600, easing: 'easeOutQuad', complete: () => vig.remove() });
+  anime({ targets: vig, opacity: [0.7, 0], duration: 500, easing: 'easeOutQuad', complete: () => vig.remove() });
 
   // Squash mid cell
-  anime({ targets: mid, scaleX: [1, 1.3, 0.9, 1.05, 1], scaleY: [1, 0.8, 1.1, 0.97, 1], borderColor: ['#e94560', '#0f3460'], backgroundColor: ['#5c1a1a', '#16213e'], duration: 400, easing: 'easeOutElastic(1, 0.6)' });
+  anime({ targets: mid, scaleX: [1, 1.3, 0.88, 1.05, 1], scaleY: [1, 0.8, 1.12, 0.97, 1], borderColor: ['#e94560', '#0f3460'], backgroundColor: ['#5c1a1a', '#16213e'], boxShadow: ['0 0 10px 4px rgba(233,69,96,0.4)', '0 0 0px transparent'], duration: 450, easing: 'easeOutElastic(1, 0.6)' });
 
-  // Push left/right
-  anime({ targets: left, translateX: [-14, 2, 0], duration: 350, easing: 'easeOutBack' });
-  anime({ targets: right, translateX: [14, -2, 0], duration: 350, easing: 'easeOutBack' });
+  // Push left/right 14px
+  anime({ targets: left, translateX: [-14, 3, 0], duration: 400, easing: 'easeOutBack' });
+  anime({ targets: right, translateX: [14, -3, 0], duration: 400, easing: 'easeOutBack' });
 
-  // Red debris particles
-  burst(cx, cy, { texture: 'redSpark', count: 20, spread: 90, duration: 400, sizeMin: 0.5, sizeMax: 1.2 });
-  burst(cx, cy, { texture: 'debris', count: 15, spread: 70, duration: 450, gravity: 25, sizeMin: 0.6, sizeMax: 1, tint: [0x8b0000, 0x555555, 0xe94560] });
+  // Debris: triangle + redSpark (mixed shapes)
+  burst(cx, cy, { texture: 'triangle', count: 15, spread: 80, duration: 400, gravity: 25, sizeMin: 0.6, sizeMax: 1.2, tint: [0x8b0000, 0x555555, 0xe94560] });
+  burst(cx, cy, { texture: 'redSpark', count: 18, spread: 100, duration: 380, sizeMin: 0.5, sizeMax: 1.2 });
+  burst(cx, cy, { texture: 'debris', count: 10, spread: 70, duration: 450, gravity: 20, tint: [0x444444, 0x666666] });
+
+  // === SETTLE (200ms) — auto via animation durations ===
 }

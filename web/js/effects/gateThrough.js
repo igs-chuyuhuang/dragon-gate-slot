@@ -1,4 +1,4 @@
-// gateThrough.js — 穿門成功 using VFX systems
+// gateThrough.js — 穿門成功：800ms total (200ms anticipation + 100ms hitStop + 300ms impact + 200ms settle)
 import { anime } from '../gameFeel.js';
 import { burst, shockwave, glowAt } from './particlePool.js';
 import { hitStop, shakeBoard, flashScreen, dimBackground, restoreDim, focusRow, shockwaveDOM } from './cameraFeel.js';
@@ -11,43 +11,56 @@ export async function playGateThrough(row, mult) {
   const cx = midRect.left + midRect.width / 2;
   const cy = midRect.top + midRect.height / 2;
 
-  // === ANTICIPATION ===
+  // === ANTICIPATION (200ms) ===
   const unfocus = focusRow(row);
-  const dim = dimBackground(0.3, 80);
-  anime({ targets: cells, backgroundColor: '#3a2800', duration: 80, easing: 'easeOutQuad' });
+  const dim = dimBackground(0.35, 150);
+  anime({ targets: cells, backgroundColor: ['#16213e', '#3a2800'], boxShadow: ['0 0 0px transparent', '0 0 12px 4px rgba(255,215,0,0.3)'], duration: 200, easing: 'easeOutQuad' });
 
-  await hitStop(80);
+  await hitStop(200);
 
-  // === IMPACT ===
-  playLayered([{ name: 'gate_through' }, { name: 'score_fly', delay: 150, volume: 0.5 }]);
-  flashScreen('#ffd700', 0.4, 250);
-  shakeBoard(8 + mult, 200);
-  shockwaveDOM(cx, cy, '#ffd700', 6, 350);
-  shockwave(cx, cy, { scale: 5, duration: 350 });
-  glowAt(cx, cy, { startScale: 1, endScale: 4, duration: 300 });
+  // === HIT STOP (100ms) ===
+  await hitStop(100);
+
+  // === IMPACT (300ms) ===
+  playLayered([{ name: 'gate_through' }, { name: 'score_fly', delay: 200, volume: 0.5 }]);
+
+  // Flash
+  flashScreen('#ffd700', 0.4, 300);
+
+  // Shockwave
+  shockwaveDOM(cx, cy, '#ffd700', 7, 400);
+  shockwave(cx, cy, { scale: 6, duration: 400 });
+
+  // Glow bloom
+  glowAt(cx, cy, { startScale: 1, endScale: 5, duration: 350, alpha: 0.9 });
+
+  // Board shake 8px
+  shakeBoard(8, 200);
 
   // Cell glow
-  anime({ targets: cells, backgroundColor: ['#ffd700', '#16213e'], boxShadow: ['0 0 30px 12px #ffd700', '0 0 0px transparent'], duration: 400, easing: 'easeOutExpo' });
+  anime({ targets: cells, backgroundColor: ['#ffd700', '#16213e'], boxShadow: ['0 0 30px 14px #ffd700', '0 0 0px transparent'], duration: 400, easing: 'easeOutExpo' });
 
-  // Particles: sparks + streaks + debris
-  burst(cx, cy, { texture: 'spark', count: 25, spread: 120, duration: 350, sizeMin: 0.5, sizeMax: 1.2 });
-  burst(cx, cy, { texture: 'streak', count: 12, spread: 100, duration: 280, sizeMin: 0.8, sizeMax: 1.5 });
-  burst(cx, cy, { texture: 'debris', count: 15, spread: 80, duration: 400, gravity: 20, sizeMin: 0.6, sizeMax: 1 });
+  // Particles: star sparks + streaks + debris (mixed shapes)
+  burst(cx, cy, { texture: 'star', count: 20, spread: 130, duration: 400, sizeMin: 0.5, sizeMax: 1.3 });
+  burst(cx, cy, { texture: 'streak', count: 15, spread: 110, duration: 320, sizeMin: 0.8, sizeMax: 1.5 });
+  burst(cx, cy, { texture: 'debris', count: 15, spread: 90, duration: 450, gravity: 20, sizeMin: 0.6, sizeMax: 1 });
+  burst(cx, cy, { texture: 'spark', count: 12, spread: 140, duration: 380, sizeMin: 0.4, sizeMax: 1 });
 
-  // === REWARD ===
+  // === REWARD (after 200ms) ===
   setTimeout(() => {
     const winRect = document.getElementById('win').getBoundingClientRect();
-    flyNumber(`×${mult}`, { fromX: cx, fromY: cy, toX: winRect.left + winRect.width / 2, toY: winRect.top, size: 38 });
-  }, 150);
+    flyNumber(`×${mult}`, { fromX: cx, fromY: cy, toX: winRect.left + winRect.width / 2, toY: winRect.top, size: 42 });
+  }, 200);
 
   // Big Hit for mult >= 4
   if (mult >= 4) {
     playLayered([{ name: 'dragon_roar', delay: 100, volume: 0.7 }]);
-    flashScreen('#ffd700', 0.5, 400);
-    shockwaveDOM(cx, cy, '#ffd700', 8, 500);
-    burst(cx, cy, { texture: 'glow', count: 8, spread: 150, duration: 500, sizeMin: 1, sizeMax: 2.5 });
+    flashScreen('#ffd700', 0.55, 450);
+    shockwaveDOM(cx, cy, '#ffd700', 9, 550);
+    shakeBoard(12, 300);
+    burst(cx, cy, { texture: 'glow', count: 10, spread: 160, duration: 500, sizeMin: 1.2, sizeMax: 2.5 });
   }
 
-  // === SETTLE ===
+  // === SETTLE (200ms) ===
   setTimeout(() => { restoreDim(200); unfocus(); }, 500);
 }

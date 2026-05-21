@@ -11,14 +11,17 @@ export function hitStop(ms = 80) {
 export function shakeBoard(intensity = 8, duration = 200) {
   const b = board();
   if (!b) return;
-  const steps = Math.ceil(duration / 30);
-  const keyframes = [];
+  const steps = Math.max(6, Math.ceil(duration / 30));
+  const kfX = [], kfY = [];
   for (let i = 0; i < steps; i++) {
-    const decay = 1 - i / steps;
-    keyframes.push({ value: (Math.random() > 0.5 ? 1 : -1) * intensity * decay, duration: 30 });
+    const decay = 1 - (i / steps) * 0.6;
+    const angle = Math.random() * Math.PI * 2;
+    kfX.push({ value: Math.cos(angle) * intensity * decay, duration: 30 });
+    kfY.push({ value: Math.sin(angle) * intensity * decay * 0.6, duration: 30 });
   }
-  keyframes.push({ value: 0, duration: 30 });
-  anime({ targets: b, translateX: keyframes, easing: 'easeOutQuad' });
+  kfX.push({ value: 0, duration: 30 });
+  kfY.push({ value: 0, duration: 30 });
+  anime({ targets: b, translateX: kfX, translateY: kfY, easing: 'easeOutQuad' });
 }
 
 export function flashScreen(color = '#ffd700', alpha = 0.4, duration = 250) {
@@ -54,12 +57,12 @@ export function pulseScreen(color = '#ffd700', count = 2) {
   const el = document.createElement('div');
   el.style.cssText = `position:fixed;inset:0;background:${color};opacity:0;z-index:899;pointer-events:none`;
   document.body.appendChild(el);
-  anime({ targets: el, opacity: [0, 0.15, 0], duration: 300, loop: count, easing: 'easeInOutSine', complete: () => el.remove() });
+  anime({ targets: el, opacity: [0, 0.2, 0], duration: 350, loop: count, easing: 'easeInOutSine', complete: () => el.remove() });
 }
 
 export function shockwaveDOM(cx, cy, color = '#ffd700', scale = 6, duration = 400) {
   const sw = document.createElement('div');
-  sw.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;width:40px;height:40px;border-radius:50%;border:3px solid ${color};transform:translate(-50%,-50%) scale(1);z-index:910;pointer-events:none;box-shadow:0 0 8px ${color}`;
+  sw.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;width:40px;height:40px;border-radius:50%;border:3px solid ${color};transform:translate(-50%,-50%) scale(1);z-index:910;pointer-events:none;box-shadow:0 0 12px ${color}`;
   document.body.appendChild(sw);
   anime({ targets: sw, scale: [1, scale], opacity: [1, 0], duration, easing: 'easeOutQuad', complete: () => sw.remove() });
 }

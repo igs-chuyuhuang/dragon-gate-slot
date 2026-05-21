@@ -1,14 +1,14 @@
-// bigWin.js — 分級 Big Win using VFX systems
+// bigWin.js — 分級 Big Win: 3000ms (500ms expand + 2000ms count-up + 500ms settle)
 import { anime } from '../gameFeel.js';
-import { burst, rain, shockwave } from './particlePool.js';
+import { burst, rain } from './particlePool.js';
 import { shakeBoard, flashScreen, shockwaveDOM } from './cameraFeel.js';
 import { explodeText, countUp } from './vfxTypo.js';
 import { playSfx, stopSfx } from './sfxBus.js';
 
 const TIERS = [
-  { threshold: 10, label: 'BIG WIN', color: '#ffd700', shake: 5, particles: 40 },
-  { threshold: 30, label: 'MEGA WIN', color: '#ff6b35', shake: 8, particles: 70 },
-  { threshold: 80, label: '🐉 DRAGON WIN 🐉', color: '#ff2222', shake: 12, particles: 100 },
+  { threshold: 10, label: 'BIG WIN', color: '#ffd700', shake: 6, particles: 50 },
+  { threshold: 30, label: 'MEGA WIN', color: '#ff6b35', shake: 10, particles: 80 },
+  { threshold: 80, label: '🐉 DRAGON WIN 🐉', color: '#ff2222', shake: 14, particles: 120 },
 ];
 
 export function playBigWin(payout, bet) {
@@ -17,42 +17,46 @@ export function playBigWin(payout, bet) {
   if (!tier) return Promise.resolve();
 
   return new Promise(resolve => {
-    // Dark overlay
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+
+    // === EXPAND (500ms) ===
+    // Dark overlay — centered flex
     const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1100;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0';
+    overlay.className = 'bigwin-overlay';
     document.body.appendChild(overlay);
-    anime({ targets: overlay, opacity: [0, 1], duration: 250, easing: 'easeOutQuad' });
+    anime({ targets: overlay, opacity: [0, 1], duration: 300, easing: 'easeOutQuad' });
 
-    // Shockwave
+    // Shockwave + flash
     setTimeout(() => {
-      shockwaveDOM(window.innerWidth / 2, window.innerHeight / 2, tier.color, 8, 500);
-      flashScreen(tier.color, 0.3, 300);
-    }, 200);
+      shockwaveDOM(cx, cy, tier.color, 9, 550);
+      flashScreen(tier.color, 0.35, 350);
+    }, 250);
 
-    // Tier label
-    setTimeout(() => explodeText(tier.label, { size: 50, color: tier.color, holdMs: 2500 }), 350);
+    // Tier label (500ms in)
+    setTimeout(() => explodeText(tier.label, { size: 56, color: tier.color, holdMs: 2800 }), 400);
 
-    // Count-up
+    // === COUNT-UP (2000ms) ===
     setTimeout(() => {
       playSfx('coin_count', { loop: true, volume: 0.6 });
-      const numEl = countUp(payout, { container: overlay, duration: 1500, size: 54 });
+      const numEl = countUp(payout, { container: overlay, duration: 2000, size: 56 });
 
-      // Shake during count
-      const shk = setInterval(() => shakeBoard(tier.shake, 100), 120);
+      // Sustained shake
+      const shk = setInterval(() => shakeBoard(tier.shake, 100), 130);
 
-      // Side particles
-      rain({ texture: 'coin', count: tier.particles, duration: 1400, stagger: 600, tint: [0xffd700, 0xffaa00] });
+      // Coin rain from sides
+      rain({ texture: 'coin', count: tier.particles, duration: 1600, stagger: 800, tint: [0xffd700, 0xffaa00] });
+      burst(cx, cy, { texture: 'star', count: 20, spread: 150, duration: 500 });
 
-      // Finish
+      // === SETTLE (500ms) ===
       setTimeout(() => {
         clearInterval(shk);
         stopSfx('coin_count');
         playSfx('jp_win');
-        anime({ targets: numEl, scale: [1, 1.3, 1], duration: 300, easing: 'easeOutElastic(1, 0.5)' });
+        anime({ targets: numEl, scale: [1, 1.4, 1], duration: 350, easing: 'easeOutElastic(1, 0.5)' });
         setTimeout(() => {
           anime({ targets: overlay, opacity: 0, duration: 400, easing: 'easeInQuad', complete: () => { overlay.remove(); resolve(); } });
-        }, 800);
-      }, 1800);
+        }, 500);
+      }, 2000);
     }, 600);
   });
 }
