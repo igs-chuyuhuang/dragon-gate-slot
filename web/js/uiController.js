@@ -33,13 +33,17 @@ const ALL_IMGS = Object.values(CARD_IMG);
 const scatterAudio = new Audio('assets/sfx/dragon_roar.mp3');
 scatterAudio.volume = 0.6;
 
+const CARD_LABELS = { 1:'A', 2:'2', 3:'3', 4:'4', 5:'5', 6:'6', 7:'7', 8:'8', 9:'9', 10:'10', 11:'J', 12:'Q', 13:'K' };
+
 function cellToImg(cell) {
   const src = cell.isScatter ? SC_IMG : CARD_IMG[cell.value];
-  return `<img src="assets/img/${src}" alt="${cellToString(cell)}">`;
+  const label = cell.isScatter ? '🐉' : CARD_LABELS[cell.value];
+  return `<span class="cell-label">${label}</span><img src="assets/img/${src}" alt="${cellToString(cell)}">`;
 }
 
-function randomImg() {
-  return ALL_IMGS[Math.floor(Math.random() * ALL_IMGS.length)];
+function randomCellHtml() {
+  const val = Math.floor(Math.random() * 13) + 1;
+  return `<span class="cell-label">${CARD_LABELS[val]}</span><img src="assets/img/${ALL_IMGS[val - 1]}">`;
 }
 
 function fmt(n) { return Math.round(n).toLocaleString(); }
@@ -75,7 +79,7 @@ function buildReelStrip(col, finalCells) {
   for (let i = 0; i < REEL_SYMBOLS; i++) {
     const div = document.createElement('div');
     div.className = 'cell';
-    div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+    div.innerHTML = randomCellHtml();
     strip.appendChild(div);
   }
   for (let r = 0; r < 3; r++) {
@@ -333,7 +337,7 @@ export function init() {
     strip.style.transform = 'translateY(0px)';
     for (let r = 0; r < 3; r++) {
       const cell = $(`cell-${r}-${col}`);
-      cell.innerHTML = `<img src="assets/img/${ALL_IMGS[Math.floor(Math.random() * ALL_IMGS.length)]}">`;
+      cell.innerHTML = randomCellHtml();
     }
   }
 
