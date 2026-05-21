@@ -239,3 +239,43 @@
   .jp-tier-label { font-size: 36px; }
   .jp-payout-number { font-size: 40px; }
 }
+
+/* === FG Meter (JP Progress Bar) === */
+.fg-meter {
+  position: fixed; right: 12px; top: 50%; transform: translateY(-50%);
+  width: 48px; height: 65vh; max-height: 380px;
+  z-index: 850; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.fg-meter-track {
+  position: relative; width: 32px; height: 100%;
+  background: rgba(255,255,255,0.04); border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1); overflow: visible;
+}
+.fg-meter-beam {
+  position: absolute; bottom: 0; left: 4px; right: 4px;
+  height: 0; border-radius: 3px 3px 0 0;
+  background: linear-gradient(to top, #ffd700, #fffacd);
+  box-shadow: 0 0 8px 2px rgba(255,215,0,0.4);
+}
+.fg-meter-zone {
+  position: absolute; left: -6px; right: -6px;
+  border-radius: 4px; transition: box-shadow 0.3s, transform 0.2s;
+}
+.fg-meter-zone-near { animation: zone-blink 0.6s ease-in-out infinite alternate; }
+@keyframes zone-blink { from { opacity: 0.6; } to { opacity: 1; box-shadow: 0 0 8px currentColor; } }
+.fg-meter-zone-active { box-shadow: 0 0 12px 4px currentColor; background-color: currentColor !important; opacity: 0.3; }
+.fg-meter-label {
+  position: absolute; right: calc(100% + 6px); top: 50%; transform: translateY(-50%);
+  font-size: 10px; font-weight: bold; white-space: nowrap;
+}
+.fg-meter-hint {
+  font-size: 11px; font-weight: bold; text-align: center;
+  white-space: nowrap; opacity: 0;
+}
+
+@media (max-width: 480px) {
+  .fg-meter { right: 4px; width: 36px; max-height: 280px; }
+  .fg-meter-track { width: 24px; }
+  .fg-meter-label { font-size: 8px; }
+}

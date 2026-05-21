@@ -10,6 +10,7 @@ import { revealScatters, initScatterDebug } from './effects/scatterReveal.js';
 import { playFreeGameTransition } from './effects/freeGameTransition.js';
 import { playBigWin } from './effects/bigWin.js';
 import { playJpReveal } from './effects/jpReveal.js';
+import { showFgMeter, updateFgMeter, hideFgMeter } from './effects/fgMeter.js';
 
 const gm = new GameManager();
 const $ = id => document.getElementById(id);
@@ -162,6 +163,9 @@ async function showResult(result) {
   const resEl = $('results');
 
   if (result.mode === 'fg') {
+    // Update FG meter with current score
+    updateFgMeter(result.totalScore);
+
     let html = `<div class="row-result r-sc">FG 本轉得分: +${fmt(result.spinScore)}</div>`;
     html += `<div class="row-result">累積總分: ${fmt(result.totalScore)}</div>`;
     html += `<div class="row-result">剩餘: ${result.spinsLeft} 轉</div>`;
@@ -180,6 +184,7 @@ async function showResult(result) {
 
     // JP Reveal ceremony on FG end
     if (result.fgDone && result.jpResult) {
+      hideFgMeter();
       await playJpReveal(result.totalScore, result.jpResult);
     }
   } else {
@@ -245,6 +250,7 @@ async function showResult(result) {
         for (let c = 0; c < 3; c++)
           if (result.board[r][c].isScatter) scCells.push({ r, c });
       await playFreeGameTransition(scCells);
+      showFgMeter();
     }
   }
 }
@@ -290,6 +296,7 @@ export function init() {
     if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
     if ((e.key === 'f' || e.key === 'F') && !gm.fg.active && !spinning) {
       gm.triggerFreeGame();
+      showFgMeter();
       $('results').innerHTML = '<div class="row-result r-sc">🐉 Free Game 觸發！（測試）</div>';
       updateUI();
     }
