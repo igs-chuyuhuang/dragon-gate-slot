@@ -7,6 +7,7 @@ import { onSpinStart, onColumnStop, onSpinEnd } from './effects/reelStop.js';
 import { revealScatters, initScatterDebug } from './effects/scatterReveal.js';
 import { playFreeGameTransition } from './effects/freeGameTransition.js';
 import { playBigWin } from './effects/bigWin.js';
+import { playJpReveal } from './effects/jpReveal.js';
 
 const gm = new GameManager();
 const $ = id => document.getElementById(id);
@@ -99,9 +100,9 @@ async function showResult(result) {
     winEl.textContent = result.fgDone && result.jpResult ? `+${fmt(result.jpResult.payout)}` : '-';
     winEl.className = result.jpResult && result.jpResult.payout > 0 ? 'win-positive' : '';
 
-    // H. Big Win on FG end
-    if (result.fgDone && result.jpResult && result.jpResult.payout > 0) {
-      await playBigWin(result.jpResult.payout, gm.bet);
+    // JP Reveal ceremony on FG end
+    if (result.fgDone && result.jpResult) {
+      await playJpReveal(result.totalScore, result.jpResult);
     }
   } else {
     // F. Scatter reveal (if any scatters)

@@ -191,3 +191,51 @@
   .bigwin-number { font-size: 42px; }
   .sc-hint-text { font-size: 24px; }
 }
+
+/* === JP Reveal Ceremony === */
+.jp-reveal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1200; gap: 20px;
+}
+.jp-score-display {
+  font-size: 36px; font-weight: bold; color: #ffd700;
+  text-shadow: 0 0 12px #ffd700;
+}
+.jp-bar-container { width: 60px; height: 70vh; max-height: 400px; position: relative; }
+.jp-bar-track {
+  width: 100%; height: 100%; position: relative;
+  background: rgba(255,255,255,0.05); border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: visible;
+}
+.jp-beam {
+  position: absolute; bottom: 0; left: 10%; width: 80%;
+  height: 0; border-radius: 4px 4px 0 0;
+  background: linear-gradient(to top, #ffd700, #fffacd);
+  box-shadow: 0 0 12px 4px rgba(255,215,0,0.5);
+  transition: background 0.3s;
+}
+.jp-gate {
+  position: absolute; left: -20px; right: -20px; height: 3px;
+  border: 2px solid; border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transform-origin: center;
+}
+.jp-gate span {
+  position: absolute; right: calc(100% + 8px);
+  font-size: 11px; font-weight: bold; white-space: nowrap;
+}
+.jp-tier-label { font-size: 48px; font-weight: 900; text-shadow: 0 0 20px currentColor; }
+.jp-payout-number {
+  font-size: 52px; font-weight: bold; color: #fff;
+  text-shadow: 0 0 12px #ffd700;
+}
+
+@media (max-width: 480px) {
+  .jp-bar-container { height: 50vh; }
+  .jp-score-display { font-size: 28px; }
+  .jp-tier-label { font-size: 36px; }
+  .jp-payout-number { font-size: 40px; }
+}
