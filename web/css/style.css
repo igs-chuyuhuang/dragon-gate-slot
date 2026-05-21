@@ -274,12 +274,7 @@ body.fg-mode .stage-frame { border-image: linear-gradient(180deg, #ffd700, #ff66
   body { padding: 4px; }
   .logo { font-size: 20px; letter-spacing: 3px; padding: 4px 14px; margin: 4px 0 2px; }
   .logo-sub { font-size: 9px; }
-  .board { gap: 3px; }
-  .reel { width: clamp(60px, 20vw, 90px); height: calc(clamp(60px, 20vw, 90px) * 3 + 4px); }
-  .cell { width: clamp(60px, 20vw, 90px); height: clamp(60px, 20vw, 90px); }
-  .reel-strip { gap: 2px; }
-  .stage-frame { padding: 6px; }
-  .stage { margin: 4px 0; }
+  .stage { transform: scale(0.7); transform-origin: top center; margin-bottom: -60px; }
   .spin-btn { width: 70px; height: 70px; margin: 6px 0; }
   .spin-btn .spin-label { font-size: 16px; }
   .console { padding: 6px 8px; gap: 4px; margin: 4px 0; }
