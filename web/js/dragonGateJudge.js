@@ -15,7 +15,7 @@ function judgeRow(row, left, mid, right) {
   const lo = Math.min(l, r2), hi = Math.max(l, r2);
   const gap = hi - lo - 1;
 
-  if (m === lo || m === hi) return { row, type: 'wall', mult: -2, gap };
+  if (m === lo || m === hi) return { row, type: 'wall', mult: 1.2, gap };
   if (m > lo && m < hi) return { row, type: 'through', mult: getPassMult(gap), gap };
   return { row, type: 'miss', mult: 0, gap };
 }
