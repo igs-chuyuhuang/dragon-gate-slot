@@ -37,13 +37,12 @@ const CARD_LABELS = { 1:'A', 2:'2', 3:'3', 4:'4', 5:'5', 6:'6', 7:'7', 8:'8', 9:
 
 function cellToImg(cell) {
   const src = cell.isScatter ? SC_IMG : CARD_IMG[cell.value];
-  const label = cell.isScatter ? '🐉' : CARD_LABELS[cell.value];
-  return `<span class="cell-label">${label}</span><img src="assets/img/${src}" alt="${cellToString(cell)}">`;
+  return `<img src="assets/img/${src}" alt="${cellToString(cell)}">`;
 }
 
 function randomCellHtml() {
   const val = Math.floor(Math.random() * 13) + 1;
-  return `<span class="cell-label">${CARD_LABELS[val]}</span><img src="assets/img/${ALL_IMGS[val - 1]}">`;
+  return `<img src="assets/img/${ALL_IMGS[val - 1]}">`;
 }
 
 function fmt(n) { return Math.round(n).toLocaleString(); }
