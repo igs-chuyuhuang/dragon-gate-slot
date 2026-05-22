@@ -232,7 +232,7 @@ button.small { padding: 6px 10px; background: #0f3460; min-height: 34px; }
 /* === SPIN Button === */
 .spin-btn {
   position: relative;
-  width: 64px; height: 64px;
+  width: 84px; height: 84px;
   border-radius: 50%;
   background: transparent; border: none; padding: 0;
   cursor: pointer;
@@ -244,7 +244,7 @@ button.small { padding: 6px 10px; background: #0f3460; min-height: 34px; }
 .spin-btn .spin-label {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: bold; color: #fff;
+  font-size: 16px; font-weight: bold; color: #fff;
   text-shadow: 0 2px 4px rgba(0,0,0,0.8);
   letter-spacing: 1px;
 }
@@ -252,10 +252,42 @@ button.small { padding: 6px 10px; background: #0f3460; min-height: 34px; }
 .spin-btn:active { transform: scale(0.92); }
 .spin-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; filter: none; box-shadow: none; }
 
+/* === Spin Row === */
+.spin-row {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  margin: 4px 0;
+}
+
+/* === Auto Button === */
+.auto-btn-styled {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: #0f3460;
+  border: 2px solid rgba(255,215,0,0.4);
+  color: #ffd700;
+  font-size: 12px; font-weight: bold;
+  cursor: pointer;
+  min-height: unset; padding: 0;
+  transition: all 0.15s;
+}
+.auto-btn-styled:hover { border-color: #ffd700; background: #1a4a80; }
+.auto-btn-styled.running { background: #e94560; border-color: #e94560; color: #fff; }
+
+/* === Bet Presets === */
+.bet-presets { display: flex; gap: 3px; margin-top: 4px; }
+.bet-btn {
+  padding: 3px 8px; font-size: 11px; min-height: 22px;
+  background: #0f3460; border: 1px solid rgba(255,215,0,0.3);
+  color: #ccc; border-radius: 4px; cursor: pointer;
+}
+.bet-btn.active { background: #c9a032; color: #000; border-color: #ffd700; }
+.bet-btn:hover { border-color: #ffd700; }
+
 /* === Auto Group === */
 .auto-group { display: flex; gap: 4px; align-items: center; }
-.auto-group button { font-size: 11px; padding: 4px 8px; min-height: 26px; background: #0f3460; }
-.auto-group button.active { background: #e94560; }
+.auto-label { font-size: 10px; color: #999; margin-right: 2px; }
+.auto-group .auto-preset { font-size: 11px; padding: 4px 8px; min-height: 24px; background: #0f3460; border: 1px solid rgba(255,215,0,0.2); color: #aaa; border-radius: 4px; }
+.auto-group .auto-preset.active { background: #c9a032; color: #000; border-color: #ffd700; }
 #auto-btn { background: #e94560; }
 
 /* === Results Panel === */
@@ -295,21 +327,20 @@ body.fg-mode .stage-frame { border-image: linear-gradient(180deg, #ffd700, #ff66
 
 /* === Rules === */
 .rules-btn {
-  position: fixed;
-  top: 12px; right: 12px;
-  width: 36px; height: 36px;
+  position: absolute;
+  top: -4px; right: -4px;
+  width: 32px; height: 32px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,215,0,0.4);
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,215,0,0.5);
   color: #ffd700;
-  font-size: 18px; font-weight: bold;
+  font-size: 16px; font-weight: bold;
   cursor: pointer;
-  z-index: 100;
+  z-index: 10;
   display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(4px);
   min-height: unset; padding: 0;
 }
-.rules-btn:hover { background: rgba(0,0,0,0.8); border-color: #ffd700; }
+.rules-btn:hover { background: rgba(0,0,0,0.9); border-color: #ffd700; }
 .rules-overlay {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.8);

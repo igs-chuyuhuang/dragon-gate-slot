@@ -63,7 +63,9 @@ function updateUI() {
     fgEl.textContent = `🎰 Free Game: 剩餘 ${gm.fg.spinsLeft} 轉 | 累積 ${fmt(gm.fg.totalScore)} 分 | 延伸 ${gm.fg.extensions}/2`;
   } else { fgEl.style.display = 'none'; }
   document.body.classList.toggle('fg-mode', gm.fg.active);
-  $('auto-btn').textContent = autoSpins > 0 ? `停止 (${autoSpins})` : '自動';
+  const autoEl = $('auto-btn');
+  autoEl.textContent = autoSpins > 0 ? `Stop` : 'Auto';
+  autoEl.classList.toggle('running', autoSpins > 0);
 }
 
 // === Real Reel Scrolling Animation ===
@@ -333,8 +335,17 @@ export function init() {
   $('spin-btn').addEventListener('click', doSpin);
   initSpinButton($('spin-btn')); // A. Spin charge
   $('auto-btn').addEventListener('click', autoSpin);
-  $('bet-up').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex + 1); updateUI(); } });
-  $('bet-down').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex - 1); updateUI(); } });
+  // Bet presets
+  document.querySelectorAll('.bet-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (spinning) return;
+      const val = parseInt(btn.dataset.bet);
+      const idx = [5, 10, 20, 50, 100].indexOf(val);
+      if (idx >= 0) { gm.setBetIndex(idx); updateUI(); }
+      document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
 
   document.querySelectorAll('.auto-preset').forEach(btn => {
     btn.addEventListener('click', () => {

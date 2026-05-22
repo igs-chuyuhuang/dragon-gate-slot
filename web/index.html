@@ -23,6 +23,7 @@
 
   <!-- Main Stage -->
   <div class="stage">
+    <button id="rules-btn" class="rules-btn">？</button>
     <div class="stage-frame">
       <div class="board">
         <div class="reel" id="reel-0">
@@ -68,12 +69,17 @@
       </div>
     </div>
     <div class="console-section console-center">
-      <button class="small" id="bet-down">◀</button>
       <div class="console-panel" style="background-image:url('assets/img/UI-02_bet_panel.png')">
         <span class="panel-label">押注</span>
         <strong id="bet">10</strong>
       </div>
-      <button class="small" id="bet-up">▶</button>
+      <div class="bet-presets">
+        <button class="bet-btn" data-bet="5">5</button>
+        <button class="bet-btn" data-bet="10">10</button>
+        <button class="bet-btn active" data-bet="20">20</button>
+        <button class="bet-btn" data-bet="50">50</button>
+        <button class="bet-btn" data-bet="100">100</button>
+      </div>
     </div>
     <div class="console-section">
       <div class="console-panel win-panel">
@@ -81,25 +87,26 @@
         <strong id="win">0</strong>
       </div>
     </div>
-    <div class="console-section">
-      <button id="spin-btn" class="spin-btn">
-        <img src="assets/img/UI-04_spin_btn.png" alt="SPIN">
-        <span class="spin-label">SPIN</span>
-      </button>
-    </div>
-    <div class="console-section auto-group">
+  </div>
+
+  <!-- SPIN + Auto Row -->
+  <div class="spin-row">
+    <div class="auto-group">
+      <span class="auto-label">次數</span>
       <button class="auto-preset" data-count="10">10</button>
       <button class="auto-preset" data-count="50">50</button>
-      <button class="auto-preset" data-count="100">100</button>
-      <button id="auto-btn">自動</button>
+      <button class="auto-preset active" data-count="100">100</button>
     </div>
+    <button id="spin-btn" class="spin-btn">
+      <img src="assets/img/UI-04_spin_btn.png" alt="SPIN">
+      <span class="spin-label">SPIN</span>
+    </button>
+    <button id="auto-btn" class="auto-btn-styled">Auto</button>
   </div>
 
   <!-- Results Panel -->
   <div id="results">按 SPIN 開始遊戲</div>
 
-  <!-- Rules Button -->
-  <button id="rules-btn" class="rules-btn">？</button>
 
   <!-- Rules Overlay -->
   <div id="rules-overlay" class="rules-overlay" style="display:none">
@@ -107,6 +114,14 @@
       <button class="rules-close">✕</button>
       <div class="rules-content">
         <h2>🐉 射龍門 Slot — 遊戲規則</h2>
+
+        <h3>【畫面說明】</h3>
+        <ul>
+          <li>標題下方三個圖示為 JP 彩金池：🔵 Basic / 🟠 Major / 🔴 Grand</li>
+          <li>數字為目前累積獎金</li>
+          <li>押注區：點擊金額按鈕直接切換押注</li>
+          <li>Auto：先選次數（10/50/100），再按 Auto 開始自動轉</li>
+        </ul>
 
         <h3>【基本玩法】</h3>
         <ul>
