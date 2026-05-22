@@ -70,24 +70,26 @@ function updateUI() {
 const CELL_H = 110;
 const GAP = 3;
 const CELL_TOTAL = CELL_H + GAP; // 113px per cell
-const REEL_SYMBOLS = 20; // random symbols before final 3
-const OVERSHOOT = 18; // px overshoot on stop
+const REEL_SYMBOLS = 25; // random symbols for scrolling distance
+const OVERSHOOT = 16; // px overshoot on stop
 
 function buildReelStrip(col, finalCells) {
   const strip = document.querySelector(`#reel-${col} .reel-strip`);
   strip.innerHTML = '';
-  for (let i = 0; i < REEL_SYMBOLS; i++) {
-    const div = document.createElement('div');
-    div.className = 'cell';
-    div.innerHTML = randomCellHtml();
-    strip.appendChild(div);
-  }
+  // Final 3 symbols on top (visible at translateY=0)
   for (let r = 0; r < 3; r++) {
     const cell = finalCells[r];
     const div = document.createElement('div');
     div.className = 'cell';
     div.id = `cell-${r}-${col}`;
     div.innerHTML = cellToImg(cell);
+    strip.appendChild(div);
+  }
+  // Random symbols below (visible during spin)
+  for (let i = 0; i < REEL_SYMBOLS; i++) {
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.innerHTML = randomCellHtml();
     strip.appendChild(div);
   }
   return strip;
@@ -100,7 +102,8 @@ function highlightRow(row, type) {
   setTimeout(() => cells.forEach(c => { if (c) c.classList.remove(cls); }), 1500);
 }
 
-const TARGET_Y = -(REEL_SYMBOLS * CELL_TOTAL);
+// At translateY=0: top 3 (finals) visible. Start pushed down to show randoms.
+const START_Y = REEL_SYMBOLS * CELL_TOTAL;
 const stopAudio = new Audio('assets/sfx/spin_release.mp3');
 stopAudio.volume = 0.5;
 
@@ -112,34 +115,41 @@ function animateSpin(board) {
     for (let col = 0; col < 3; col++) {
       const finalCells = [board[0][col], board[1][col], board[2][col]];
       const strip = buildReelStrip(col, finalCells);
-      strip.style.transform = 'translateY(0px)';
+      strip.style.transform = `translateY(${START_Y}px)`;
     }
 
     document.querySelector('#reel-0 .reel-strip').offsetHeight;
 
-    // Left(0ms) → Right(150ms) → Middle(300ms), durations 600/650/700ms
-    const delays = [0, 300, 150]; // col0=left, col1=middle(last), col2=right
-    const durations = [500, 600, 550]; // main scroll phase per col
+    // Left→Right→Middle stop order. Total ~2.6s for last column.
+    // Multi-phase: slow start → fast → decelerate → overshoot → bounce
+    const colTimings = [
+      { delay: 0, dur: 1800 },    // col 0 (left): stops at ~1.8s
+      { delay: 600, dur: 2000 },  // col 1 (middle): stops at ~2.6s (last)
+      { delay: 200, dur: 1900 },  // col 2 (right): stops at ~2.1s
+    ];
     let completed = 0;
 
     for (let col = 0; col < 3; col++) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
+      const t = colTimings[col];
 
+      // 4-phase animation: accelerate → cruise → decelerate+overshoot → bounce
       anime({
         targets: strip,
         translateY: [
-          { value: TARGET_Y - OVERSHOOT, duration: durations[col], easing: 'easeInQuad' },
-          { value: TARGET_Y, duration: 150, easing: 'easeOutBack' }
+          // Phase 1+2+3: from START_Y down to -OVERSHOOT (past target)
+          { value: -OVERSHOOT, duration: t.dur, easing: 'cubicBezier(0.1, 0.6, 0.3, 1)' },
+          // Phase 4: bounce back to 0
+          { value: 0, duration: 200, easing: 'easeOutBounce' }
         ],
-        delay: delays[col],
+        delay: t.delay,
         complete: () => {
-          // Stop thud audio
           const thud = stopAudio.cloneNode();
           thud.volume = 0.5;
           thud.play().catch(() => {});
 
           const cells = strip.querySelectorAll('.cell');
-          const finalCells = Array.from(cells).slice(-3);
+          const finalCells = Array.from(cells).slice(0, 3);
           finalCells.forEach(c => {
             if (board.some((row, r) => row[col].isScatter && c.id === `cell-${r}-${col}`)) {
               c.classList.add('scatter', 'sc-flash');
