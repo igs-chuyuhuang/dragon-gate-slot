@@ -76,20 +76,20 @@ const OVERSHOOT = 18; // px overshoot on stop
 function buildReelStrip(col, finalCells) {
   const strip = document.querySelector(`#reel-${col} .reel-strip`);
   strip.innerHTML = '';
-  // Final 3 symbols at top (visible at translateY=0 with top:0)
+  // Random symbols on top (visible during spin at translateY=0)
+  for (let i = 0; i < REEL_SYMBOLS; i++) {
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.innerHTML = randomCellHtml();
+    strip.appendChild(div);
+  }
+  // Final 3 symbols at bottom (visible when translateY = -SCROLL_DIST)
   for (let r = 0; r < 3; r++) {
     const cell = finalCells[r];
     const div = document.createElement('div');
     div.className = 'cell';
     div.id = `cell-${r}-${col}`;
     div.innerHTML = cellToImg(cell);
-    strip.appendChild(div);
-  }
-  // Random symbols below (visible during spin when strip is pushed down)
-  for (let i = 0; i < REEL_SYMBOLS; i++) {
-    const div = document.createElement('div');
-    div.className = 'cell';
-    div.innerHTML = randomCellHtml();
     strip.appendChild(div);
   }
   return strip;
@@ -102,8 +102,8 @@ function highlightRow(row, type) {
   setTimeout(() => cells.forEach(c => { if (c) c.classList.remove(cls); }), 1500);
 }
 
-// With top:0: at translateY=0, first 3 cells (finals) visible in viewport.
-// Push strip DOWN (positive translateY) to show random symbols below finals.
+// With top:0: at translateY=0, first cells (randoms) visible.
+// Animate to translateY=-SCROLL_DIST to show final 3 at bottom.
 const SCROLL_DIST = REEL_SYMBOLS * CELL_TOTAL; // ~4520px
 const stopAudio = new Audio('assets/sfx/spin_release.mp3');
 stopAudio.volume = 0.5;
@@ -116,8 +116,8 @@ function animateSpin(board) {
     for (let col = 0; col < 3; col++) {
       const finalCells = [board[0][col], board[1][col], board[2][col]];
       const strip = buildReelStrip(col, finalCells);
-      // Start: strip pushed DOWN, showing random symbols in viewport
-      strip.style.transform = `translateY(${SCROLL_DIST}px)`;
+      // Start: translateY=0, showing random symbols at top of strip
+      strip.style.transform = `translateY(0px)`;
     }
 
     document.querySelector('#reel-0 .reel-strip').offsetHeight;
@@ -140,31 +140,30 @@ function animateSpin(board) {
       const cruiseDur = Math.round(t.mainDur * 0.55);
       const decelDur = Math.round(t.mainDur * 0.30);
 
-      const accelEnd = SCROLL_DIST * 0.85;
-      const cruiseEnd = SCROLL_DIST * 0.15;
+      const targetY = -SCROLL_DIST;
 
       anime.timeline({ delay: t.delay })
         .add({
           targets: strip,
-          translateY: [{ value: SCROLL_DIST }, { value: accelEnd }],
+          translateY: [{ value: 0 }, { value: targetY * 0.15 }],
           duration: accelDur,
           easing: 'easeInQuad'
         })
         .add({
           targets: strip,
-          translateY: cruiseEnd,
+          translateY: targetY * 0.85,
           duration: cruiseDur,
           easing: 'linear'
         })
         .add({
           targets: strip,
-          translateY: -OVERSHOOT,
+          translateY: -SCROLL_DIST - OVERSHOOT,
           duration: decelDur,
           easing: 'easeOutQuad',
           complete: () => {
             anime({
               targets: strip,
-              translateY: 0,
+              translateY: -SCROLL_DIST,
               duration: 200,
               easing: 'easeOutBounce',
               complete: () => {
@@ -173,7 +172,7 @@ function animateSpin(board) {
                 thud.play().catch(() => {});
 
                 const cells = strip.querySelectorAll('.cell');
-                const finalCells = Array.from(cells).slice(0, 3);
+                const finalCells = Array.from(cells).slice(-3);
                 finalCells.forEach(c => {
                   if (board.some((row, r) => row[col].isScatter && c.id === `cell-${r}-${col}`)) {
                     c.classList.add('scatter', 'sc-flash');
