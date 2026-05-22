@@ -8,7 +8,7 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 10px;
+  padding: 6px;
   overflow-x: hidden;
 }
 
@@ -18,7 +18,7 @@ body {
   color: #ffd700;
   text-shadow: 0 0 12px rgba(255,215,0,0.6), 0 2px 4px rgba(0,0,0,0.8);
   letter-spacing: 6px;
-  margin: 8px 0 4px;
+  margin: 4px 0 2px;
   text-align: center;
   position: relative;
   z-index: 10;
@@ -37,7 +37,7 @@ body {
 }
 
 /* === JP Panel === */
-.jp-bar { display: flex; gap: 16px; margin-bottom: 10px; justify-content: center; flex-wrap: wrap; }
+.jp-bar { display: flex; gap: 16px; margin-bottom: 4px; justify-content: center; flex-wrap: wrap; }
 .jp {
   display: flex; align-items: center; gap: 6px;
   padding: 6px 14px; border-radius: 8px;
@@ -63,14 +63,14 @@ body {
 /* === Main Stage === */
 .stage {
   position: relative;
-  margin: 8px 0;
+  margin: 4px 0;
 }
 .stage-frame {
   background: linear-gradient(145deg, rgba(20,10,5,0.9), rgba(40,20,10,0.85));
   border: 4px solid #c9a032;
   border-image: linear-gradient(180deg, #ffd700, #8b6914, #ffd700) 1;
   border-radius: 0;
-  padding: 14px;
+  padding: 10px;
   box-shadow:
     0 0 40px rgba(201,160,50,0.25),
     inset 0 0 30px rgba(0,0,0,0.6),
@@ -199,7 +199,7 @@ body {
   border: 2px solid #8b6914;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,215,0,0.1);
-  margin: 8px 0;
+  margin: 4px 0;
   flex-wrap: wrap; justify-content: center;
 }
 .console-section { display: flex; align-items: center; gap: 6px; }
@@ -232,28 +232,29 @@ button.small { padding: 6px 10px; background: #0f3460; min-height: 34px; }
 /* === SPIN Button === */
 .spin-btn {
   position: relative;
-  width: 110px; height: 110px;
+  width: 64px; height: 64px;
   border-radius: 50%;
   background: transparent; border: none; padding: 0;
-  cursor: pointer; margin: 10px 0;
+  cursor: pointer;
   transition: transform 0.15s, filter 0.15s;
   box-shadow: 0 4px 20px rgba(233,69,96,0.4);
+  min-height: unset;
 }
 .spin-btn img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 .spin-btn .spin-label {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: bold; color: #fff;
+  font-size: 14px; font-weight: bold; color: #fff;
   text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 .spin-btn:hover { transform: scale(1.1); filter: brightness(1.2); box-shadow: 0 6px 30px rgba(233,69,96,0.6); }
 .spin-btn:active { transform: scale(0.92); }
 .spin-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; filter: none; box-shadow: none; }
 
 /* === Auto Group === */
-.auto-group { display: flex; gap: 6px; align-items: center; margin: 4px 0; }
-.auto-group button { font-size: 12px; padding: 5px 10px; min-height: 30px; background: #0f3460; }
+.auto-group { display: flex; gap: 4px; align-items: center; }
+.auto-group button { font-size: 11px; padding: 4px 8px; min-height: 26px; background: #0f3460; }
 .auto-group button.active { background: #e94560; }
 #auto-btn { background: #e94560; }
 
@@ -261,10 +262,10 @@ button.small { padding: 6px 10px; background: #0f3460; min-height: 34px; }
 #results {
   background: rgba(10,15,30,0.8);
   border: 1px solid rgba(201,160,50,0.2);
-  padding: 10px 14px; border-radius: 8px;
-  margin: 6px 0; min-height: 50px; min-width: 320px;
-  text-align: center; line-height: 1.7;
-  backdrop-filter: blur(4px); font-size: 13px;
+  padding: 6px 14px; border-radius: 8px;
+  margin: 2px 0; min-height: 36px; min-width: 320px;
+  text-align: center; line-height: 1.5;
+  backdrop-filter: blur(4px); font-size: 12px;
 }
 #results .row-result { margin: 2px 0; }
 #results .r-pass { color: #4caf50; }
