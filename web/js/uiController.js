@@ -261,10 +261,10 @@ async function showResult(result) {
       let cls, text;
       switch (j.type) {
         case 'through':
-          cls = 'r-pass'; text = `✓ 穿門 ×${j.mult} (+${fmt(gm.bet * j.mult)})`;
+          cls = 'r-pass'; text = `✓ 穿門 ×${j.mult} (+${fmt(Math.round(gm.bet / 3 * j.mult))})`;
           break;
         case 'wall':
-          cls = 'r-wall'; text = `⚡ 碰壁 賠雙 (-${fmt(gm.bet * 2)})`;
+          cls = 'r-wall'; text = `⚡ 碰壁 ×1.2 (+${fmt(Math.round(gm.bet / 3 * 1.2))})`;
           break;
         case 'same-hit':
           cls = 'r-same'; text = `💀 同值命中 賠4 (-${fmt(gm.bet * 3)})`;
