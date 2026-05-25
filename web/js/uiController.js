@@ -193,16 +193,18 @@ function animateSpin(board) {
                         if (cfg.isMiddle) deactivateMiddleFocus();
 
                         onReelStopped(strip, col, board, () => {
-                      if (!cfg.isMiddle) sidesStoppedCount++;
-                      completed++;
-                      if (completed === 3) {
-                        setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 80);
+                          if (!cfg.isMiddle) sidesStoppedCount++;
+                          completed++;
+                          if (completed === 3) {
+                            setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 80);
+                          }
+                        });
                       }
                     });
                   }
                 });
-              }
-            });
+              });
+            }
           });
         }
       });
