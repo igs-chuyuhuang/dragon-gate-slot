@@ -130,7 +130,7 @@ function animateSpin(board) {
     // Sides: fast spin → bridge 450ms → 4 ticks
     const configs = [
       { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', extraSpinDur: 0, extraSpinDist: 0, tickMs: 900, isMiddle: false },
-      { lastSymbols: 6, bridgeDist: 8, bridgeDur: 600, bridgeEase: 'easeOutQuart', extraSpinDur: 500, extraSpinDist: 8, tickMs: 1000, isMiddle: true },
+      { lastSymbols: 6, bridgeDist: 12, bridgeDur: 800, bridgeEase: 'easeOutQuart', extraSpinDur: 700, extraSpinDist: 14, tickMs: 1600, isMiddle: true },
       { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', extraSpinDur: 0, extraSpinDist: 0, tickMs: 900, isMiddle: false },
     ];
 
