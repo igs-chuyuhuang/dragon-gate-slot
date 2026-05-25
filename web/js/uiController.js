@@ -126,11 +126,11 @@ function animateSpin(board) {
     const overshootDist = Math.round(CELL_TOTAL * 0.18);
 
     // Config per reel
-    // Middle reel: after sides stop, continues spinning 600ms more, then bridge 600ms, then 6 ticks
+    // Middle reel: after sides stop, extra spin 500ms + bridge 600ms + 6 ticks ~1000ms ≈ 2.1s total
     // Sides: fast spin → bridge 450ms → 4 ticks
     const configs = [
       { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', extraSpinDur: 0, extraSpinDist: 0, tickMs: 900, isMiddle: false },
-      { lastSymbols: 6, bridgeDist: 6, bridgeDur: 600, bridgeEase: 'easeOutQuart', extraSpinDur: 650, extraSpinDist: 10, tickMs: 1200, isMiddle: true },
+      { lastSymbols: 6, bridgeDist: 8, bridgeDur: 600, bridgeEase: 'easeOutQuart', extraSpinDur: 500, extraSpinDist: 8, tickMs: 1000, isMiddle: true },
       { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', extraSpinDur: 0, extraSpinDist: 0, tickMs: 900, isMiddle: false },
     ];
 
@@ -269,10 +269,10 @@ function reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone
 
 // Continuous deceleration: last symbol of middle reel gets extra duration
 function slideDecelerate(strip, startY, symbolCount, totalMs, isMiddle, onDone) {
+  // Gentle 1.35x ratio: continuous deceleration without huge jumps
+  // 6 symbols → ~120, 160, 220, 295, 400, 540ms feel
   const ratios = [];
-  for (let i = 0; i < symbolCount; i++) ratios.push(Math.pow(1.6, i));
-  // Middle reel: boost last symbol ratio for extra suspense (600-700ms feel)
-  if (isMiddle) ratios[ratios.length - 1] *= 7;
+  for (let i = 0; i < symbolCount; i++) ratios.push(Math.pow(1.35, i));
   const ratioSum = ratios.reduce((a, b) => a + b, 0);
   const durations = ratios.map(r => Math.round((r / ratioSum) * totalMs));
 
@@ -283,7 +283,7 @@ function slideDecelerate(strip, startY, symbolCount, totalMs, isMiddle, onDone) 
       targets: strip,
       translateY: startY - (i + 1) * CELL_TOTAL,
       duration: durations[i],
-      easing: 'easeOutSine',
+      easing: 'linear', // linear per-symbol = continuous sliding, no pause between symbols
       complete: () => { i++; step(); }
     });
   };
