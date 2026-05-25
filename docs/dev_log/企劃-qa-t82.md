@@ -32,3 +32,36 @@
 **關鍵 prompt / 指令：** 使用者回報盤面上「4」symbol 顯示異常，看起來像「44」，請進行 Visual QA
 **人工修正：** 無
 **耗時：** ~10 分鐘
+
+### [2026-05-25] — Visual QA Report V2 + 建立 CURRENT_STATUS.md
+
+**環節：** 測試 / 企劃
+**AI 工具：** Kiro Agent
+**做了什麼：** 完成 Visual QA Report V2（全面重新評估遊戲視覺品質，總評 6.5/10，列出 P0~P3 待修項目）。建立 `docs/CURRENT_STATUS.md` 即時狀態總覽文件，彙整各模組進度與待辦事項。
+**Before：** 無系統性 QA 報告、無即時狀態追蹤機制
+**After：** visual_qa_report.md V2 完成（7 大項目評分 + 優先級待修清單）、CURRENT_STATUS.md 上線（各模組狀態 + 待辦 + 最近完成）
+**關鍵 prompt / 指令：** 進行完整 Visual QA 評估；建立專案即時狀態文件供所有 Agent 共用
+**人工修正：** 無
+**耗時：** ~15 分鐘
+
+### [2026-05-25] — Visual QA Report V2 + DRAGON WIN 文字截斷修復
+
+**環節：** 測試
+**AI 工具：** Kiro Agent
+**做了什麼：** 執行第二輪 Visual QA，產出完整報告（總評 6.5/10），列出 P0~P3 共 7 項待修問題。同時修復 P0 項目：Big Win「DRAGON」文字被截斷——將文字特效位置移到盤面上方居中 (top 15%)，z-index 提升到 1150。
+**Before：** DRAGON WIN 文字被盤面遮擋/截斷；無系統性 QA 報告
+**After：** Visual QA Report V2 完成（docs/visual_qa_report.md）；DRAGON WIN 文字正常顯示於盤面上方
+**關鍵 prompt / 指令：** 執行 Visual QA 第二輪，產出報告並修復 P0 問題
+**人工修正：** 無
+**耗時：** ~15 分鐘
+
+### [2026-05-25] — 建立專案即時狀態文件 CURRENT_STATUS.md
+
+**環節：** 企劃
+**AI 工具：** Kiro Agent
+**做了什麼：** 建立 docs/CURRENT_STATUS.md，彙整所有模組（程式核心、前端UI、美術音效、數學模型、企劃QA、特效爽感、創意總監）的即時狀態、待辦事項、最近完成項目。
+**Before：** 各 Agent 進度散落在各自 dev_log，無統一狀態總覽
+**After：** docs/CURRENT_STATUS.md 上線，所有 Agent 可快速了解全局進度
+**關鍵 prompt / 指令：** 新規則生效——啟動時讀 CURRENT_STATUS.md，完成任務後更新
+**人工修正：** 無
+**耗時：** ~5 分鐘
