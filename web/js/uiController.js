@@ -164,7 +164,7 @@ function animateSpin(board) {
           if (cfg.isMiddle) activateMiddleFocus(col);
 
           // Phase 2: Deceleration slide
-          const totalSlowMs = cfg.isMiddle ? 1100 : 600; // middle gets more time
+          const totalSlowMs = cfg.isMiddle ? 1100 : 1000; // middle gets more time
           slideDecelerate(strip, -fastDist, cfg.lastSymbols, totalSlowMs, cfg.isMiddle, () => {
 
             // Phase 3: Overshoot — same direction as scroll (downward = more negative translateY)
