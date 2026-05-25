@@ -139,55 +139,60 @@ function animateSpin(board) {
 
       // Motion blur on strip only (not reel border)
       strip.style.filter = 'blur(3px)';
-      strip.style.transition = 'filter 0.3s';
 
       const slowdownDist = cfg.lastSymbols * CELL_TOTAL;
-      const fastDist = Math.abs(targetY) - slowdownDist;
+      const bufferDist = 6 * CELL_TOTAL; // ~6 symbols of deceleration buffer
+      const fastDist = Math.abs(targetY) - bufferDist - slowdownDist;
       const fastDur = 600 + cfg.stopDelay;
+      const bufferDur = cfg.isMiddle ? 550 : 450; // gradual decel buffer
 
-      // Phase 1: High-speed scroll
+      // Phase 1: High-speed scroll (blur stays at 3px)
       anime({
         targets: strip,
         translateY: -fastDist,
         duration: fastDur,
         easing: 'linear',
-        update: (anim) => {
-          if (anim.progress > 70) {
-            const clarity = (anim.progress - 70) / 30;
-            strip.style.filter = `blur(${3 * (1 - clarity)}px)`;
-          }
-        },
         complete: () => {
-          strip.style.filter = 'none';
+          // Phase 2: Deceleration buffer — speed drops smoothly, blur fades with it
+          anime({
+            targets: strip,
+            translateY: -(fastDist + bufferDist),
+            duration: bufferDur,
+            easing: 'easeOutCubic',
+            update: (anim) => {
+              // Blur syncs with deceleration: 3px → 0px
+              strip.style.filter = `blur(${3 * (1 - anim.progress / 100)}px)`;
+            },
+            complete: () => {
+              strip.style.filter = 'none';
 
-          // Middle reel focus: when sides have stopped, highlight middle
-          if (cfg.isMiddle) activateMiddleFocus(col);
+              // Middle reel focus: when sides have stopped, highlight middle
+              if (cfg.isMiddle) activateMiddleFocus(col);
 
-          // Phase 2: Deceleration slide
-          const totalSlowMs = cfg.isMiddle ? 1100 : 1000; // middle gets more time
-          slideDecelerate(strip, -fastDist, cfg.lastSymbols, totalSlowMs, cfg.isMiddle, () => {
+              // Phase 3: Tick deceleration slide (last N symbols)
+              const totalSlowMs = cfg.isMiddle ? 1100 : 1000;
+              slideDecelerate(strip, -(fastDist + bufferDist), cfg.lastSymbols, totalSlowMs, cfg.isMiddle, () => {
 
-            // Phase 3: Overshoot — same direction as scroll (downward = more negative translateY)
-            anime({
-              targets: strip,
-              translateY: targetY - overshootDist,
-              duration: 80,
-              easing: 'easeOutQuad',
-              complete: () => {
-
-                // Phase 4: Snap back — short, sharp, authoritative
+                // Phase 4: Overshoot — same direction as scroll
                 anime({
                   targets: strip,
-                  translateY: targetY,
-                  duration: 90,
-                  easing: 'easeOutCubic',
+                  translateY: targetY - overshootDist,
+                  duration: 80,
+                  easing: 'easeOutQuad',
                   complete: () => {
-                    // Impact feel
-                    reelImpact(reel, col);
 
-                    if (cfg.isMiddle) deactivateMiddleFocus();
+                    // Phase 5: Snap back
+                    anime({
+                      targets: strip,
+                      translateY: targetY,
+                      duration: 90,
+                      easing: 'easeOutCubic',
+                      complete: () => {
+                        reelImpact(reel, col);
 
-                    onReelStopped(strip, col, board, () => {
+                        if (cfg.isMiddle) deactivateMiddleFocus();
+
+                        onReelStopped(strip, col, board, () => {
                       if (!cfg.isMiddle) sidesStoppedCount++;
                       completed++;
                       if (completed === 3) {
