@@ -121,117 +121,107 @@ function animateSpin(board) {
 
     document.querySelector('#reel-0 .reel-strip').offsetHeight;
 
-    // Stop order: Left(0ms) → Right(400ms) → Middle(800ms last) — builds anticipation
+    // Stop order: Left+Right together → Middle last (middle builds anticipation)
     const colTimings = [
-      { delay: 0,   totalDur: 1600 },   // col 0 (left, first)
-      { delay: 800, totalDur: 2000 },   // col 1 (middle, last)
-      { delay: 400, totalDur: 1800 },   // col 2 (right, second)
+      { delay: 0,   isLast: false },  // col 0 (left)
+      { delay: 600, isLast: true },   // col 1 (middle, last — extra tick drama)
+      { delay: 0,   isLast: false },  // col 2 (right, same as left)
     ];
     let completed = 0;
+    const targetY = -SCROLL_DIST;
+    const overshootDist = Math.round(CELL_TOTAL * 0.10); // 10% of one symbol height
 
     for (let col = 0; col < 3; col++) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
       const t = colTimings[col];
-      const targetY = -SCROLL_DIST;
+      const tickSymbols = t.isLast ? 5 : 3; // middle reel gets more ticks
+      const tickDist = tickSymbols * CELL_TOTAL;
+      const fastDist = Math.abs(targetY) - tickDist - overshootDist;
 
-      // Phase durations (% of total)
-      const accelDur   = Math.round(t.totalDur * 0.12); // quick start
-      const cruiseDur  = Math.round(t.totalDur * 0.40); // high speed
-      const slowDur    = Math.round(t.totalDur * 0.25); // anticipation slowdown
-      const crawlDur   = Math.round(t.totalDur * 0.23); // final crawl to near-target
-
-      // Distance allocation
-      const accelDist  = targetY * 0.10;
-      const cruiseDist = targetY * 0.55;
-      const slowDist   = targetY * 0.25;
-      const crawlDist  = targetY * 0.10; // last 10% very slow = anticipation
-
-      const overshootPx = 20; // overshoot past target
-      const bounceDur = 180;
-      const settleDur = 280;
-
-      anime.timeline({ delay: t.delay })
-        // Phase 1: Acceleration — quick ramp up
-        .add({
+      setTimeout(() => {
+        // Phase 1: Fast spin (bulk of distance)
+        anime({
           targets: strip,
-          translateY: [0, accelDist],
-          duration: accelDur,
-          easing: 'easeInCubic'
-        })
-        // Phase 2: Cruise — full speed linear
-        .add({
-          targets: strip,
-          translateY: accelDist + cruiseDist,
-          duration: cruiseDur,
-          easing: 'linear'
-        })
-        // Phase 3: Slowdown — decelerating, building anticipation
-        .add({
-          targets: strip,
-          translateY: accelDist + cruiseDist + slowDist,
-          duration: slowDur,
-          easing: 'easeOutQuad'
-        })
-        // Phase 4: Crawl — very slow final approach (anticipation peak)
-        .add({
-          targets: strip,
-          translateY: targetY - overshootPx,
-          duration: crawlDur,
-          easing: 'easeOutQuart',
+          translateY: -fastDist,
+          duration: t.isLast ? 1000 : 800,
+          easing: 'linear',
           complete: () => {
-            // Phase 5: Overshoot past target
-            anime({
-              targets: strip,
-              translateY: targetY + overshootPx,
-              duration: bounceDur,
-              easing: 'easeOutQuad',
-              complete: () => {
-                // Phase 6: Bounce back + settle with micro-oscillation
-                anime({
-                  targets: strip,
-                  translateY: [
-                    { value: targetY - 3, duration: Math.round(settleDur * 0.35), easing: 'easeOutQuad' },
-                    { value: targetY + 2, duration: Math.round(settleDur * 0.30), easing: 'easeInOutSine' },
-                    { value: targetY, duration: Math.round(settleDur * 0.35), easing: 'easeOutSine' }
-                  ],
-                  complete: () => {
-                    // Thud sound
-                    const thud = stopAudio.cloneNode();
-                    thud.volume = 0.5;
-                    thud.play().catch(() => {});
-
-                    // Mark final cells
-                    const cells = strip.querySelectorAll('.cell');
-                    const finalCells = Array.from(cells).slice(-3);
-                    finalCells.forEach(c => {
-                      if (board.some((row, r) => row[col].isScatter && c.id === `cell-${r}-${col}`)) {
-                        c.classList.add('scatter', 'sc-flash');
+            // Phase 2: Tick-by-tick slowdown (last N symbols)
+            tickDown(strip, -fastDist, tickSymbols, t.isLast, () => {
+              const preOvershoot = -(fastDist + tickDist);
+              // Phase 3: Overshoot past target
+              anime({
+                targets: strip,
+                translateY: targetY - overshootDist,
+                duration: 80,
+                easing: 'easeOutQuad',
+                complete: () => {
+                  // Phase 4: Clean bounce back to target
+                  anime({
+                    targets: strip,
+                    translateY: targetY,
+                    duration: 120,
+                    easing: 'easeOutCubic',
+                    complete: () => onReelStopped(strip, col, board, () => {
+                      completed++;
+                      if (completed === 3) {
+                        setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 80);
                       }
-                      c.classList.add('stop-bounce');
-                    });
-
-                    onColumnStop(col);
-
-                    for (let r = 0; r < 3; r++) {
-                      if (board[r][col].isScatter) {
-                        scatterAudio.currentTime = 0;
-                        scatterAudio.play().catch(() => {});
-                        break;
-                      }
-                    }
-
-                    completed++;
-                    if (completed === 3) {
-                      setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 100);
-                    }
-                  }
-                });
-              }
+                    })
+                  });
+                }
+              });
             });
           }
         });
+      }, t.delay);
     }
   });
+}
+
+// Tick-by-tick: each symbol snaps into place with increasing interval
+function tickDown(strip, startY, count, isLast, onDone) {
+  let i = 0;
+  const baseInterval = isLast ? 80 : 60; // ms per tick, middle reel slower
+  const step = () => {
+    if (i >= count) { onDone(); return; }
+    const interval = baseInterval + i * (isLast ? 30 : 20); // each tick slower than last
+    anime({
+      targets: strip,
+      translateY: startY - (i + 1) * CELL_TOTAL,
+      duration: interval,
+      easing: 'easeOutQuad',
+      complete: () => { i++; step(); }
+    });
+  };
+  step();
+}
+
+function onReelStopped(strip, col, board, done) {
+  const thud = stopAudio.cloneNode();
+  thud.volume = 0.5;
+  thud.play().catch(() => {});
+
+  const cells = strip.querySelectorAll('.cell');
+  const finalCells = Array.from(cells).slice(-3);
+  finalCells.forEach(c => {
+    if (board.some((row, r) => row[col].isScatter && c.id === `cell-${r}-${col}`)) {
+      c.classList.add('scatter', 'sc-flash');
+    }
+    c.classList.add('stop-bounce');
+  });
+
+  onColumnStop(col);
+
+  for (let r = 0; r < 3; r++) {
+    if (board[r][col].isScatter) {
+      scatterAudio.currentTime = 0;
+      scatterAudio.play().catch(() => {});
+      break;
+    }
+  }
+
+  done();
 }
 
 async function doSpin() {
