@@ -121,90 +121,145 @@ function animateSpin(board) {
 
     document.querySelector('#reel-0 .reel-strip').offsetHeight;
 
-    // All 3 start together. Left+Right stop together, Middle stops last.
-    const colConfigs = [
-      { stopDelay: 0,   lastSymbols: 4, isMiddle: false },
-      { stopDelay: 700, lastSymbols: 5, isMiddle: true },
-      { stopDelay: 0,   lastSymbols: 4, isMiddle: false },
-    ];
     let completed = 0;
-    let sidesStoppedCount = 0;
     const targetY = -SCROLL_DIST;
     const overshootDist = Math.round(CELL_TOTAL * 0.18);
+
+    // Config per reel
+    // Middle reel: after sides stop, continues spinning 600ms more, then bridge 600ms, then 6 ticks
+    // Sides: fast spin → bridge 450ms → 4 ticks
+    const configs = [
+      { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', extraSpinDur: 0, extraSpinDist: 0, tickMs: 900, isMiddle: false },
+      { lastSymbols: 6, bridgeDist: 6, bridgeDur: 600, bridgeEase: 'easeOutQuart', extraSpinDur: 650, extraSpinDist: 10, tickMs: 1200, isMiddle: true },
+      { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', extraSpinDur: 0, extraSpinDist: 0, tickMs: 900, isMiddle: false },
+    ];
 
     for (let col = 0; col < 3; col++) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
       const reel = strip.parentElement;
-      const cfg = colConfigs[col];
+      const cfg = configs[col];
 
-      // Motion blur on strip only (not reel border)
       strip.style.filter = 'blur(3px)';
 
-      const slowdownDist = cfg.lastSymbols * CELL_TOTAL;
-      const bufferDist = 6 * CELL_TOTAL; // ~6 symbols of deceleration buffer
-      const fastDist = Math.abs(targetY) - bufferDist - slowdownDist;
-      const fastDur = 600 + cfg.stopDelay;
-      const bufferDur = cfg.isMiddle ? 550 : 450; // gradual decel buffer
+      // Distance allocation
+      const tickDist = cfg.lastSymbols * CELL_TOTAL;
+      const bridgeDist = cfg.bridgeDist * CELL_TOTAL;
+      const extraDist = cfg.extraSpinDist * CELL_TOTAL;
+      const fastDist = Math.abs(targetY) - extraDist - bridgeDist - tickDist;
 
-      // Phase 1: High-speed scroll (blur stays at 3px)
+      // All reels: same fast spin duration so sides stop together
+      const fastDur = 700;
+
+      // Phase 1: High-speed linear scroll (all reels together, blur=3px)
       anime({
         targets: strip,
         translateY: -fastDist,
         duration: fastDur,
         easing: 'linear',
         complete: () => {
-          // Phase 2: Deceleration buffer — speed drops smoothly, blur fades with it
-          anime({
-            targets: strip,
-            translateY: -(fastDist + bufferDist),
-            duration: bufferDur,
-            easing: 'easeOutCubic',
-            update: (anim) => {
-              // Blur syncs with deceleration: 3px → 0px
-              strip.style.filter = `blur(${3 * (1 - anim.progress / 100)}px)`;
-            },
-            complete: () => {
-              strip.style.filter = 'none';
+          if (cfg.isMiddle) {
+            // Middle reel: extra spin at high speed while sides are stopping
+            activateMiddleFocus(col);
+            middleReelSequence(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone);
+          } else {
+            // Side reels: bridge → ticks → stop
+            sideReelStop(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone);
+          }
+        }
+      });
+    }
 
-              // Middle reel focus: when sides have stopped, highlight middle
-              if (cfg.isMiddle) activateMiddleFocus(col);
+    function onDone(col, cfg) {
+      completed++;
+      if (completed === 3) {
+        setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 80);
+      }
+    }
+  });
+}
 
-              // Phase 3: Tick deceleration slide (last N symbols)
-              const totalSlowMs = cfg.isMiddle ? 1100 : 1000;
-              slideDecelerate(strip, -(fastDist + bufferDist), cfg.lastSymbols, totalSlowMs, cfg.isMiddle, () => {
+// Side reels: bridge deceleration → final ticks → overshoot → bounce
+function sideReelStop(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone) {
+  const bridgeDist = cfg.bridgeDist * CELL_TOTAL;
+  const bridgeStart = -fastDist;
+  const bridgeEnd = bridgeStart - bridgeDist;
 
-                // Phase 4: Overshoot — same direction as scroll
-                anime({
-                  targets: strip,
-                  translateY: targetY - overshootDist,
-                  duration: 80,
-                  easing: 'easeOutQuad',
-                  complete: () => {
+  // Bridge: speed drops from medium-high to slow, blur fades 3→0
+  anime({
+    targets: strip,
+    translateY: bridgeEnd,
+    duration: cfg.bridgeDur,
+    easing: cfg.bridgeEase,
+    update: (anim) => {
+      strip.style.filter = `blur(${3 * (1 - anim.progress / 100)}px)`;
+    },
+    complete: () => {
+      strip.style.filter = 'none';
+      // Final ticks
+      slideDecelerate(strip, bridgeEnd, cfg.lastSymbols, cfg.tickMs, false, () => {
+        reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
+      });
+    }
+  });
+}
 
-                    // Phase 5: Snap back
-                    anime({
-                      targets: strip,
-                      translateY: targetY,
-                      duration: 90,
-                      easing: 'easeOutCubic',
-                      complete: () => {
-                        reelImpact(reel, col);
+// Middle reel: extra spin → bridge → final ticks → overshoot → bounce
+function middleReelSequence(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone) {
+  const extraDist = cfg.extraSpinDist * CELL_TOTAL;
+  const bridgeDist = cfg.bridgeDist * CELL_TOTAL;
+  const extraStart = -fastDist;
+  const extraEnd = extraStart - extraDist;
+  const bridgeEnd = extraEnd - bridgeDist;
 
-                        if (cfg.isMiddle) deactivateMiddleFocus();
+  // Extra spin: still fast/medium-high, blur stays ~2.5px (slightly clearing)
+  anime({
+    targets: strip,
+    translateY: extraEnd,
+    duration: cfg.extraSpinDur,
+    easing: 'easeOutSine',
+    update: (anim) => {
+      strip.style.filter = `blur(${3 - 0.5 * (anim.progress / 100)}px)`;
+    },
+    complete: () => {
+      // Bridge: medium speed → slow, blur 2.5→0
+      anime({
+        targets: strip,
+        translateY: bridgeEnd,
+        duration: cfg.bridgeDur,
+        easing: cfg.bridgeEase,
+        update: (anim) => {
+          strip.style.filter = `blur(${2.5 * (1 - anim.progress / 100)}px)`;
+        },
+        complete: () => {
+          strip.style.filter = 'none';
+          // Final ticks (6 symbols, longer duration for suspense)
+          slideDecelerate(strip, bridgeEnd, cfg.lastSymbols, cfg.tickMs, true, () => {
+            reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
+          });
+        }
+      });
+    }
+  });
+}
 
-                        onReelStopped(strip, col, board, () => {
-                          if (!cfg.isMiddle) sidesStoppedCount++;
-                          completed++;
-                          if (completed === 3) {
-                            setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 80);
-                          }
-                        });
-                      }
-                    });
-                  }
-                });
-              });
-            }
+// Shared: overshoot → bounce → impact → done
+function reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone) {
+  anime({
+    targets: strip,
+    translateY: targetY - overshootDist,
+    duration: 80,
+    easing: 'easeOutQuad',
+    complete: () => {
+      anime({
+        targets: strip,
+        translateY: targetY,
+        duration: 90,
+        easing: 'easeOutCubic',
+        complete: () => {
+          reelImpact(reel, col);
+          if (cfg.isMiddle) deactivateMiddleFocus();
+          onReelStopped(strip, col, board, () => {
+            onDone(col, cfg);
           });
         }
       });
