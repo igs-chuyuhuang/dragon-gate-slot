@@ -73,17 +73,16 @@ const GAP = 3;
 const CELL_TOTAL = CELL_H + GAP; // 113px per cell
 const REEL_SYMBOLS = 40; // lots of symbols for continuous reel feel
 
-function buildReelStrip(col, finalCells) {
+function buildReelStrip(col, finalCells, numSymbols) {
+  const count = numSymbols || REEL_SYMBOLS;
   const strip = document.querySelector(`#reel-${col} .reel-strip`);
   strip.innerHTML = '';
-  // Random symbols on top (visible during spin at translateY=0)
-  for (let i = 0; i < REEL_SYMBOLS; i++) {
+  for (let i = 0; i < count; i++) {
     const div = document.createElement('div');
     div.className = 'cell';
     div.innerHTML = randomCellHtml();
     strip.appendChild(div);
   }
-  // Final 3 symbols at bottom (visible when translateY = -SCROLL_DIST)
   for (let r = 0; r < 3; r++) {
     const cell = finalCells[r];
     const div = document.createElement('div');
@@ -113,44 +112,48 @@ function animateSpin(board) {
     spinning = true;
     onSpinStart();
 
+    // Middle reel gets longer strip so it spins longer at same speed
+    const MID_SYMBOLS = 60;
+
     for (let col = 0; col < 3; col++) {
       const finalCells = [board[0][col], board[1][col], board[2][col]];
-      const strip = buildReelStrip(col, finalCells);
+      const numSym = col === 1 ? MID_SYMBOLS : REEL_SYMBOLS;
+      const strip = buildReelStrip(col, finalCells, numSym);
       strip.style.transform = `translateY(0px)`;
     }
 
     document.querySelector('#reel-0 .reel-strip').offsetHeight;
 
     let completed = 0;
-    const targetY = -SCROLL_DIST;
     const overshootDist = Math.round(CELL_TOTAL * 0.18);
 
     // Config per reel
-    // Middle reel: after sides stop, extra spin 500ms + bridge 600ms + 6 ticks ~1000ms ≈ 2.1s total
-    // Sides: fast spin → bridge 450ms → 4 ticks
     const configs = [
-      { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', extraSpinDur: 0, extraSpinDist: 0, tickMs: 900, isMiddle: false },
-      { lastSymbols: 6, bridgeDist: 12, bridgeDur: 800, bridgeEase: 'easeOutQuart', extraSpinDur: 700, extraSpinDist: 14, tickMs: 1600, isMiddle: true },
-      { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', extraSpinDur: 0, extraSpinDist: 0, tickMs: 900, isMiddle: false },
+      { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', tickMs: 900, isMiddle: false },
+      { lastSymbols: 6, bridgeDist: 12, bridgeDur: 800, bridgeEase: 'easeOutQuart', tickMs: 1600, isMiddle: true },
+      { lastSymbols: 4, bridgeDist: 5, bridgeDur: 450, bridgeEase: 'easeOutCubic', tickMs: 900, isMiddle: false },
     ];
+
+    // Unified high speed from side reels
+    const sideScrollDist = REEL_SYMBOLS * CELL_TOTAL;
+    const sideDecelDist = (configs[0].bridgeDist + configs[0].lastSymbols) * CELL_TOTAL;
+    const sideFastDist = sideScrollDist - sideDecelDist;
+    const SIDE_FAST_DUR = 700;
+    const HIGH_SPEED = sideFastDist / SIDE_FAST_DUR; // px/ms
 
     for (let col = 0; col < 3; col++) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
       const reel = strip.parentElement;
       const cfg = configs[col];
+      const scrollDist = (col === 1 ? MID_SYMBOLS : REEL_SYMBOLS) * CELL_TOTAL;
+      const targetY = -scrollDist;
 
       strip.style.filter = 'blur(3px)';
 
-      // Distance allocation
-      const tickDist = cfg.lastSymbols * CELL_TOTAL;
-      const bridgeDist = cfg.bridgeDist * CELL_TOTAL;
-      const extraDist = cfg.extraSpinDist * CELL_TOTAL;
-      const fastDist = Math.abs(targetY) - extraDist - bridgeDist - tickDist;
+      const decelDist = (cfg.bridgeDist + cfg.lastSymbols) * CELL_TOTAL;
+      const fastDist = scrollDist - decelDist;
+      const fastDur = Math.round(fastDist / HIGH_SPEED); // same px/s, middle runs longer
 
-      // All reels: same fast spin duration so sides stop together
-      const fastDur = 700;
-
-      // Phase 1: High-speed linear scroll (all reels together, blur=3px)
       anime({
         targets: strip,
         translateY: -fastDist,
@@ -158,11 +161,9 @@ function animateSpin(board) {
         easing: 'linear',
         complete: () => {
           if (cfg.isMiddle) {
-            // Middle reel: extra spin at high speed while sides are stopping
             activateMiddleFocus(col);
             middleReelSequence(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone);
           } else {
-            // Side reels: bridge → ticks → stop
             sideReelStop(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone);
           }
         }
@@ -206,10 +207,10 @@ function sideReelStop(strip, reel, col, fastDist, cfg, targetY, overshootDist, b
 // Middle reel: single continuous deceleration from medium-high speed to stop
 // No segment boundaries = no speed discontinuities
 function middleReelSequence(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone) {
-  const totalDecelDist = cfg.extraSpinDist * CELL_TOTAL + cfg.bridgeDist * CELL_TOTAL + cfg.lastSymbols * CELL_TOTAL;
+  // Deceleration covers bridge + ticks distance (extraSpinDist already in fast phase)
+  const totalDecelDist = (cfg.bridgeDist + cfg.lastSymbols) * CELL_TOTAL;
   const decelEnd = -fastDist - totalDecelDist;
-  // Total decel time: extra(500) + bridge(600) + ticks(1000) = 2100ms
-  const totalDecelMs = cfg.extraSpinDur + cfg.bridgeDur + cfg.tickMs;
+  const totalDecelMs = cfg.bridgeDur + cfg.tickMs;
 
   // Single easeOutQuart curve covers the entire deceleration
   // Speed is strictly monotonically decreasing throughout
@@ -219,10 +220,10 @@ function middleReelSequence(strip, reel, col, fastDist, cfg, targetY, overshootD
     duration: totalDecelMs,
     easing: 'easeOutQuart',
     update: (anim) => {
-      // Blur syncs: 3px at start → 0px at ~60% progress (when symbols become readable)
+      // Blur syncs: 3px at start → 0px at ~50% progress (when symbols become readable)
       const p = anim.progress / 100;
-      if (p < 0.6) {
-        strip.style.filter = `blur(${3 * (1 - p / 0.6)}px)`;
+      if (p < 0.5) {
+        strip.style.filter = `blur(${3 * (1 - p / 0.5)}px)`;
       } else {
         strip.style.filter = 'none';
       }
