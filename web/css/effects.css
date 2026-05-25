@@ -2,7 +2,7 @@
 
 /* === VFX Typography (gradient + stroke + glow + ghost) === */
 .vfx-text {
-  position: fixed; left: 50%; top: 32%;
+  position: fixed; left: 50%; top: 15%;
   transform: translate(-50%, -50%);
   font-size: 48px; font-weight: 900;
   background: linear-gradient(180deg, var(--vfx-color, #ffd700), #ff8c00);
@@ -10,18 +10,18 @@
   background-clip: text;
   -webkit-text-stroke: 2px #000;
   filter: drop-shadow(0 0 10px var(--vfx-color, #ffd700)) drop-shadow(0 0 20px rgba(255,165,0,0.5)) drop-shadow(0 4px 8px rgba(0,0,0,0.8));
-  z-index: 960; pointer-events: none;
+  z-index: 1150; pointer-events: none;
   white-space: nowrap;
   max-width: 90vw; text-align: center;
   overflow: visible;
 }
 .vfx-text-ghost {
-  position: fixed; left: 50%; top: 32%;
+  position: fixed; left: 50%; top: 15%;
   transform: translate(-50%, -50%);
   font-size: 48px; font-weight: 900;
   color: var(--vfx-color, #ffd700);
   -webkit-text-stroke: 2px #000;
-  z-index: 959; pointer-events: none;
+  z-index: 1149; pointer-events: none;
   white-space: nowrap; max-width: 90vw;
 }
 .vfx-countup {
