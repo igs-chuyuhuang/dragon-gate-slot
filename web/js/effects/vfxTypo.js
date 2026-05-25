@@ -3,7 +3,7 @@ import { anime } from '../gameFeel.js';
 
 export function explodeText(text, { x, y, size = 48, color, duration = 600, holdMs = 900 } = {}) {
   const cx = x ?? window.innerWidth / 2;
-  const cy = y ?? window.innerHeight * 0.32;
+  const cy = y ?? window.innerHeight * 0.15;
 
   const el = document.createElement('div');
   el.className = 'vfx-text';
