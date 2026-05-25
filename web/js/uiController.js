@@ -123,70 +123,78 @@ function animateSpin(board) {
 
     // All 3 start together. Left+Right stop together, Middle stops last.
     const colConfigs = [
-      { stopDelay: 0,   lastSymbols: 4 },  // col 0 (left)
-      { stopDelay: 700, lastSymbols: 5 },  // col 1 (middle, last — more drama)
-      { stopDelay: 0,   lastSymbols: 4 },  // col 2 (right)
+      { stopDelay: 0,   lastSymbols: 4, isMiddle: false },
+      { stopDelay: 700, lastSymbols: 5, isMiddle: true },
+      { stopDelay: 0,   lastSymbols: 4, isMiddle: false },
     ];
     let completed = 0;
+    let sidesStoppedCount = 0;
     const targetY = -SCROLL_DIST;
-    const overshootDist = Math.round(CELL_TOTAL * 0.18); // 18% of symbol height
+    const overshootDist = Math.round(CELL_TOTAL * 0.18);
 
     for (let col = 0; col < 3; col++) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
       const reel = strip.parentElement;
       const cfg = colConfigs[col];
 
-      // Apply motion blur during high-speed spin
-      reel.style.filter = 'blur(1.5px)';
-      reel.style.transition = 'filter 0.3s';
+      // Motion blur on strip only (not reel border)
+      strip.style.filter = 'blur(3px)';
+      strip.style.transition = 'filter 0.3s';
 
-      // Distance breakdown
-      const slowdownDist = cfg.lastSymbols * CELL_TOTAL; // last N symbols decelerate
+      const slowdownDist = cfg.lastSymbols * CELL_TOTAL;
       const fastDist = Math.abs(targetY) - slowdownDist;
-      const fastDur = 600 + cfg.stopDelay; // longer spin for middle reel
+      const fastDur = 600 + cfg.stopDelay;
 
-      // Phase 1: High-speed continuous scroll (all reels start together)
+      // Phase 1: High-speed scroll
       anime({
         targets: strip,
         translateY: -fastDist,
         duration: fastDur,
         easing: 'linear',
         update: (anim) => {
-          // Gradually clear blur as we approach slowdown
           if (anim.progress > 70) {
-            const clarity = (anim.progress - 70) / 30; // 0→1
-            reel.style.filter = `blur(${1.5 * (1 - clarity)}px)`;
+            const clarity = (anim.progress - 70) / 30;
+            strip.style.filter = `blur(${3 * (1 - clarity)}px)`;
           }
         },
         complete: () => {
-          reel.style.filter = 'none';
+          strip.style.filter = 'none';
 
-          // Phase 2: Deceleration — continuous slide through last N symbols
-          // Each symbol takes progressively longer (accelerating intervals)
-          // Total ~800-1000ms for middle, ~600ms for sides
-          const totalSlowMs = cfg.lastSymbols === 5 ? 900 : 600;
-          slideDecelerate(strip, -fastDist, cfg.lastSymbols, totalSlowMs, () => {
+          // Middle reel focus: when sides have stopped, highlight middle
+          if (cfg.isMiddle) activateMiddleFocus(col);
 
-            // Phase 3: Overshoot — slide past target with weight
+          // Phase 2: Deceleration slide
+          const totalSlowMs = cfg.isMiddle ? 1100 : 600; // middle gets more time
+          slideDecelerate(strip, -fastDist, cfg.lastSymbols, totalSlowMs, cfg.isMiddle, () => {
+
+            // Phase 3: Overshoot — same direction as scroll (downward = more negative translateY)
             anime({
               targets: strip,
               translateY: targetY - overshootDist,
-              duration: 100,
+              duration: 80,
               easing: 'easeOutQuad',
               complete: () => {
 
-                // Phase 4: Heavy bounce back — snap to target with authority
+                // Phase 4: Snap back — short, sharp, authoritative
                 anime({
                   targets: strip,
                   translateY: targetY,
-                  duration: 150,
-                  easing: 'easeOutBack',
-                  complete: () => onReelStopped(strip, col, board, () => {
-                    completed++;
-                    if (completed === 3) {
-                      setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 80);
-                    }
-                  })
+                  duration: 90,
+                  easing: 'easeOutCubic',
+                  complete: () => {
+                    // Impact feel
+                    reelImpact(reel, col);
+
+                    if (cfg.isMiddle) deactivateMiddleFocus();
+
+                    onReelStopped(strip, col, board, () => {
+                      if (!cfg.isMiddle) sidesStoppedCount++;
+                      completed++;
+                      if (completed === 3) {
+                        setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 80);
+                      }
+                    });
+                  }
                 });
               }
             });
@@ -197,11 +205,12 @@ function animateSpin(board) {
   });
 }
 
-// Continuous deceleration: slide through N symbols with increasing duration per symbol
-function slideDecelerate(strip, startY, symbolCount, totalMs, onDone) {
-  // Generate durations: each symbol takes longer (ratio 1:1.5:2.2:3:4 etc)
+// Continuous deceleration: last symbol of middle reel gets extra duration
+function slideDecelerate(strip, startY, symbolCount, totalMs, isMiddle, onDone) {
   const ratios = [];
   for (let i = 0; i < symbolCount; i++) ratios.push(Math.pow(1.6, i));
+  // Middle reel: boost last symbol ratio for extra suspense (600-700ms feel)
+  if (isMiddle) ratios[ratios.length - 1] *= 1.5;
   const ratioSum = ratios.reduce((a, b) => a + b, 0);
   const durations = ratios.map(r => Math.round((r / ratioSum) * totalMs));
 
@@ -212,18 +221,56 @@ function slideDecelerate(strip, startY, symbolCount, totalMs, onDone) {
       targets: strip,
       translateY: startY - (i + 1) * CELL_TOTAL,
       duration: durations[i],
-      easing: 'easeOutSine', // smooth deceleration within each symbol
+      easing: 'easeOutSine',
       complete: () => { i++; step(); }
     });
   };
   step();
 }
 
-function onReelStopped(strip, col, board, done) {
-  const thud = stopAudio.cloneNode();
-  thud.volume = 0.5;
-  thud.play().catch(() => {});
+// Middle reel focus: glow border + dim sides
+function activateMiddleFocus(middleCol) {
+  for (let c = 0; c < 3; c++) {
+    const reel = document.querySelector(`#reel-${c}`);
+    if (c === middleCol) {
+      reel.style.boxShadow = '0 0 12px 3px rgba(255,215,0,0.6)';
+      reel.style.borderColor = '#ffd700';
+      reel.style.transition = 'box-shadow 0.2s, border-color 0.2s';
+    } else {
+      reel.style.filter = 'brightness(0.6)';
+      reel.style.transition = 'filter 0.2s';
+    }
+  }
+}
 
+function deactivateMiddleFocus() {
+  for (let c = 0; c < 3; c++) {
+    const reel = document.querySelector(`#reel-${c}`);
+    reel.style.boxShadow = '';
+    reel.style.borderColor = '';
+    reel.style.filter = '';
+  }
+}
+
+// Stop impact: short shake + border flash
+function reelImpact(reel, col) {
+  // Board micro-shake (2-3px, 60ms)
+  const board = document.querySelector('.board');
+  board.style.transform = 'translateY(2px)';
+  setTimeout(() => { board.style.transform = 'translateY(-1px)'; }, 30);
+  setTimeout(() => { board.style.transform = ''; }, 60);
+
+  // Border flash (gold glow 100ms)
+  reel.style.boxShadow = '0 0 14px 4px rgba(255,215,0,0.8)';
+  setTimeout(() => { reel.style.boxShadow = ''; }, 100);
+
+  // Thud audio
+  const thud = stopAudio.cloneNode();
+  thud.volume = 0.6;
+  thud.play().catch(() => {});
+}
+
+function onReelStopped(strip, col, board, done) {
   const cells = strip.querySelectorAll('.cell');
   const finalCells = Array.from(cells).slice(-3);
   finalCells.forEach(c => {
