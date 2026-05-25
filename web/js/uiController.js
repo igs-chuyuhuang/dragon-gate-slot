@@ -203,41 +203,33 @@ function sideReelStop(strip, reel, col, fastDist, cfg, targetY, overshootDist, b
   });
 }
 
-// Middle reel: extra spin → bridge → final ticks → overshoot → bounce
+// Middle reel: single continuous deceleration from medium-high speed to stop
+// No segment boundaries = no speed discontinuities
 function middleReelSequence(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone) {
-  const extraDist = cfg.extraSpinDist * CELL_TOTAL;
-  const bridgeDist = cfg.bridgeDist * CELL_TOTAL;
-  const extraStart = -fastDist;
-  const extraEnd = extraStart - extraDist;
-  const bridgeEnd = extraEnd - bridgeDist;
+  const totalDecelDist = cfg.extraSpinDist * CELL_TOTAL + cfg.bridgeDist * CELL_TOTAL + cfg.lastSymbols * CELL_TOTAL;
+  const decelEnd = -fastDist - totalDecelDist;
+  // Total decel time: extra(500) + bridge(600) + ticks(1000) = 2100ms
+  const totalDecelMs = cfg.extraSpinDur + cfg.bridgeDur + cfg.tickMs;
 
-  // Extra spin: still fast/medium-high, blur stays ~2.5px (slightly clearing)
+  // Single easeOutQuart curve covers the entire deceleration
+  // Speed is strictly monotonically decreasing throughout
   anime({
     targets: strip,
-    translateY: extraEnd,
-    duration: cfg.extraSpinDur,
-    easing: 'easeOutSine',
+    translateY: decelEnd,
+    duration: totalDecelMs,
+    easing: 'easeOutQuart',
     update: (anim) => {
-      strip.style.filter = `blur(${3 - 0.5 * (anim.progress / 100)}px)`;
+      // Blur syncs: 3px at start → 0px at ~60% progress (when symbols become readable)
+      const p = anim.progress / 100;
+      if (p < 0.6) {
+        strip.style.filter = `blur(${3 * (1 - p / 0.6)}px)`;
+      } else {
+        strip.style.filter = 'none';
+      }
     },
     complete: () => {
-      // Bridge: medium speed → slow, blur 2.5→0
-      anime({
-        targets: strip,
-        translateY: bridgeEnd,
-        duration: cfg.bridgeDur,
-        easing: cfg.bridgeEase,
-        update: (anim) => {
-          strip.style.filter = `blur(${2.5 * (1 - anim.progress / 100)}px)`;
-        },
-        complete: () => {
-          strip.style.filter = 'none';
-          // Final ticks (6 symbols, longer duration for suspense)
-          slideDecelerate(strip, bridgeEnd, cfg.lastSymbols, cfg.tickMs, true, () => {
-            reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
-          });
-        }
-      });
+      strip.style.filter = 'none';
+      reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
     }
   });
 }
