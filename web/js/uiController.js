@@ -210,7 +210,7 @@ function slideDecelerate(strip, startY, symbolCount, totalMs, isMiddle, onDone) 
   const ratios = [];
   for (let i = 0; i < symbolCount; i++) ratios.push(Math.pow(1.6, i));
   // Middle reel: boost last symbol ratio for extra suspense (600-700ms feel)
-  if (isMiddle) ratios[ratios.length - 1] *= 1.5;
+  if (isMiddle) ratios[ratios.length - 1] *= 7;
   const ratioSum = ratios.reduce((a, b) => a + b, 0);
   const durations = ratios.map(r => Math.round((r / ratioSum) * totalMs));
 
