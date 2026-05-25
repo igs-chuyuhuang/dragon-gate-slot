@@ -121,76 +121,98 @@ function animateSpin(board) {
 
     document.querySelector('#reel-0 .reel-strip').offsetHeight;
 
-    // Stop order: Left+Right together → Middle last (middle builds anticipation)
-    const colTimings = [
-      { delay: 0,   isLast: false },  // col 0 (left)
-      { delay: 600, isLast: true },   // col 1 (middle, last — extra tick drama)
-      { delay: 0,   isLast: false },  // col 2 (right, same as left)
+    // All 3 start together. Left+Right stop together, Middle stops last.
+    const colConfigs = [
+      { stopDelay: 0,   lastSymbols: 4 },  // col 0 (left)
+      { stopDelay: 700, lastSymbols: 5 },  // col 1 (middle, last — more drama)
+      { stopDelay: 0,   lastSymbols: 4 },  // col 2 (right)
     ];
     let completed = 0;
     const targetY = -SCROLL_DIST;
-    const overshootDist = Math.round(CELL_TOTAL * 0.10); // 10% of one symbol height
+    const overshootDist = Math.round(CELL_TOTAL * 0.18); // 18% of symbol height
 
     for (let col = 0; col < 3; col++) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
-      const t = colTimings[col];
-      const tickSymbols = t.isLast ? 5 : 3; // middle reel gets more ticks
-      const tickDist = tickSymbols * CELL_TOTAL;
-      const fastDist = Math.abs(targetY) - tickDist - overshootDist;
+      const reel = strip.parentElement;
+      const cfg = colConfigs[col];
 
-      setTimeout(() => {
-        // Phase 1: Fast spin (bulk of distance)
-        anime({
-          targets: strip,
-          translateY: -fastDist,
-          duration: t.isLast ? 1000 : 800,
-          easing: 'linear',
-          complete: () => {
-            // Phase 2: Tick-by-tick slowdown (last N symbols)
-            tickDown(strip, -fastDist, tickSymbols, t.isLast, () => {
-              const preOvershoot = -(fastDist + tickDist);
-              // Phase 3: Overshoot past target
-              anime({
-                targets: strip,
-                translateY: targetY - overshootDist,
-                duration: 80,
-                easing: 'easeOutQuad',
-                complete: () => {
-                  // Phase 4: Clean bounce back to target
-                  anime({
-                    targets: strip,
-                    translateY: targetY,
-                    duration: 120,
-                    easing: 'easeOutCubic',
-                    complete: () => onReelStopped(strip, col, board, () => {
-                      completed++;
-                      if (completed === 3) {
-                        setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 80);
-                      }
-                    })
-                  });
-                }
-              });
-            });
+      // Apply motion blur during high-speed spin
+      reel.style.filter = 'blur(1.5px)';
+      reel.style.transition = 'filter 0.3s';
+
+      // Distance breakdown
+      const slowdownDist = cfg.lastSymbols * CELL_TOTAL; // last N symbols decelerate
+      const fastDist = Math.abs(targetY) - slowdownDist;
+      const fastDur = 600 + cfg.stopDelay; // longer spin for middle reel
+
+      // Phase 1: High-speed continuous scroll (all reels start together)
+      anime({
+        targets: strip,
+        translateY: -fastDist,
+        duration: fastDur,
+        easing: 'linear',
+        update: (anim) => {
+          // Gradually clear blur as we approach slowdown
+          if (anim.progress > 70) {
+            const clarity = (anim.progress - 70) / 30; // 0→1
+            reel.style.filter = `blur(${1.5 * (1 - clarity)}px)`;
           }
-        });
-      }, t.delay);
+        },
+        complete: () => {
+          reel.style.filter = 'none';
+
+          // Phase 2: Deceleration — continuous slide through last N symbols
+          // Each symbol takes progressively longer (accelerating intervals)
+          // Total ~800-1000ms for middle, ~600ms for sides
+          const totalSlowMs = cfg.lastSymbols === 5 ? 900 : 600;
+          slideDecelerate(strip, -fastDist, cfg.lastSymbols, totalSlowMs, () => {
+
+            // Phase 3: Overshoot — slide past target with weight
+            anime({
+              targets: strip,
+              translateY: targetY - overshootDist,
+              duration: 100,
+              easing: 'easeOutQuad',
+              complete: () => {
+
+                // Phase 4: Heavy bounce back — snap to target with authority
+                anime({
+                  targets: strip,
+                  translateY: targetY,
+                  duration: 150,
+                  easing: 'easeOutBack',
+                  complete: () => onReelStopped(strip, col, board, () => {
+                    completed++;
+                    if (completed === 3) {
+                      setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 80);
+                    }
+                  })
+                });
+              }
+            });
+          });
+        }
+      });
     }
   });
 }
 
-// Tick-by-tick: each symbol snaps into place with increasing interval
-function tickDown(strip, startY, count, isLast, onDone) {
+// Continuous deceleration: slide through N symbols with increasing duration per symbol
+function slideDecelerate(strip, startY, symbolCount, totalMs, onDone) {
+  // Generate durations: each symbol takes longer (ratio 1:1.5:2.2:3:4 etc)
+  const ratios = [];
+  for (let i = 0; i < symbolCount; i++) ratios.push(Math.pow(1.6, i));
+  const ratioSum = ratios.reduce((a, b) => a + b, 0);
+  const durations = ratios.map(r => Math.round((r / ratioSum) * totalMs));
+
   let i = 0;
-  const baseInterval = isLast ? 80 : 60; // ms per tick, middle reel slower
   const step = () => {
-    if (i >= count) { onDone(); return; }
-    const interval = baseInterval + i * (isLast ? 30 : 20); // each tick slower than last
+    if (i >= symbolCount) { onDone(); return; }
     anime({
       targets: strip,
       translateY: startY - (i + 1) * CELL_TOTAL,
-      duration: interval,
-      easing: 'easeOutQuad',
+      duration: durations[i],
+      easing: 'easeOutSine', // smooth deceleration within each symbol
       complete: () => { i++; step(); }
     });
   };
