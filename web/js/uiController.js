@@ -113,7 +113,7 @@ function animateSpin(board) {
     onSpinStart();
 
     // Middle reel gets longer strip so it spins longer at same speed
-    const MID_SYMBOLS = 60;
+    const MID_SYMBOLS = 80;
 
     for (let col = 0; col < 3; col++) {
       const finalCells = [board[0][col], board[1][col], board[2][col]];
@@ -151,7 +151,9 @@ function animateSpin(board) {
       strip.style.filter = 'blur(3px)';
 
       const decelDist = (cfg.bridgeDist + cfg.lastSymbols) * CELL_TOTAL;
-      const fastDist = scrollDist - decelDist;
+      const encoreSymbols = cfg.isMiddle ? 12 : 0; // middle reel reserves symbols for encore
+      const encoreDist = encoreSymbols * CELL_TOTAL;
+      const fastDist = scrollDist - decelDist - encoreDist;
       const fastDur = Math.round(fastDist / HIGH_SPEED); // same px/s, middle runs longer
 
       anime({
@@ -204,33 +206,44 @@ function sideReelStop(strip, reel, col, fastDist, cfg, targetY, overshootDist, b
   });
 }
 
-// Middle reel: single continuous deceleration from medium-high speed to stop
-// No segment boundaries = no speed discontinuities
+// Middle reel: encore spin (linear, same speed) → easeOutQuart decel
+// Encore gives "still spinning fast" feel after sides stop
 function middleReelSequence(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone) {
-  // Deceleration covers bridge + ticks distance (extraSpinDist already in fast phase)
-  const totalDecelDist = (cfg.bridgeDist + cfg.lastSymbols) * CELL_TOTAL;
-  const decelEnd = -fastDist - totalDecelDist;
-  const totalDecelMs = cfg.bridgeDur + cfg.tickMs;
+  const decelDist = (cfg.bridgeDist + cfg.lastSymbols) * CELL_TOTAL;
+  const scrollDist = Math.abs(targetY);
+  const encoreDist = scrollDist - fastDist - decelDist;
+  // Encore at same HIGH_SPEED (5 px/ms) — visible "still spinning" after sides stop
+  const encoreDur = Math.round(encoreDist / 5); // ~650ms at 5px/ms
 
-  // Single easeOutQuart curve covers the entire deceleration
-  // Speed is strictly monotonically decreasing throughout
+  // Phase A: Linear encore spin (same speed as before, blur stays)
   anime({
     targets: strip,
-    translateY: decelEnd,
-    duration: totalDecelMs,
-    easing: 'easeOutQuart',
-    update: (anim) => {
-      // Blur syncs: 3px at start → 0px at ~50% progress (when symbols become readable)
-      const p = anim.progress / 100;
-      if (p < 0.5) {
-        strip.style.filter = `blur(${3 * (1 - p / 0.5)}px)`;
-      } else {
-        strip.style.filter = 'none';
-      }
-    },
+    translateY: -(fastDist + encoreDist),
+    duration: encoreDur,
+    easing: 'linear',
     complete: () => {
-      strip.style.filter = 'none';
-      reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
+      // Phase B: easeOutQuart deceleration (speed strictly decreasing)
+      const decelEnd = targetY;
+      const totalDecelMs = cfg.bridgeDur + cfg.tickMs;
+
+      anime({
+        targets: strip,
+        translateY: decelEnd,
+        duration: totalDecelMs,
+        easing: 'easeOutQuart',
+        update: (anim) => {
+          const p = anim.progress / 100;
+          if (p < 0.4) {
+            strip.style.filter = `blur(${3 * (1 - p / 0.4)}px)`;
+          } else {
+            strip.style.filter = 'none';
+          }
+        },
+        complete: () => {
+          strip.style.filter = 'none';
+          reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
+        }
+      });
     }
   });
 }
