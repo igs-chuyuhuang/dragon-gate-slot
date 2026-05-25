@@ -72,7 +72,6 @@ const CELL_H = 110;
 const GAP = 3;
 const CELL_TOTAL = CELL_H + GAP; // 113px per cell
 const REEL_SYMBOLS = 40; // lots of symbols for continuous reel feel
-const OVERSHOOT = 18; // px overshoot on stop
 
 function buildReelStrip(col, finalCells) {
   const strip = document.querySelector(`#reel-${col} .reel-strip`);
@@ -117,84 +116,116 @@ function animateSpin(board) {
     for (let col = 0; col < 3; col++) {
       const finalCells = [board[0][col], board[1][col], board[2][col]];
       const strip = buildReelStrip(col, finalCells);
-      // Start: translateY=0, showing random symbols at top of strip
       strip.style.transform = `translateY(0px)`;
     }
 
     document.querySelector('#reel-0 .reel-strip').offsetHeight;
 
-    // Stop order: Left(0) → Right(200ms) → Middle(500ms last)
-    // Animate: translateY from +SCROLL_DIST → -OVERSHOOT → 0
-    // Strip moves UP = in viewport symbols fall DOWN ✓
+    // Stop order: Left(0ms) → Right(400ms) → Middle(800ms last) — builds anticipation
     const colTimings = [
-      { delay: 0, mainDur: 1800 },
-      { delay: 500, mainDur: 2000 },   // col 1 (middle, last)
-      { delay: 200, mainDur: 1900 },   // col 2 (right)
+      { delay: 0,   totalDur: 1600 },   // col 0 (left, first)
+      { delay: 800, totalDur: 2000 },   // col 1 (middle, last)
+      { delay: 400, totalDur: 1800 },   // col 2 (right, second)
     ];
     let completed = 0;
 
     for (let col = 0; col < 3; col++) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
       const t = colTimings[col];
-
-      const accelDur = Math.round(t.mainDur * 0.15);
-      const cruiseDur = Math.round(t.mainDur * 0.55);
-      const decelDur = Math.round(t.mainDur * 0.30);
-
       const targetY = -SCROLL_DIST;
 
+      // Phase durations (% of total)
+      const accelDur   = Math.round(t.totalDur * 0.12); // quick start
+      const cruiseDur  = Math.round(t.totalDur * 0.40); // high speed
+      const slowDur    = Math.round(t.totalDur * 0.25); // anticipation slowdown
+      const crawlDur   = Math.round(t.totalDur * 0.23); // final crawl to near-target
+
+      // Distance allocation
+      const accelDist  = targetY * 0.10;
+      const cruiseDist = targetY * 0.55;
+      const slowDist   = targetY * 0.25;
+      const crawlDist  = targetY * 0.10; // last 10% very slow = anticipation
+
+      const overshootPx = 20; // overshoot past target
+      const bounceDur = 180;
+      const settleDur = 280;
+
       anime.timeline({ delay: t.delay })
+        // Phase 1: Acceleration — quick ramp up
         .add({
           targets: strip,
-          translateY: [{ value: 0 }, { value: targetY * 0.15 }],
+          translateY: [0, accelDist],
           duration: accelDur,
-          easing: 'easeInQuad'
+          easing: 'easeInCubic'
         })
+        // Phase 2: Cruise — full speed linear
         .add({
           targets: strip,
-          translateY: targetY * 0.85,
+          translateY: accelDist + cruiseDist,
           duration: cruiseDur,
           easing: 'linear'
         })
+        // Phase 3: Slowdown — decelerating, building anticipation
         .add({
           targets: strip,
-          translateY: -SCROLL_DIST - OVERSHOOT,
-          duration: decelDur,
-          easing: 'easeOutQuad',
+          translateY: accelDist + cruiseDist + slowDist,
+          duration: slowDur,
+          easing: 'easeOutQuad'
+        })
+        // Phase 4: Crawl — very slow final approach (anticipation peak)
+        .add({
+          targets: strip,
+          translateY: targetY - overshootPx,
+          duration: crawlDur,
+          easing: 'easeOutQuart',
           complete: () => {
+            // Phase 5: Overshoot past target
             anime({
               targets: strip,
-              translateY: -SCROLL_DIST,
-              duration: 200,
-              easing: 'easeOutBounce',
+              translateY: targetY + overshootPx,
+              duration: bounceDur,
+              easing: 'easeOutQuad',
               complete: () => {
-                const thud = stopAudio.cloneNode();
-                thud.volume = 0.5;
-                thud.play().catch(() => {});
+                // Phase 6: Bounce back + settle with micro-oscillation
+                anime({
+                  targets: strip,
+                  translateY: [
+                    { value: targetY - 3, duration: Math.round(settleDur * 0.35), easing: 'easeOutQuad' },
+                    { value: targetY + 2, duration: Math.round(settleDur * 0.30), easing: 'easeInOutSine' },
+                    { value: targetY, duration: Math.round(settleDur * 0.35), easing: 'easeOutSine' }
+                  ],
+                  complete: () => {
+                    // Thud sound
+                    const thud = stopAudio.cloneNode();
+                    thud.volume = 0.5;
+                    thud.play().catch(() => {});
 
-                const cells = strip.querySelectorAll('.cell');
-                const finalCells = Array.from(cells).slice(-3);
-                finalCells.forEach(c => {
-                  if (board.some((row, r) => row[col].isScatter && c.id === `cell-${r}-${col}`)) {
-                    c.classList.add('scatter', 'sc-flash');
+                    // Mark final cells
+                    const cells = strip.querySelectorAll('.cell');
+                    const finalCells = Array.from(cells).slice(-3);
+                    finalCells.forEach(c => {
+                      if (board.some((row, r) => row[col].isScatter && c.id === `cell-${r}-${col}`)) {
+                        c.classList.add('scatter', 'sc-flash');
+                      }
+                      c.classList.add('stop-bounce');
+                    });
+
+                    onColumnStop(col);
+
+                    for (let r = 0; r < 3; r++) {
+                      if (board[r][col].isScatter) {
+                        scatterAudio.currentTime = 0;
+                        scatterAudio.play().catch(() => {});
+                        break;
+                      }
+                    }
+
+                    completed++;
+                    if (completed === 3) {
+                      setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 100);
+                    }
                   }
-                  c.classList.add('stop-bounce');
                 });
-
-                onColumnStop(col);
-
-                for (let r = 0; r < 3; r++) {
-                  if (board[r][col].isScatter) {
-                    scatterAudio.currentTime = 0;
-                    scatterAudio.play().catch(() => {});
-                    break;
-                  }
-                }
-
-                completed++;
-                if (completed === 3) {
-                  setTimeout(() => { spinning = false; onSpinEnd(); resolve(); }, 100);
-                }
               }
             });
           }
