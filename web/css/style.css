@@ -351,9 +351,7 @@ body.fg-mode .stage-frame { border-image: linear-gradient(180deg, #ffd700, #ff66
 
 /* === Info Button & Modal === */
 .rules-btn {
-  position: absolute;
-  top: -4px; right: -4px;
-  width: 32px; height: 32px;
+  width: 36px; height: 36px;
   border-radius: 50%;
   background: linear-gradient(180deg, #ffd700, #c9a032);
   border: 2px solid #fff3;
