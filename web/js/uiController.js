@@ -125,7 +125,7 @@ function animateSpin(board) {
     document.querySelector('#reel-0 .reel-strip').offsetHeight;
 
     let completed = 0;
-    const overshootDist = Math.round(CELL_TOTAL * 0.18);
+    const overshootDist = Math.round(CELL_TOTAL * 0.15);
 
     // Config per reel
     const configs = [
