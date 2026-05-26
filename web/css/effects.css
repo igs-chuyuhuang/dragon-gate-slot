@@ -190,3 +190,43 @@
   .sc-hint-text { font-size: 22px; }
   .bigwin-overlay { padding: 16px; }
 }
+
+/* === Win Line Animation System === */
+.board.win-dimmed .cell { opacity: 0.4; transition: opacity 0.3s; }
+.board.win-dimmed .cell.win-active { opacity: 1; }
+.cell.win-glow {
+  box-shadow: 0 0 12px 4px rgba(255,215,0,0.6), inset 0 0 6px rgba(255,215,0,0.3);
+  border-color: #ffd700 !important;
+  z-index: 5;
+}
+.cell.win-pulse { animation: winPulse 0.4s ease-out; }
+@keyframes winPulse { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
+
+/* Gold sweep line */
+.win-sweep {
+  position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,215,0,0.5), transparent);
+  pointer-events: none; z-index: 6;
+  animation: sweepLR 0.5s ease-out forwards;
+}
+@keyframes sweepLR { from{left:-100%} to{left:100%} }
+
+/* Win particles */
+.win-particle {
+  position: absolute; width: 6px; height: 6px;
+  background: #ffd700; border-radius: 50%;
+  pointer-events: none; z-index: 7;
+  animation: particleFly 0.7s ease-out forwards;
+}
+@keyframes particleFly {
+  0% { opacity:1; transform:translate(0,0) scale(1); }
+  100% { opacity:0; transform:translate(var(--px), var(--py)) scale(0.3); }
+}
+
+/* Badge glow upgrade */
+.row-badge.win-pop {
+  background: rgba(255,215,0,0.2); border: 1.5px solid #ffd700;
+  box-shadow: 0 0 8px rgba(255,215,0,0.5);
+  animation: badgePop 0.35s ease-out;
+}
+@keyframes badgePop { 0%{transform:scale(0.7);opacity:0} 60%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }

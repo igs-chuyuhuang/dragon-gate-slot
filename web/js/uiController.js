@@ -11,6 +11,7 @@ import { playFreeGameTransition } from './effects/freeGameTransition.js';
 import { playBigWin } from './effects/bigWin.js';
 import { playJpReveal } from './effects/jpReveal.js';
 import { showFgMeter, updateFgMeter, hideFgMeter, initFgMeterDebug } from './effects/fgMeter.js';
+import { playWinLines } from './effects/winLine.js';
 
 const gm = new GameManager();
 const $ = id => document.getElementById(id);
@@ -441,6 +442,15 @@ async function showResult(result) {
         }
       }
     });
+
+    // Win line animation for winning rows
+    const winRows = result.judgments
+      .filter(j => j.type === 'through' || j.type === 'wall')
+      .filter(j => !([result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].some(c => c.isScatter)))
+      .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
+    if (winRows.length > 0) {
+      await playWinLines(winRows);
+    }
 
     // Simplified bottom results (summary only)
     let html = '';
