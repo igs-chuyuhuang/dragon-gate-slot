@@ -274,14 +274,18 @@ button.small { padding: 6px 10px; background: #0f3460; min-height: 34px; }
 .auto-btn-styled.running { background: #e94560; border-color: #e94560; color: #fff; }
 
 /* === Bet Presets === */
-.bet-presets { display: flex; gap: 3px; margin-top: 4px; }
-.bet-btn {
-  padding: 3px 8px; font-size: 11px; min-height: 22px;
-  background: #0f3460; border: 1px solid rgba(255,215,0,0.3);
-  color: #ccc; border-radius: 4px; cursor: pointer;
+.bet-control { display: flex; gap: 6px; margin-top: 4px; align-items: center; }
+.bet-adj {
+  width: 36px; height: 36px; font-size: 20px; font-weight: bold;
+  background: linear-gradient(180deg, #1a3a6a, #0f2a50);
+  border: 2px solid rgba(255,215,0,0.5); color: #ffd700;
+  border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  text-shadow: 0 0 6px rgba(255,215,0,0.4);
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
 }
-.bet-btn.active { background: #c9a032; color: #000; border-color: #ffd700; }
-.bet-btn:hover { border-color: #ffd700; }
+.bet-adj:hover { border-color: #ffd700; background: linear-gradient(180deg, #1f4a80, #153560); }
+.bet-adj:active { transform: scale(0.9); background: #c9a032; color: #000; }
+.bet-adj:disabled { opacity: 0.3; cursor: default; transform: none; border-color: rgba(255,215,0,0.15); }
 
 /* === Auto Group === */
 .auto-group { display: flex; gap: 4px; align-items: center; }

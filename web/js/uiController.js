@@ -50,6 +50,8 @@ function fmt(n) { return Math.round(n).toLocaleString(); }
 function updateUI() {
   $('balance').textContent = fmt(gm.balance);
   $('bet').textContent = fmt(gm.bet);
+  $('bet-dec').disabled = spinning || gm.betIndex <= 0;
+  $('bet-inc').disabled = spinning || gm.betIndex >= 4;
   $('spin-btn').disabled = spinning || !gm.canSpin();
   const label = $('spin-btn').querySelector('.spin-label');
   if (label) label.textContent = gm.fg.active ? `FG (${gm.fg.spinsLeft})` : 'SPIN';
@@ -485,16 +487,14 @@ export function init() {
   $('spin-btn').addEventListener('click', doSpin);
   initSpinButton($('spin-btn')); // A. Spin charge
   $('auto-btn').addEventListener('click', autoSpin);
-  // Bet presets
-  document.querySelectorAll('.bet-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (spinning) return;
-      const val = parseInt(btn.dataset.bet);
-      const idx = [5, 10, 20, 50, 100].indexOf(val);
-      if (idx >= 0) { gm.setBetIndex(idx); updateUI(); }
-      document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    });
+  // Bet +/- controls
+  $('bet-dec').addEventListener('click', () => {
+    if (spinning) return;
+    gm.setBetIndex(gm.betIndex - 1); updateUI();
+  });
+  $('bet-inc').addEventListener('click', () => {
+    if (spinning) return;
+    gm.setBetIndex(gm.betIndex + 1); updateUI();
   });
 
   document.querySelectorAll('.auto-preset').forEach(btn => {
