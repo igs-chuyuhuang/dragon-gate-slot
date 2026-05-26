@@ -181,11 +181,11 @@ function animateSpin(board) {
   });
 }
 
-// Side reels: single continuous deceleration (no bridge+tick split)
+// Side reels: single continuous deceleration ending at overshoot position
 function sideReelStop(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone) {
-  const decelDist = (cfg.bridgeDist + cfg.lastSymbols) * CELL_TOTAL;
-  const decelEnd = -fastDist - decelDist;
-  const decelMs = cfg.bridgeDur + cfg.tickMs; // ~1350ms total
+  const decelDist = (cfg.bridgeDist + cfg.lastSymbols) * CELL_TOTAL + overshootDist;
+  const decelEnd = targetY - overshootDist; // slide past target
+  const decelMs = cfg.bridgeDur + cfg.tickMs;
 
   anime({
     targets: strip,
@@ -202,7 +202,7 @@ function sideReelStop(strip, reel, col, fastDist, cfg, targetY, overshootDist, b
     },
     complete: () => {
       strip.style.filter = 'none';
-      reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
+      reelBounce(strip, reel, col, targetY, board, cfg, onDone);
     }
   });
 }
@@ -223,8 +223,8 @@ function middleReelSequence(strip, reel, col, fastDist, cfg, targetY, overshootD
     duration: encoreDur,
     easing: 'linear',
     complete: () => {
-      // Phase B: easeOutQuart deceleration (speed strictly decreasing)
-      const decelEnd = targetY;
+      // Phase B: easeOutQuart deceleration ending at overshoot position
+      const decelEnd = targetY - overshootDist;
       const totalDecelMs = cfg.bridgeDur + cfg.tickMs;
 
       anime({
@@ -242,33 +242,25 @@ function middleReelSequence(strip, reel, col, fastDist, cfg, targetY, overshootD
         },
         complete: () => {
           strip.style.filter = 'none';
-          reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
+          reelBounce(strip, reel, col, targetY, board, cfg, onDone);
         }
       });
     }
   });
 }
 
-// Shared: overshoot → bounce → impact → done
-function reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone) {
+// Bounce back from overshoot position to target + impact
+function reelBounce(strip, reel, col, targetY, board, cfg, onDone) {
+  reelImpact(reel, col);
   anime({
     targets: strip,
-    translateY: targetY - overshootDist,
-    duration: 80,
-    easing: 'easeOutQuad',
+    translateY: targetY,
+    duration: 90,
+    easing: 'easeOutCubic',
     complete: () => {
-      anime({
-        targets: strip,
-        translateY: targetY,
-        duration: 90,
-        easing: 'easeOutCubic',
-        complete: () => {
-          reelImpact(reel, col);
-          if (cfg.isMiddle) deactivateMiddleFocus();
-          onReelStopped(strip, col, board, () => {
-            onDone(col, cfg);
-          });
-        }
+      if (cfg.isMiddle) deactivateMiddleFocus();
+      onReelStopped(strip, col, board, () => {
+        onDone(col, cfg);
       });
     }
   });
