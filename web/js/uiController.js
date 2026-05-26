@@ -371,6 +371,9 @@ async function showResult(result) {
   const winEl = $('win');
   const resEl = $('results');
 
+  // Clear row badges
+  for (let r = 0; r < 3; r++) { const b = $(`badge-${r}`); b.className = 'row-badge'; b.textContent = ''; }
+
   if (result.mode === 'fg') {
     // Update FG meter with current score
     updateFgMeter(result.totalScore);
@@ -410,33 +413,44 @@ async function showResult(result) {
     });
     if (!hasThrough) resetCombo();
 
-    let html = '';
+    // Update row badges
     result.judgments.forEach(j => {
-      let cls, text;
-      switch (j.type) {
-        case 'through':
-          cls = 'r-pass'; text = `✓ 穿門 ×${j.mult} (+${fmt(Math.round(gm.bet / 3 * j.mult))})`;
-          break;
-        case 'wall':
-          cls = 'r-wall'; text = `⚡ 碰壁 ×1.2 (+${fmt(Math.round(gm.bet / 3 * 1.2))})`;
-          break;
-        case 'same-hit':
-          cls = 'r-same'; text = `💀 同值命中 賠4 (-${fmt(gm.bet * 3)})`;
-          break;
-        case 'same-miss':
-          cls = 'r-miss'; text = `✗ 同值未中`;
-          break;
-        default:
-          cls = 'r-miss'; text = `✗ 未穿`;
-      }
+      const badge = $(`badge-${j.row}`);
       const rowCells = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]];
       const hasSC = rowCells.some(c => c.isScatter);
-      if (hasSC) { cls = 'r-sc'; text = `🐉 龍符號（不判定）`; }
-      html += `<div class="row-result ${cls}">列${j.row + 1}: ${text}</div>`;
+      badge.className = 'row-badge';
+      if (hasSC) {
+        badge.classList.add('scatter');
+        badge.textContent = '🐉 龍 ×1';
+      } else {
+        switch (j.type) {
+          case 'through':
+            badge.classList.add('win');
+            badge.textContent = `穿門 +${fmt(Math.round(gm.bet / 3 * j.mult))}`;
+            break;
+          case 'wall':
+            badge.classList.add('wall');
+            badge.textContent = `碰壁 +${fmt(Math.round(gm.bet / 3 * 1.2))}`;
+            break;
+          case 'same-hit':
+            badge.classList.add('loss');
+            badge.textContent = `同值 -${fmt(gm.bet * 3)}`;
+            break;
+          default:
+            badge.textContent = '—';
+        }
+      }
     });
 
-    const pClass = result.totalPayout >= 0 ? 'r-pass' : 'r-wall';
-    html += `<div class="r-summary ${pClass}">結算: ${result.totalPayout >= 0 ? '+' : ''}${fmt(result.totalPayout)}</div>`;
+    // Simplified bottom results (summary only)
+    let html = '';
+    if (result.totalPayout > 0) {
+      html = `<div class="r-summary r-pass">本局贏得 +${fmt(result.totalPayout)}</div>`;
+    } else if (result.totalPayout < 0) {
+      html = `<div class="r-summary r-wall">本局 ${fmt(result.totalPayout)}</div>`;
+    } else {
+      html = `<div class="r-summary">本局未中獎</div>`;
+    }
     if (result.scatterCount > 0) html += `<div class="row-result r-sc">🐉 SC × ${result.scatterCount}</div>`;
     if (result.fgTriggered) html += `<div class="row-result r-sc">🎰 Free Game 觸發！</div>`;
     resEl.innerHTML = html;
