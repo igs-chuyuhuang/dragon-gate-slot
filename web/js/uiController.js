@@ -181,27 +181,28 @@ function animateSpin(board) {
   });
 }
 
-// Side reels: bridge deceleration → final ticks → overshoot → bounce
+// Side reels: single continuous deceleration (no bridge+tick split)
 function sideReelStop(strip, reel, col, fastDist, cfg, targetY, overshootDist, board, onDone) {
-  const bridgeDist = cfg.bridgeDist * CELL_TOTAL;
-  const bridgeStart = -fastDist;
-  const bridgeEnd = bridgeStart - bridgeDist;
+  const decelDist = (cfg.bridgeDist + cfg.lastSymbols) * CELL_TOTAL;
+  const decelEnd = -fastDist - decelDist;
+  const decelMs = cfg.bridgeDur + cfg.tickMs; // ~1350ms total
 
-  // Bridge: speed drops from medium-high to slow, blur fades 3→0
   anime({
     targets: strip,
-    translateY: bridgeEnd,
-    duration: cfg.bridgeDur,
-    easing: cfg.bridgeEase,
+    translateY: decelEnd,
+    duration: decelMs,
+    easing: 'easeOutCubic',
     update: (anim) => {
-      strip.style.filter = `blur(${3 * (1 - anim.progress / 100)}px)`;
+      const p = anim.progress / 100;
+      if (p < 0.4) {
+        strip.style.filter = `blur(${3 * (1 - p / 0.4)}px)`;
+      } else {
+        strip.style.filter = 'none';
+      }
     },
     complete: () => {
       strip.style.filter = 'none';
-      // Final ticks
-      slideDecelerate(strip, bridgeEnd, cfg.lastSymbols, cfg.tickMs, false, () => {
-        reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
-      });
+      reelFinish(strip, reel, col, targetY, overshootDist, board, cfg, onDone);
     }
   });
 }
