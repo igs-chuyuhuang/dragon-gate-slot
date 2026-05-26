@@ -23,7 +23,7 @@
 
   <!-- Main Stage -->
   <div class="stage">
-    <button id="rules-btn" class="rules-btn">？</button>
+    <button id="rules-btn" class="rules-btn">i</button>
     <div class="stage-frame">
       <div class="board">
         <div class="reel" id="reel-0">
@@ -105,80 +105,70 @@
   <div id="results">按 SPIN 開始遊戲</div>
 
 
-  <!-- Rules Overlay -->
-  <div id="rules-overlay" class="rules-overlay" style="display:none">
-    <div class="rules-card">
-      <button class="rules-close">✕</button>
-      <div class="rules-content">
-        <h2>🐉 射龍門 Slot — 遊戲規則</h2>
-
-        <h3>【畫面說明】</h3>
-        <ul>
-          <li>標題下方三個圖示為 JP 彩金池：🔵 Basic / 🟠 Major / 🔴 Grand</li>
-          <li>數字為目前累積獎金</li>
-          <li>押注區：點擊金額按鈕直接切換押注</li>
-          <li>Auto：先選次數（10/50/100），再按 Auto 開始自動轉</li>
-        </ul>
-
-        <h3>【基本玩法】</h3>
-        <ul>
-          <li>3×3 盤面，每列獨立判定</li>
-          <li>左欄和右欄決定「門寬」</li>
-          <li>中欄決定是否「穿門」</li>
-          <li>中欄落在左右之間 = 穿門成功</li>
-          <li>中欄等於左或右邊界 = 碰壁</li>
-          <li>中欄超出範圍 = 未穿</li>
-        </ul>
-
-        <h3>【賠率表】</h3>
-        <ul>
-          <li>極窄門（差1點）：×6</li>
-          <li>窄門（差2~3點）：×4</li>
-          <li>中門（差4~7點）：×2</li>
-          <li>寬門（差8~11點）：×1</li>
-          <li>碰壁：×1.2</li>
-          <li>同值命中（左=右=中）：扣 3 倍押注</li>
-        </ul>
-
-        <h3>【下注說明】</h3>
-        <ul>
-          <li>每注分配給 3 列，每列 bet/3</li>
-          <li>最低餘額要求：3 × 押注金額</li>
-        </ul>
-
-        <h3>【Scatter 龍符號】</h3>
-        <ul>
-          <li>每格 5% 機率出現</li>
-          <li>同一轉出現 3 個以上觸發 Free Game</li>
-          <li>Scatter 所在列不參與主遊戲判定</li>
-        </ul>
-
-        <h3>【Free Game】</h3>
-        <ul>
-          <li>觸發後獲得 8 轉免費遊戲</li>
-          <li>計分規則：穿門 +中欄牌值、碰壁 +中欄牌值×3</li>
-          <li>FG 中再出 3 個 Scatter 可延伸 +8 轉（最多 2 次）</li>
-          <li>FG 結束後用累積分數判定 JP</li>
-        </ul>
-
-        <h3>【JP 彩金系統】</h3>
-        <ul>
-          <li>Basic JP：累積 60~120 分（中心 90）</li>
-          <li>Major JP：累積 130~200 分（中心 165）</li>
-          <li>Grand JP：累積 210~320 分（中心 265）</li>
-          <li>精準命中中心值：獎金 = JP 池 ×3</li>
-          <li>每注 5% 貢獻到 JP 池累積</li>
-        </ul>
-
-        <h3>【快捷鍵（測試用）】</h3>
-        <ul>
-          <li>Space = SPIN</li>
-          <li>F = 觸發 Free Game</li>
-          <li>T = 穿門特效 / W = 碰壁特效</li>
-          <li>C = Combo / B = Big Win</li>
-          <li>S = Scatter Reveal</li>
-        </ul>
+  <!-- Info Modal (paginated) -->
+  <div id="info-modal" class="info-modal" style="display:none">
+    <div class="info-card">
+      <button class="info-close" id="info-close">✕</button>
+      <button class="info-arrow info-prev" id="info-prev">‹</button>
+      <button class="info-arrow info-next" id="info-next">›</button>
+      <div class="info-pages">
+        <div class="info-page" data-page="0">
+          <h2>🐉 基本玩法</h2>
+          <ul>
+            <li>3×3 盤面，每列獨立判定</li>
+            <li>左欄和右欄決定「門寬」</li>
+            <li>中欄決定是否「穿門」</li>
+            <li>中欄落在左右之間 = 穿門成功</li>
+            <li>中欄等於左或右邊界 = 碰壁</li>
+            <li>中欄超出範圍 = 未穿</li>
+          </ul>
+        </div>
+        <div class="info-page" data-page="1" style="display:none">
+          <h2>💰 賠率表</h2>
+          <ul>
+            <li>極窄門（差1點）：×6</li>
+            <li>窄門（差2~3點）：×4</li>
+            <li>中門（差4~7點）：×2</li>
+            <li>寬門（差8~11點）：×1</li>
+            <li>碰壁：×1.2</li>
+            <li>同值命中（左=右=中）：扣 3 倍押注</li>
+          </ul>
+        </div>
+        <div class="info-page" data-page="2" style="display:none">
+          <h2>🐉 Scatter & Free Game</h2>
+          <ul>
+            <li>龍符號（Scatter）：每格 5% 機率出現</li>
+            <li>同一轉 3 個以上觸發 Free Game</li>
+            <li>Scatter 所在列不參與判定</li>
+            <li>Free Game：8 轉免費遊戲</li>
+            <li>FG 計分：穿門 +中欄牌值、碰壁 +中欄牌值×3</li>
+            <li>FG 中再出 3 Scatter 延伸 +8 轉（最多 2 次）</li>
+          </ul>
+        </div>
+        <div class="info-page" data-page="3" style="display:none">
+          <h2>🎰 押注與自動轉</h2>
+          <ul>
+            <li>押注級距：5 / 10 / 20 / 50 / 100</li>
+            <li>用 +/- 按鈕調整押注</li>
+            <li>每注分配給 3 列，每列 bet/3</li>
+            <li>最低餘額要求：3 × 押注金額</li>
+            <li>Auto：選次數後按 Auto 自動轉</li>
+            <li>轉動中再按 Auto 可停止</li>
+          </ul>
+        </div>
+        <div class="info-page" data-page="4" style="display:none">
+          <h2>🏆 JP 彩金系統</h2>
+          <ul>
+            <li>每注 5% 貢獻到 JP 池累積</li>
+            <li>FG 結束後用累積分數判定 JP</li>
+            <li>Basic JP：累積 60~120 分（中心 90）</li>
+            <li>Major JP：累積 130~200 分（中心 165）</li>
+            <li>Grand JP：累積 210~320 分（中心 265）</li>
+            <li>精準命中中心值：獎金 = JP 池 ×3</li>
+          </ul>
+        </div>
       </div>
+      <div class="info-dots" id="info-dots"></div>
     </div>
   </div>
 
@@ -186,13 +176,35 @@
     import { init } from './js/uiController.js';
     init();
 
-    // Rules overlay
-    const rulesBtn = document.getElementById('rules-btn');
-    const rulesOverlay = document.getElementById('rules-overlay');
-    const rulesClose = rulesOverlay.querySelector('.rules-close');
-    rulesBtn.addEventListener('click', () => { rulesOverlay.style.display = 'flex'; });
-    rulesClose.addEventListener('click', () => { rulesOverlay.style.display = 'none'; });
-    rulesOverlay.addEventListener('click', e => { if (e.target === rulesOverlay) rulesOverlay.style.display = 'none'; });
+    // Info modal pagination
+    const modal = document.getElementById('info-modal');
+    const pages = modal.querySelectorAll('.info-page');
+    const dotsEl = document.getElementById('info-dots');
+    const totalPages = pages.length;
+    let curPage = 0;
+
+    // Build dots
+    for (let i = 0; i < totalPages; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'info-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => goPage(i));
+      dotsEl.appendChild(dot);
+    }
+
+    function goPage(n) {
+      pages[curPage].style.display = 'none';
+      curPage = Math.max(0, Math.min(n, totalPages - 1));
+      pages[curPage].style.display = '';
+      dotsEl.querySelectorAll('.info-dot').forEach((d, i) => d.classList.toggle('active', i === curPage));
+      document.getElementById('info-prev').style.visibility = curPage === 0 ? 'hidden' : '';
+      document.getElementById('info-next').style.visibility = curPage === totalPages - 1 ? 'hidden' : '';
+    }
+
+    document.getElementById('rules-btn').addEventListener('click', () => { modal.style.display = 'flex'; goPage(0); });
+    document.getElementById('info-close').addEventListener('click', () => { modal.style.display = 'none'; });
+    document.getElementById('info-prev').addEventListener('click', () => goPage(curPage - 1));
+    document.getElementById('info-next').addEventListener('click', () => goPage(curPage + 1));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
   </script>
 </body>
 </html>
