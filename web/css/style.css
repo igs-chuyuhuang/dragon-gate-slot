@@ -2,7 +2,7 @@
 
 body {
   font-family: 'Noto Sans TC', sans-serif;
-  background: #0a0a14 url('../assets/img/BG-01_main_bg.png') center/cover no-repeat fixed;
+  background: #0a0a14;
   color: #eee;
   display: flex;
   flex-direction: column;
@@ -10,6 +10,20 @@ body {
   min-height: 100vh;
   padding: 6px;
   overflow-x: hidden;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1;
+  background: url('../assets/img/BG-01_main_bg.png') center/cover no-repeat;
+  filter: blur(2px) brightness(0.5) saturate(0.5);
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: -1;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+}
 }
 
 /* === Logo === */
@@ -66,15 +80,16 @@ body {
   margin: 4px 0;
 }
 .stage-frame {
-  background: linear-gradient(145deg, rgba(20,10,5,0.9), rgba(40,20,10,0.85));
+  background: linear-gradient(145deg, rgba(8,5,2,0.95), rgba(15,10,5,0.92));
   border: 4px solid #c9a032;
   border-image: linear-gradient(180deg, #ffd700, #8b6914, #ffd700) 1;
   border-radius: 0;
   padding: 10px;
   box-shadow:
-    0 0 40px rgba(201,160,50,0.25),
-    inset 0 0 30px rgba(0,0,0,0.6),
-    0 8px 32px rgba(0,0,0,0.7);
+    0 0 30px rgba(255,215,0,0.4),
+    0 0 60px rgba(201,160,50,0.2),
+    inset 0 0 30px rgba(0,0,0,0.7),
+    0 8px 32px rgba(0,0,0,0.8);
   position: relative;
   display: flex; align-items: stretch; gap: 8px;
 }
@@ -120,7 +135,7 @@ body {
 .cell {
   width: 110px; height: 110px;
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, #1a2540, #1e2d50);
+  background: linear-gradient(180deg, #0a0f1a, #0d1525);
   border: 2px solid #2a4a7a;
   border-radius: 8px;
   overflow: hidden;
@@ -362,7 +377,7 @@ button.small { padding: 6px 10px; background: #0f3460; min-height: 34px; }
 @keyframes fg-fade { 0%,70% { opacity: 1; } 100% { opacity: 0; } }
 
 /* FG mode */
-body.fg-mode { background-image: url('../assets/img/FG-01_free_game.png'); }
+body.fg-mode::before { background-image: url('../assets/img/FG-01_free_game.png'); }
 body.fg-mode .stage-frame { border-image: linear-gradient(180deg, #ffd700, #ff6600, #ffd700) 1; box-shadow: 0 0 50px rgba(255,215,0,0.4), inset 0 0 30px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.7); }
 
 /* === Info Button & Modal === */
