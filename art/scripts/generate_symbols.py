@@ -11,10 +11,10 @@ OUTPUT_DIR = os.path.join(BASE_DIR, "assets")
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
 
 CARDS = [
-    ("CD-01_ace.png", "A", "high"),
-    ("CD-02_king.png", "K", "high"),
-    ("CD-03_queen.png", "Q", "high"),
-    ("CD-04_jack.png", "J", "high"),
+    ("CD-01_ace.png", "A", "mid"),
+    ("CD-02_king.png", "K", "mid"),
+    ("CD-03_queen.png", "Q", "mid"),
+    ("CD-04_jack.png", "J", "mid"),
     ("CD-05_num2.png", "2", "mid"),
     ("CD-06_num3.png", "3", "mid"),
     ("CD-07_num4.png", "4", "mid"),
