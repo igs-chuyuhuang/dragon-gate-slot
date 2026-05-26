@@ -287,11 +287,31 @@ button.small { padding: 6px 10px; background: #0f3460; min-height: 34px; }
 .bet-adj:active { transform: scale(0.9); background: #c9a032; color: #000; }
 .bet-adj:disabled { opacity: 0.3; cursor: default; transform: none; border-color: rgba(255,215,0,0.15); }
 
-/* === Auto Group === */
-.auto-group { display: flex; gap: 4px; align-items: center; }
-.auto-label { font-size: 10px; color: #999; margin-right: 2px; }
-.auto-group .auto-preset { font-size: 11px; padding: 4px 8px; min-height: 24px; background: #0f3460; border: 1px solid rgba(255,215,0,0.2); color: #aaa; border-radius: 4px; }
-.auto-group .auto-preset.active { background: #c9a032; color: #000; border-color: #ffd700; }
+/* === Auto Panel === */
+.auto-wrapper { position: relative; }
+.auto-panel {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(180deg, #1a1a2e, #0f1a30);
+  border: 2px solid rgba(255,215,0,0.5); border-radius: 10px;
+  padding: 12px 16px; margin-bottom: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  z-index: 100; white-space: nowrap;
+}
+.auto-stepper { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 10px; }
+#auto-count-display { color: #ffd700; font-size: 16px; font-weight: bold; min-width: 50px; text-align: center; }
+.auto-panel-actions { display: flex; gap: 8px; justify-content: center; }
+.auto-start-btn {
+  padding: 6px 18px; font-size: 13px; font-weight: bold;
+  background: linear-gradient(180deg, #ffd700, #c9a032); color: #1a1a2e;
+  border: 1px solid #ffd700; border-radius: 6px; cursor: pointer;
+}
+.auto-start-btn:hover { background: linear-gradient(180deg, #ffe44d, #ddb840); }
+.auto-cancel-btn {
+  padding: 6px 14px; font-size: 13px;
+  background: transparent; color: #999; border: 1px solid #555;
+  border-radius: 6px; cursor: pointer;
+}
+.auto-cancel-btn:hover { color: #fff; border-color: #999; }
 #auto-btn { background: #e94560; }
 
 /* === Results Panel === */

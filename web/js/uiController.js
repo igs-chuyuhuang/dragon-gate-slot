@@ -17,7 +17,7 @@ const $ = id => document.getElementById(id);
 let spinning = false;
 let autoSpins = 0;
 let autoStopped = false;
-let autoCount = 10;
+let autoCount = 50;
 
 // Card value → image file mapping
 const CARD_IMG = {
@@ -65,7 +65,7 @@ function updateUI() {
   } else { fgEl.style.display = 'none'; }
   document.body.classList.toggle('fg-mode', gm.fg.active);
   const autoEl = $('auto-btn');
-  autoEl.textContent = autoSpins > 0 ? `Stop` : 'Auto';
+  autoEl.textContent = autoSpins > 0 ? `Auto ${autoSpins}` : 'Auto';
   autoEl.classList.toggle('running', autoSpins > 0);
 }
 
@@ -486,7 +486,6 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 export function init() {
   $('spin-btn').addEventListener('click', doSpin);
   initSpinButton($('spin-btn')); // A. Spin charge
-  $('auto-btn').addEventListener('click', autoSpin);
   // Bet +/- controls
   $('bet-dec').addEventListener('click', () => {
     if (spinning) return;
@@ -497,13 +496,23 @@ export function init() {
     gm.setBetIndex(gm.betIndex + 1); updateUI();
   });
 
-  document.querySelectorAll('.auto-preset').forEach(btn => {
-    btn.addEventListener('click', () => {
-      autoCount = parseInt(btn.dataset.count);
-      document.querySelectorAll('.auto-preset').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    });
+  // Auto panel
+  const autoPanel = $('auto-panel');
+  const autoDisplay = $('auto-count-display');
+  function updateAutoPanel() {
+    autoDisplay.textContent = autoCount + ' 局';
+    $('auto-dec').disabled = autoCount <= 10;
+    $('auto-inc').disabled = autoCount >= 100;
+  }
+  $('auto-btn').addEventListener('click', () => {
+    if (autoSpins > 0) { autoStopped = true; autoSpins = 0; updateUI(); return; }
+    autoPanel.style.display = autoPanel.style.display === 'none' ? '' : 'none';
+    updateAutoPanel();
   });
+  $('auto-dec').addEventListener('click', () => { autoCount = Math.max(10, autoCount - 10); updateAutoPanel(); });
+  $('auto-inc').addEventListener('click', () => { autoCount = Math.min(100, autoCount + 10); updateAutoPanel(); });
+  $('auto-start').addEventListener('click', () => { autoPanel.style.display = 'none'; autoSpin(); });
+  $('auto-cancel').addEventListener('click', () => { autoPanel.style.display = 'none'; });
 
   // Hotkeys
   document.addEventListener('keydown', e => {

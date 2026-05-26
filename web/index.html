@@ -88,17 +88,24 @@
 
   <!-- SPIN + Auto Row -->
   <div class="spin-row">
-    <div class="auto-group">
-      <span class="auto-label">次數</span>
-      <button class="auto-preset" data-count="10">10</button>
-      <button class="auto-preset" data-count="50">50</button>
-      <button class="auto-preset active" data-count="100">100</button>
+    <div class="auto-wrapper">
+      <button id="auto-btn" class="auto-btn-styled">Auto</button>
+      <div id="auto-panel" class="auto-panel" style="display:none">
+        <div class="auto-stepper">
+          <button class="bet-adj" id="auto-dec">−</button>
+          <span id="auto-count-display">50 局</span>
+          <button class="bet-adj" id="auto-inc">+</button>
+        </div>
+        <div class="auto-panel-actions">
+          <button class="auto-start-btn" id="auto-start">開始</button>
+          <button class="auto-cancel-btn" id="auto-cancel">取消</button>
+        </div>
+      </div>
     </div>
     <button id="spin-btn" class="spin-btn">
       <img src="assets/img/UI-04_spin_btn.png" alt="SPIN">
       <span class="spin-label">SPIN</span>
     </button>
-    <button id="auto-btn" class="auto-btn-styled">Auto</button>
   </div>
 
   <!-- Results Panel -->
