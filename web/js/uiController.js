@@ -54,8 +54,6 @@ function updateUI() {
   $('bet-dec').disabled = spinning || gm.betIndex <= 0;
   $('bet-inc').disabled = spinning || gm.betIndex >= 4;
   $('spin-btn').disabled = spinning || !gm.canSpin();
-  const label = $('spin-btn').querySelector('.spin-label');
-  if (label) label.textContent = gm.fg.active ? `FG (${gm.fg.spinsLeft})` : 'SPIN';
   $('jp-basic').textContent = fmt(gm.jp.pools.basic);
   $('jp-major').textContent = fmt(gm.jp.pools.major);
   $('jp-grand').textContent = fmt(gm.jp.pools.grand);
@@ -71,9 +69,9 @@ function updateUI() {
 }
 
 // === Real Reel Scrolling Animation ===
-const CELL_H = 110;
-const GAP = 3;
-const CELL_TOTAL = CELL_H + GAP; // 113px per cell
+const CELL_H = 98;
+const GAP = 2;
+const CELL_TOTAL = CELL_H + GAP; // 100px per cell
 const REEL_SYMBOLS = 40; // lots of symbols for continuous reel feel
 
 function buildReelStrip(col, finalCells, numSymbols) {
