@@ -365,6 +365,13 @@ async function doSpin() {
   await animateSpin(result.board);
   await showResult(result);
   updateUI();
+
+  // Auto-continue Free Game spins
+  if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
+    await delay(400);
+    doSpin(); // fire-and-forget next FG spin
+  }
+
   return result;
 }
 
@@ -548,6 +555,7 @@ export function init() {
       showFgMeter();
       $('results').innerHTML = '<div class="row-result r-sc">🐉 Free Game 觸發！（測試）</div>';
       updateUI();
+      setTimeout(() => doSpin(), 500);
     }
     // Debug hotkeys
     if (e.key === 't' || e.key === 'T') {
