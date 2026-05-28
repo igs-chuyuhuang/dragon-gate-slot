@@ -123,17 +123,25 @@
     import { init } from './js/uiController.js';
     init();
 
-    // Responsive scale
+    // Responsive scale — robust
     function resizeGame() {
       const root = document.getElementById('game-root');
-      const scaleX = window.innerWidth / 1080;
-      const scaleY = window.innerHeight / 1920;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const scaleX = vw / 1080;
+      const scaleY = vh / 1920;
       const scale = Math.min(scaleX, scaleY);
+      const scaledW = 1080 * scale;
+      const scaledH = 1920 * scale;
       root.style.transform = `scale(${scale})`;
-      root.style.transformOrigin = 'top center';
+      root.style.transformOrigin = 'top left';
+      root.style.left = ((vw - scaledW) / 2) + 'px';
+      root.style.top = ((vh - scaledH) / 2) + 'px';
+      console.log('[RESIZE] scale:', scale.toFixed(4), 'viewport:', vw, 'x', vh);
     }
     window.addEventListener('resize', resizeGame);
     resizeGame();
+    setTimeout(resizeGame, 100);
+    setTimeout(resizeGame, 500);
 
     // Info modal
     const modal = document.getElementById('info-modal');
