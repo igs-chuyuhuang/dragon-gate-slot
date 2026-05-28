@@ -89,9 +89,11 @@ function buildReelStrip(col, finalCells, numSymbols) {
   const count = numSymbols || REEL_SYMBOLS;
   const strip = document.querySelector(`#reel-${col} .reel-strip`);
   strip.innerHTML = '';
+  const cellH = CELL_TOTAL + 'px';
   for (let i = 0; i < count; i++) {
     const div = document.createElement('div');
     div.className = 'cell';
+    div.style.height = cellH;
     div.innerHTML = randomCellHtml();
     strip.appendChild(div);
   }
@@ -99,6 +101,7 @@ function buildReelStrip(col, finalCells, numSymbols) {
     const cell = finalCells[r];
     const div = document.createElement('div');
     div.className = 'cell';
+    div.style.height = cellH;
     div.id = `cell-${r}-${col}`;
     div.innerHTML = cellToImg(cell);
     strip.appendChild(div);
