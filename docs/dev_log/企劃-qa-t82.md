@@ -114,3 +114,34 @@
 **關鍵 prompt / 指令：** 多項 UI 改造需求 + 中獎線演出動畫系統 + 背景層次分離
 **人工修正：** overshoot 數值經使用者反饋多次微調
 **耗時：** ~3 小時（含多項任務）
+
+### [2026-05-28] — 企劃規格書 v1.5 + Agent 協作總結
+
+**環節：** 企劃
+**AI 工具：** Kiro Agent
+**做了什麼：** 更新企劃規格書至 v1.5，將 Scatter 機制從「3 顆觸發」改為「累積收集制」（碰壁扣 1 燈、同值扣 2 燈、門檻待數學確認）。另新增 Agent 協作總結文件，記錄各 Agent 分工與協作流程。
+**Before：** Scatter 為傳統 3 顆觸發制；無協作流程文件
+**After：** game_design.md v1.5（Scatter 累積收集制）、agent_workflow_summary.md 新增
+**關鍵 prompt / 指令：** Scatter 改為累積收集制，整合數學模型 Agent 的機率分析結果（推薦門檻 8 + SR 5%）
+**人工修正：** 無
+**耗時：** ~10 分鐘
+
+### [2026-05-28] — dev/ 版本完全重構（固定座標系→純CSS responsive→BG底圖架構）
+
+**環節：** 程式
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. dev/ 改為固定 1080×1920 座標系 + responsive scale（後因手機不生效而放棄）
+2. 改為純 CSS responsive（vw/vh/%），移除 JS transform scale
+3. 修復手機版 3×3 顯示問題（cell 高度=reel/3 精確填滿）
+4. 修復功能性問題（SPIN z-index、pointer-events、+/- 按鈕）
+5. 盤面重構：reel 背景透明，cell 獨立深紅背景+金框
+6. 最終改為 BG.png 底圖 + absolute positioned cells 架構
+7. 整合完整遊戲邏輯（SPIN、結算、badge、押注、Auto、FG）
+8. 轉輪動畫改回 translateY 滾動式（reel strip）
+9. 動畫升級為 v12 風格（統一高速→easeOut減速→overshoot→bounce，左右同停中輪最後）
+**Before：** dev/ 版型不穩定，手機顯示跑掉，動畫用圖片切換
+**After：** BG.png 底圖 + absolute reels + v12 滾動動畫，手機/電腦都正常，完整可玩
+**關鍵 prompt / 指令：** 多次迭代：固定座標系→純CSS→BG底圖，最終確定 BG.png + absolute positioning 架構
+**人工修正：** 使用者多次截圖反饋佈局問題，經 5+ 次迭代確定最終方案
+**耗時：** ~3 小時（含多次架構重構）
