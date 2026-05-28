@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>射龍門 Slot</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/effects.css">
+</head>
+<body>
+  <!-- Background -->
+  <div class="game-bg"></div>
+
+  <!-- Game Container (9:16 mobile) -->
+  <div class="game-container">
+
+    <!-- Frame + Board -->
+    <div class="frame-wrapper">
+      <img src="assets/img/FR-01_slot_frame_mobile.png" class="slot-frame" alt="Frame">
+      <div class="board-area">
+        <div class="board">
+          <div class="reel" id="reel-0">
+            <div class="reel-strip">
+              <div class="cell" id="cell-0-0"></div>
+              <div class="cell" id="cell-1-0"></div>
+              <div class="cell" id="cell-2-0"></div>
+            </div>
+          </div>
+          <div class="reel" id="reel-1">
+            <div class="reel-strip">
+              <div class="cell" id="cell-0-1"></div>
+              <div class="cell" id="cell-1-1"></div>
+              <div class="cell" id="cell-2-1"></div>
+            </div>
+          </div>
+          <div class="reel" id="reel-2">
+            <div class="reel-strip">
+              <div class="cell" id="cell-0-2"></div>
+              <div class="cell" id="cell-1-2"></div>
+              <div class="cell" id="cell-2-2"></div>
+            </div>
+          </div>
+        </div>
+        <div class="row-badges">
+          <div class="row-badge" id="badge-0"></div>
+          <div class="row-badge" id="badge-1"></div>
+          <div class="row-badge" id="badge-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mascot -->
+    <img src="assets/img/MS-01_mascot_dragon.png" class="mascot" alt="Dragon">
+
+    <!-- Free Game Info -->
+    <div id="fg-info" class="fg-info" style="display:none"></div>
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar">
+      <img src="assets/img/UI-01_bottom_bar_bg.png" class="bottom-bar-bg" alt="">
+      <div class="bottom-bar-content">
+        <div class="bar-section">
+          <span class="bar-label">餘額</span>
+          <span class="bar-value" id="balance">1,000</span>
+        </div>
+        <div class="bar-section bet-section">
+          <button class="btn-adj" id="bet-dec"><img src="assets/img/BTN-07_minus.png" alt="-"></button>
+          <div class="bet-display">
+            <span class="bar-label">押注</span>
+            <span class="bar-value" id="bet">10</span>
+          </div>
+          <button class="btn-adj" id="bet-inc"><img src="assets/img/BTN-06_plus.png" alt="+"></button>
+        </div>
+        <button id="spin-btn" class="spin-btn">
+          <img src="assets/img/UI-04_spin_btn_normal.png" alt="SPIN">
+        </button>
+        <div class="bar-section">
+          <span class="bar-label">贏分</span>
+          <span class="bar-value" id="win">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Function buttons -->
+    <div class="func-row">
+      <button id="rules-btn" class="func-btn">i</button>
+      <div class="auto-wrapper">
+        <button id="auto-btn" class="func-btn">Auto</button>
+        <div id="auto-panel" class="auto-panel" style="display:none">
+          <div class="auto-stepper">
+            <button class="btn-adj-sm" id="auto-dec">−</button>
+            <span id="auto-count-display">50 局</span>
+            <button class="btn-adj-sm" id="auto-inc">+</button>
+          </div>
+          <div class="auto-panel-actions">
+            <button class="auto-start-btn" id="auto-start">開始</button>
+            <button class="auto-cancel-btn" id="auto-cancel">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="results-bar">按 SPIN 開始遊戲</div>
+
+    <!-- JP Display -->
+    <div class="jp-bar">
+      <div class="jp"><span class="jp-label">Basic</span><span id="jp-basic">500</span></div>
+      <div class="jp"><span class="jp-label">Major</span><span id="jp-major">2,000</span></div>
+      <div class="jp"><span class="jp-label">Grand</span><span id="jp-grand">10,000</span></div>
+    </div>
+  </div>
+
+  <!-- Win Popup Overlay -->
+  <div id="win-popup" class="win-popup" style="display:none">
+    <div class="win-popup-content">
+      <div class="win-popup-label">恭喜獲得</div>
+      <div class="win-popup-amount" id="win-popup-amount">0</div>
+    </div>
+  </div>
+
+  <!-- Info Modal -->
+  <div id="info-modal" class="info-modal" style="display:none">
+    <div class="info-card">
+      <button class="info-close" id="info-close">✕</button>
+      <button class="info-arrow info-prev" id="info-prev">‹</button>
+      <button class="info-arrow info-next" id="info-next">›</button>
+      <div class="info-pages">
+        <div class="info-page" data-page="0">
+          <h2>🐉 基本玩法</h2>
+          <ul><li>3×3 盤面，每列獨立判定</li><li>左欄和右欄決定「門寬」</li><li>中欄決定是否「穿門」</li><li>中欄落在左右之間 = 穿門成功</li><li>中欄等於邊界 = 碰壁</li><li>中欄超出範圍 = 未穿</li></ul>
+        </div>
+        <div class="info-page" data-page="1" style="display:none">
+          <h2>💰 賠率表</h2>
+          <ul><li>極窄門（差1點）：×6</li><li>窄門（差2~3點）：×4</li><li>中門（差4~7點）：×2</li><li>寬門（差8~11點）：×1</li><li>碰壁：×1.2</li><li>同值命中：扣 3 倍押注</li></ul>
+        </div>
+        <div class="info-page" data-page="2" style="display:none">
+          <h2>🐉 Scatter & Free Game</h2>
+          <ul><li>龍符號每格 5% 機率出現</li><li>3 個以上觸發 Free Game（8 轉）</li><li>FG 計分：穿門 +中欄牌值、碰壁 +牌值×3</li><li>FG 中再出 3 Scatter 延伸 +8 轉</li></ul>
+        </div>
+        <div class="info-page" data-page="3" style="display:none">
+          <h2>🎰 押注與自動轉</h2>
+          <ul><li>押注級距：5 / 10 / 20 / 50 / 100</li><li>用 +/- 按鈕調整</li><li>Auto：選次數後自動轉</li></ul>
+        </div>
+        <div class="info-page" data-page="4" style="display:none">
+          <h2>🏆 JP 彩金系統</h2>
+          <ul><li>每注 5% 貢獻到 JP 池</li><li>Basic：60~120 分</li><li>Major：130~200 分</li><li>Grand：210~320 分</li><li>精準命中中心值：獎金 ×3</li></ul>
+        </div>
+      </div>
+      <div class="info-dots" id="info-dots"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { init } from './js/uiController.js';
+    init();
+
+    // Info modal
+    const modal = document.getElementById('info-modal');
+    const pages = modal.querySelectorAll('.info-page');
+    const dotsEl = document.getElementById('info-dots');
+    const totalPages = pages.length;
+    let curPage = 0;
+    for (let i = 0; i < totalPages; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'info-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => goPage(i));
+      dotsEl.appendChild(dot);
+    }
+    function goPage(n) {
+      pages[curPage].style.display = 'none';
+      curPage = Math.max(0, Math.min(n, totalPages - 1));
+      pages[curPage].style.display = '';
+      dotsEl.querySelectorAll('.info-dot').forEach((d, i) => d.classList.toggle('active', i === curPage));
+      document.getElementById('info-prev').style.visibility = curPage === 0 ? 'hidden' : '';
+      document.getElementById('info-next').style.visibility = curPage === totalPages - 1 ? 'hidden' : '';
+    }
+    document.getElementById('rules-btn').addEventListener('click', () => { modal.style.display = 'flex'; goPage(0); });
+    document.getElementById('info-close').addEventListener('click', () => { modal.style.display = 'none'; });
+    document.getElementById('info-prev').addEventListener('click', () => goPage(curPage - 1));
+    document.getElementById('info-next').addEventListener('click', () => goPage(curPage + 1));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+  </script>
+</body>
+</html>
