@@ -21,16 +21,25 @@ body {
 /* Frame */
 .frame-layer {
   position: absolute;
-  top: 3%; left: 3%; width: 80%; height: auto;
+  top: 6%; left: 5%; width: 75%;
   z-index: 2; pointer-events: none;
 }
 
-/* Reel area — positioned inside FR-01 frame's inner grid */
+/* Reel area — must align with frame's inner 3x3 grid
+   Frame image: 400x450. Inner grid starts ~30% from top, ~8% from sides, 
+   grid width ~84% of frame width, grid height ~55% of frame height.
+   Frame top=6%, frame width=75vw, frame height=75vw*1.125=84.375vw
+   Grid top = 6% + 84.375vw*0.30 ≈ 6% + 25.3vw
+   Grid left = 5% + 75vw*0.08 = 5% + 6vw ≈ 11%
+   Grid width = 75vw * 0.84 = 63vw
+   Grid height = 84.375vw * 0.55 = 46.4vw */
 .reel-layer {
   position: absolute;
-  top: 25%; left: 10%;
-  width: 60%; height: 50%;
-  display: flex; gap: 1%;
+  top: calc(6% + 25vw);
+  left: 11%;
+  width: 63vw;
+  height: 46vw;
+  display: flex; gap: 0.5%;
   z-index: 3;
 }
 .reel {
@@ -58,8 +67,9 @@ body {
 /* Badges */
 .badge-layer {
   position: absolute;
-  top: 28%; right: 3%;
-  width: 16%; height: 47%;
+  top: calc(6% + 25vw);
+  right: 3%;
+  width: 14%; height: 46vw;
   display: flex; flex-direction: column;
   justify-content: space-around; gap: 2%;
   z-index: 4;
