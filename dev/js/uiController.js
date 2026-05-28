@@ -1,6 +1,6 @@
 import { cellToString } from './slotEngine.js';
 import { GameManager } from './gameManager.js';
-import { initSpinButton } from './effects/spinButton.js';
+// import { initSpinButton } from './effects/spinButton.js'; // disabled: charge effect breaks mobile tap
 import { registerThrough, resetCombo } from './effects/comboSystem.js';
 import { playWallHit } from './effects/wallHit.js';
 import { playGateThrough } from './effects/gateThrough.js';
@@ -527,7 +527,7 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 export function init() {
   recalcCellTotal();
   $('spin-btn').addEventListener('click', doSpin);
-  initSpinButton($('spin-btn')); // A. Spin charge
+  // initSpinButton($('spin-btn')); // disabled: charge effect breaks mobile tap
   // Bet +/- controls
   $('bet-dec').addEventListener('click', () => {
     if (spinning) return;
