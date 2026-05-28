@@ -69,9 +69,9 @@ function updateUI() {
 }
 
 // === Real Reel Scrolling Animation ===
-const CELL_H = 90;
-const GAP = 2;
-const CELL_TOTAL = CELL_H + GAP; // 92px per cell
+const CELL_H = 254;
+const GAP = 6;
+const CELL_TOTAL = CELL_H + GAP; // 260px per cell in 1080 design
 const REEL_SYMBOLS = 40; // lots of symbols for continuous reel feel
 
 function buildReelStrip(col, finalCells, numSymbols) {
