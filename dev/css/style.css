@@ -21,32 +21,23 @@ body {
 /* Frame */
 .frame-layer {
   position: absolute;
-  top: 6%; left: 5%; width: 75%;
+  top: 5%; left: 3%; width: 94%; height: auto;
   z-index: 2; pointer-events: none;
 }
 
-/* Reel area — must align with frame's inner 3x3 grid
-   Frame image: 400x450. Inner grid starts ~30% from top, ~8% from sides, 
-   grid width ~84% of frame width, grid height ~55% of frame height.
-   Frame top=6%, frame width=75vw, frame height=75vw*1.125=84.375vw
-   Grid top = 6% + 84.375vw*0.30 ≈ 6% + 25.3vw
-   Grid left = 5% + 75vw*0.08 = 5% + 6vw ≈ 11%
-   Grid width = 75vw * 0.84 = 63vw
-   Grid height = 84.375vw * 0.55 = 46.4vw */
+/* Reel area */
 .reel-layer {
   position: absolute;
-  top: calc(6% + 25vw);
-  left: 11%;
-  width: 63vw;
-  height: 46vw;
-  display: flex; gap: 0.5%;
+  top: 20%; left: 10%;
+  width: 65%; height: 42%;
+  display: flex; gap: 1%;
   z-index: 3;
 }
 .reel {
   flex: 1; height: 100%;
   overflow: hidden; position: relative;
-  background: transparent;
-  border-radius: 0;
+  border-radius: 1vw;
+  background: #3a0808;
 }
 .reel-strip {
   display: flex; flex-direction: column;
@@ -55,22 +46,20 @@ body {
 }
 .cell {
   width: 100%;
-  height: 0; /* set by JS */
+  height: 0; /* set by JS or calc */
   display: flex; align-items: center; justify-content: center;
-  background: rgba(60,10,10,0.9);
-  border: 1.5px solid rgba(201,160,50,0.5);
-  border-radius: 4px; overflow: hidden;
+  background: linear-gradient(180deg, #3a0808, #2a0505);
+  border: 2px solid rgba(201,160,50,0.6);
+  border-radius: 1vw; overflow: hidden;
   flex-shrink: 0; position: relative;
-  box-sizing: border-box;
 }
-.cell img { width: 85%; height: 85%; object-fit: contain; }
+.cell img { width: 88%; height: 88%; object-fit: contain; }
 
 /* Badges */
 .badge-layer {
   position: absolute;
-  top: calc(6% + 25vw);
-  right: 3%;
-  width: 14%; height: 46vw;
+  top: 21%; right: 2%;
+  width: 14%; height: 40%;
   display: flex; flex-direction: column;
   justify-content: space-around; gap: 2%;
   z-index: 4;
