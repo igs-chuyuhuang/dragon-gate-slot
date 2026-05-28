@@ -10,16 +10,10 @@
   <div class="game-root">
     <img class="bg-layer" src="assets/img/BG.png" alt="">
 
-    <!-- 3x3 Cells -->
-    <div class="cell cell-0-0" id="cell-0-0"><img></div>
-    <div class="cell cell-0-1" id="cell-0-1"><img></div>
-    <div class="cell cell-0-2" id="cell-0-2"><img></div>
-    <div class="cell cell-1-0" id="cell-1-0"><img></div>
-    <div class="cell cell-1-1" id="cell-1-1"><img></div>
-    <div class="cell cell-1-2" id="cell-1-2"><img></div>
-    <div class="cell cell-2-0" id="cell-2-0"><img></div>
-    <div class="cell cell-2-1" id="cell-2-1"><img></div>
-    <div class="cell cell-2-2" id="cell-2-2"><img></div>
+    <!-- 3 Reel containers (absolute positioned on BG grid) -->
+    <div class="reel" id="reel-0"><div class="reel-strip"></div></div>
+    <div class="reel" id="reel-1"><div class="reel-strip"></div></div>
+    <div class="reel" id="reel-2"><div class="reel-strip"></div></div>
 
     <!-- Badges -->
     <div class="badge badge-0" id="badge-0"></div>
@@ -44,17 +38,15 @@
 
     <!-- FG info -->
     <div class="fg-info" id="fg-info" style="display:none"></div>
-
-    <!-- Results -->
     <div class="results-bar" id="results"></div>
 
-    <!-- JP (hidden in BG) -->
+    <!-- JP hidden -->
     <span id="jp-basic" style="display:none">500</span>
     <span id="jp-major" style="display:none">2000</span>
     <span id="jp-grand" style="display:none">10000</span>
   </div>
 
-  <!-- Auto Panel (outside game-root for z-index) -->
+  <!-- Auto Panel -->
   <div class="auto-overlay" id="auto-overlay" style="display:none">
     <div class="auto-panel">
       <div class="auto-stepper">
@@ -86,10 +78,76 @@
     };
     const SC_IMG = 'SC-01_scatter_dragon.png';
     const ALL_IMGS = Object.values(CARD_IMG);
+    const REEL_SYMBOLS = 30;
 
     function cellImg(cell) { return cell.isScatter ? SC_IMG : CARD_IMG[cell.value]; }
     function randomImg() { return ALL_IMGS[Math.floor(Math.random() * 13)]; }
     function fmt(n) { return Math.round(n).toLocaleString(); }
+
+    // Get cell height from reel
+    function getCellH() {
+      const reel = document.querySelector('.reel');
+      return reel.getBoundingClientRect().height / 3;
+    }
+
+    function buildStrip(col, finalCells) {
+      const strip = document.querySelector(`#reel-${col} .reel-strip`);
+      const cellH = getCellH();
+      strip.innerHTML = '';
+      strip.style.transform = 'translateY(0px)';
+      for (let i = 0; i < REEL_SYMBOLS; i++) {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.style.height = cellH + 'px';
+        div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+        strip.appendChild(div);
+      }
+      for (let r = 0; r < 3; r++) {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.style.height = cellH + 'px';
+        div.id = `cell-${r}-${col}`;
+        div.innerHTML = `<img src="assets/img/${cellImg(finalCells[r])}">`;
+        strip.appendChild(div);
+      }
+      return strip;
+    }
+
+    function animateSpin(board) {
+      return new Promise(resolve => {
+        spinning = true;
+        const cellH = getCellH();
+        const scrollDist = REEL_SYMBOLS * cellH;
+
+        for (let col = 0; col < 3; col++) {
+          const finalCells = [board[0][col], board[1][col], board[2][col]];
+          buildStrip(col, finalCells);
+        }
+
+        // Animate each column: left(0ms) → right(300ms) → middle(700ms)
+        const colOrder = [0, 2, 1];
+        const delays = [0, 300, 700];
+        let done = 0;
+
+        colOrder.forEach((col, idx) => {
+          const strip = document.querySelector(`#reel-${col} .reel-strip`);
+          const dur = 800 + delays[idx];
+
+          // Fast scroll
+          setTimeout(() => {
+            strip.style.transition = `transform ${dur}ms cubic-bezier(0.2, 0, 0.1, 1)`;
+            strip.style.transform = `translateY(-${scrollDist}px)`;
+
+            strip.addEventListener('transitionend', function handler() {
+              strip.removeEventListener('transitionend', handler);
+              strip.style.transition = 'none';
+              done++;
+              if (done === 3) { spinning = false; resolve(); }
+            });
+          }, delays[idx]);
+        });
+      });
+    }
 
     function updateUI() {
       $('balance').textContent = fmt(gm.balance);
@@ -97,52 +155,10 @@
       $('spin-btn').disabled = spinning || !gm.canSpin();
       $('bet-dec').disabled = spinning || gm.betIndex <= 0;
       $('bet-inc').disabled = spinning || gm.betIndex >= 4;
-      const autoEl = $('auto-btn');
-      autoEl.textContent = autoSpins > 0 ? `Auto ${autoSpins}` : 'Auto';
+      $('auto-btn').textContent = autoSpins > 0 ? `Auto ${autoSpins}` : 'Auto';
       const fgEl = $('fg-info');
-      if (gm.fg.active) {
-        fgEl.style.display = 'block';
-        fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉 | ${fmt(gm.fg.totalScore)}分`;
-      } else { fgEl.style.display = 'none'; }
-    }
-
-    // Init cells with random symbols
-    function initCells() {
-      for (let r = 0; r < 3; r++)
-        for (let c = 0; c < 3; c++)
-          $(`cell-${r}-${c}`).querySelector('img').src = 'assets/img/' + randomImg();
-    }
-
-    // Spin animation: rapid switching → sequential stop
-    function animateSpin(board) {
-      return new Promise(resolve => {
-        spinning = true;
-        const intervals = [];
-        // Start all cells switching rapidly
-        for (let r = 0; r < 3; r++)
-          for (let c = 0; c < 3; c++) {
-            const img = $(`cell-${r}-${c}`).querySelector('img');
-            intervals.push(setInterval(() => { img.src = 'assets/img/' + randomImg(); }, 70));
-          }
-
-        // Stop columns: left(600ms) → right(900ms) → middle(1400ms)
-        const colOrder = [0, 2, 1];
-        const colDelays = [600, 900, 1400];
-
-        colOrder.forEach((col, idx) => {
-          setTimeout(() => {
-            for (let r = 0; r < 3; r++) {
-              const cellIdx = r * 3 + col;
-              clearInterval(intervals[cellIdx]);
-              const img = $(`cell-${r}-${col}`).querySelector('img');
-              img.src = 'assets/img/' + cellImg(board[r][col]);
-            }
-            if (idx === colOrder.length - 1) {
-              setTimeout(() => { spinning = false; resolve(); }, 100);
-            }
-          }, colDelays[idx]);
-        });
-      });
+      if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉 | ${fmt(gm.fg.totalScore)}分`; }
+      else { fgEl.style.display = 'none'; }
     }
 
     async function doSpin() {
@@ -153,7 +169,6 @@
       await animateSpin(result.board);
       showResult(result);
       updateUI();
-      // FG auto-continue
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
         setTimeout(() => doSpin(), 400);
       }
@@ -161,34 +176,24 @@
     }
 
     function showResult(result) {
-      // Clear badges
       for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
-
       if (result.mode === 'fg') {
         $('results').textContent = `FG +${fmt(result.spinScore)} | 累積 ${fmt(result.totalScore)}`;
-        if (result.fgDone && result.jpResult) {
-          $('win').textContent = '+' + fmt(result.jpResult.payout);
-        }
+        if (result.fgDone && result.jpResult) $('win').textContent = '+' + fmt(result.jpResult.payout);
         return;
       }
-
-      // Update badges
       result.judgments.forEach(j => {
         const badge = $(`badge-${j.row}`);
-        const rowCells = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]];
-        const hasSC = rowCells.some(c => c.isScatter);
+        const hasSC = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].some(c => c.isScatter);
         if (hasSC) { badge.textContent = '🐉 ×1'; badge.classList.add('sc'); }
         else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
         else if (j.type === 'wall') { badge.textContent = '碰壁\n+' + fmt(Math.round(gm.bet/3*1.2)); badge.classList.add('wall'); }
         else { badge.textContent = '—'; }
       });
-
-      // Bottom result
       const winEl = $('win');
       if (result.totalPayout > 0) { winEl.textContent = '+' + fmt(result.totalPayout); winEl.style.color = '#ffd700'; }
       else if (result.totalPayout < 0) { winEl.textContent = fmt(result.totalPayout); winEl.style.color = '#ff5555'; }
       else { winEl.textContent = '0'; winEl.style.color = '#ffd700'; }
-
       $('results').textContent = result.fgTriggered ? '🎰 Free Game!' : '';
     }
 
@@ -207,8 +212,24 @@
       autoSpins = 0; updateUI();
     }
 
-    // Init
-    initCells();
+    // Init: show random symbols
+    function initReels() {
+      const cellH = getCellH();
+      for (let col = 0; col < 3; col++) {
+        const strip = document.querySelector(`#reel-${col} .reel-strip`);
+        strip.innerHTML = '';
+        for (let r = 0; r < 3; r++) {
+          const div = document.createElement('div');
+          div.className = 'cell';
+          div.style.height = cellH + 'px';
+          div.id = `cell-${r}-${col}`;
+          div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+          strip.appendChild(div);
+        }
+      }
+    }
+
+    initReels();
     updateUI();
     $('spin-btn').addEventListener('click', doSpin);
     $('bet-dec').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex-1); updateUI(); } });
@@ -218,9 +239,7 @@
     $('auto-cancel').addEventListener('click', () => { $('auto-overlay').style.display = 'none'; });
     $('auto-dec').addEventListener('click', () => { autoCount = Math.max(10, autoCount-10); $('auto-count-display').textContent = autoCount+' 局'; });
     $('auto-inc').addEventListener('click', () => { autoCount = Math.min(100, autoCount+10); $('auto-count-display').textContent = autoCount+' 局'; });
-    $('rules-btn').addEventListener('click', () => { alert('基本玩法：3×3盤面，左右決定門寬，中欄穿門。\\n賠率：極窄×6/窄×4/中×2/寬×1/碰壁×1.2\\nScatter 3個觸發 Free Game'); });
-
-    // Hotkeys
+    $('rules-btn').addEventListener('click', () => { alert('射龍門 Slot\\n\\n左右欄決定門寬，中欄穿門。\\n賠率：極窄×6/窄×4/中×2/寬×1/碰壁×1.2\\nScatter 3個觸發 Free Game (8轉)'); });
     document.addEventListener('keydown', e => {
       if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
       if (e.key === 'f' && !gm.fg.active && !spinning) { gm.triggerFreeGame(); updateUI(); setTimeout(doSpin, 300); }
