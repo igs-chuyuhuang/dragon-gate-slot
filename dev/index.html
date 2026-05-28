@@ -4,149 +4,227 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>射龍門 Slot</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/effects.css">
+  <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
-  <div class="game-root" id="game-root">
-    <!-- BG -->
-    <img src="assets/img/BG-01_main_bg_mobile.png" class="bg-layer" alt="">
+  <div class="game-root">
+    <img class="bg-layer" src="assets/img/BG.png" alt="">
 
-    <!-- Slot Frame -->
-    <img src="assets/img/FR-01_slot_frame_mobile.png" class="frame-layer" alt="">
-
-    <!-- Reel Area (3x3) -->
-    <div class="reel-layer board">
-      <div class="reel" id="reel-0">
-        <div class="reel-strip">
-          <div class="cell" id="cell-0-0"></div>
-          <div class="cell" id="cell-1-0"></div>
-          <div class="cell" id="cell-2-0"></div>
-        </div>
-      </div>
-      <div class="reel" id="reel-1">
-        <div class="reel-strip">
-          <div class="cell" id="cell-0-1"></div>
-          <div class="cell" id="cell-1-1"></div>
-          <div class="cell" id="cell-2-1"></div>
-        </div>
-      </div>
-      <div class="reel" id="reel-2">
-        <div class="reel-strip">
-          <div class="cell" id="cell-0-2"></div>
-          <div class="cell" id="cell-1-2"></div>
-          <div class="cell" id="cell-2-2"></div>
-        </div>
-      </div>
-    </div>
+    <!-- 3x3 Cells -->
+    <div class="cell cell-0-0" id="cell-0-0"><img></div>
+    <div class="cell cell-0-1" id="cell-0-1"><img></div>
+    <div class="cell cell-0-2" id="cell-0-2"><img></div>
+    <div class="cell cell-1-0" id="cell-1-0"><img></div>
+    <div class="cell cell-1-1" id="cell-1-1"><img></div>
+    <div class="cell cell-1-2" id="cell-1-2"><img></div>
+    <div class="cell cell-2-0" id="cell-2-0"><img></div>
+    <div class="cell cell-2-1" id="cell-2-1"><img></div>
+    <div class="cell cell-2-2" id="cell-2-2"><img></div>
 
     <!-- Badges -->
-    <div class="badge-layer">
-      <div class="row-badge" id="badge-0"></div>
-      <div class="row-badge" id="badge-1"></div>
-      <div class="row-badge" id="badge-2"></div>
+    <div class="badge badge-0" id="badge-0"></div>
+    <div class="badge badge-1" id="badge-1"></div>
+    <div class="badge badge-2" id="badge-2"></div>
+
+    <!-- Bottom UI -->
+    <div class="ui-balance"><span class="ui-label">餘額</span><span class="ui-val" id="balance">1,000</span></div>
+    <div class="ui-bet">
+      <button class="ui-btn-adj" id="bet-dec">−</button>
+      <div><span class="ui-label">押注</span><span class="ui-val" id="bet">10</span></div>
+      <button class="ui-btn-adj" id="bet-inc">+</button>
     </div>
+    <div class="ui-win"><span class="ui-label">贏分</span><span class="ui-val" id="win">0</span></div>
 
-    <!-- Mascot -->
-    <img src="assets/img/MS-01_mascot_dragon.png" class="mascot-layer" alt="">
+    <!-- SPIN -->
+    <button class="spin-btn" id="spin-btn">SPIN</button>
 
-    <!-- Bottom Bar -->
-    <img src="assets/img/UI-01_bottom_bar_bg.png" class="bottom-bar-layer" alt="">
+    <!-- Func -->
+    <button class="func-btn func-auto" id="auto-btn">Auto</button>
+    <button class="func-btn func-info" id="rules-btn">i</button>
 
-    <!-- Button Layer -->
-    <div class="button-layer">
-      <button class="btn-adj" id="bet-dec"><img src="assets/img/BTN-07_minus.png" alt="-"></button>
-      <button id="spin-btn" class="spin-btn">SPIN</button>
-      <button class="btn-adj" id="bet-inc"><img src="assets/img/BTN-06_plus.png" alt="+"></button>
-    </div>
-
-    <!-- Text Layer -->
-    <div class="text-layer">
-      <div class="txt txt-balance"><span class="txt-label">餘額</span><span class="txt-value" id="balance">1,000</span></div>
-      <div class="txt txt-bet"><span class="txt-label">押注</span><span class="txt-value" id="bet">10</span></div>
-      <div class="txt txt-win"><span class="txt-label">贏分</span><span class="txt-value" id="win">0</span></div>
-    </div>
-
-    <!-- Func Row -->
-    <div class="func-row">
-      <button class="func-btn" id="rules-btn">i</button>
-      <div class="auto-wrapper">
-        <button class="func-btn" id="auto-btn">Auto</button>
-        <div id="auto-panel" class="auto-panel" style="display:none">
-          <div class="auto-stepper">
-            <button class="btn-adj-sm" id="auto-dec">−</button>
-            <span id="auto-count-display">50 局</span>
-            <button class="btn-adj-sm" id="auto-inc">+</button>
-          </div>
-          <div class="auto-panel-actions">
-            <button class="auto-start-btn" id="auto-start">開始</button>
-            <button class="auto-cancel-btn" id="auto-cancel">取消</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- JP -->
-    <div class="jp-bar">
-      <span class="jp" id="jp-basic">Basic 500</span>
-      <span class="jp" id="jp-major">Major 2,000</span>
-      <span class="jp" id="jp-grand">Grand 10,000</span>
-    </div>
-
-    <!-- FG Info -->
-    <div id="fg-info" class="fg-info" style="display:none"></div>
+    <!-- FG info -->
+    <div class="fg-info" id="fg-info" style="display:none"></div>
 
     <!-- Results -->
-    <div id="results" class="results-bar"></div>
+    <div class="results-bar" id="results"></div>
+
+    <!-- JP (hidden in BG) -->
+    <span id="jp-basic" style="display:none">500</span>
+    <span id="jp-major" style="display:none">2000</span>
+    <span id="jp-grand" style="display:none">10000</span>
   </div>
 
-  <!-- Info Modal (outside game-root) -->
-  <div id="info-modal" class="info-modal" style="display:none">
-    <div class="info-card">
-      <button class="info-close" id="info-close">✕</button>
-      <button class="info-arrow info-prev" id="info-prev">‹</button>
-      <button class="info-arrow info-next" id="info-next">›</button>
-      <div class="info-pages">
-        <div class="info-page" data-page="0"><h2>🐉 基本玩法</h2><ul><li>3×3 盤面，每列獨立判定</li><li>左右欄決定門寬，中欄決定穿門</li><li>穿門成功 / 碰壁 / 未穿</li></ul></div>
-        <div class="info-page" data-page="1" style="display:none"><h2>💰 賠率表</h2><ul><li>極窄門×6 / 窄門×4 / 中門×2 / 寬門×1</li><li>碰壁×1.2 / 同值命中扣3倍</li></ul></div>
-        <div class="info-page" data-page="2" style="display:none"><h2>🐉 Scatter & FG</h2><ul><li>龍符號 3 個觸發 Free Game（8 轉）</li><li>FG 中再出 3 Scatter 延伸 +8 轉</li></ul></div>
-        <div class="info-page" data-page="3" style="display:none"><h2>🎰 押注</h2><ul><li>級距：5/10/20/50/100</li><li>Auto：選次數後自動轉</li></ul></div>
-        <div class="info-page" data-page="4" style="display:none"><h2>🏆 JP 彩金</h2><ul><li>Basic 60~120 / Major 130~200 / Grand 210~320</li><li>精準命中中心值：獎金 ×3</li></ul></div>
+  <!-- Auto Panel (outside game-root for z-index) -->
+  <div class="auto-overlay" id="auto-overlay" style="display:none">
+    <div class="auto-panel">
+      <div class="auto-stepper">
+        <button class="ui-btn-adj" id="auto-dec">−</button>
+        <span id="auto-count-display">50 局</span>
+        <button class="ui-btn-adj" id="auto-inc">+</button>
       </div>
-      <div class="info-dots" id="info-dots"></div>
+      <div class="auto-actions">
+        <button class="auto-start" id="auto-start">開始</button>
+        <button class="auto-cancel" id="auto-cancel">取消</button>
+      </div>
     </div>
   </div>
 
-  <div id="win-popup" class="win-popup" style="display:none"><div class="win-popup-content"><div class="win-popup-amount" id="win-popup-amount">0</div></div></div>
-
   <script type="module">
-    import { init } from './js/uiController.js';
-    init();
+    import { spin, countScatters } from './js/slotEngine.js';
+    import { GameManager } from './js/gameManager.js';
 
-    // Info modal
-    const modal = document.getElementById('info-modal');
-    const pages = modal.querySelectorAll('.info-page');
-    const dotsEl = document.getElementById('info-dots');
-    let curPage = 0;
-    for (let i = 0; i < pages.length; i++) {
-      const dot = document.createElement('span');
-      dot.className = 'info-dot' + (i === 0 ? ' active' : '');
-      dot.addEventListener('click', () => goPage(i));
-      dotsEl.appendChild(dot);
+    const gm = new GameManager();
+    const $ = id => document.getElementById(id);
+    let spinning = false;
+    let autoSpins = 0, autoStopped = false, autoCount = 50;
+
+    const CARD_IMG = {
+      1:'CD-01_ace.png',2:'CD-05_num2.png',3:'CD-06_num3.png',
+      4:'CD-07_num4.png',5:'CD-08_num5.png',6:'CD-09_num6.png',
+      7:'CD-10_num7.png',8:'CD-11_num8.png',9:'CD-12_num9.png',
+      10:'CD-13_num10.png',11:'CD-04_jack.png',12:'CD-03_queen.png',13:'CD-02_king.png'
+    };
+    const SC_IMG = 'SC-01_scatter_dragon.png';
+    const ALL_IMGS = Object.values(CARD_IMG);
+
+    function cellImg(cell) { return cell.isScatter ? SC_IMG : CARD_IMG[cell.value]; }
+    function randomImg() { return ALL_IMGS[Math.floor(Math.random() * 13)]; }
+    function fmt(n) { return Math.round(n).toLocaleString(); }
+
+    function updateUI() {
+      $('balance').textContent = fmt(gm.balance);
+      $('bet').textContent = fmt(gm.bet);
+      $('spin-btn').disabled = spinning || !gm.canSpin();
+      $('bet-dec').disabled = spinning || gm.betIndex <= 0;
+      $('bet-inc').disabled = spinning || gm.betIndex >= 4;
+      const autoEl = $('auto-btn');
+      autoEl.textContent = autoSpins > 0 ? `Auto ${autoSpins}` : 'Auto';
+      const fgEl = $('fg-info');
+      if (gm.fg.active) {
+        fgEl.style.display = 'block';
+        fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉 | ${fmt(gm.fg.totalScore)}分`;
+      } else { fgEl.style.display = 'none'; }
     }
-    function goPage(n) {
-      pages[curPage].style.display = 'none';
-      curPage = Math.max(0, Math.min(n, pages.length - 1));
-      pages[curPage].style.display = '';
-      dotsEl.querySelectorAll('.info-dot').forEach((d, i) => d.classList.toggle('active', i === curPage));
-      document.getElementById('info-prev').style.visibility = curPage === 0 ? 'hidden' : '';
-      document.getElementById('info-next').style.visibility = curPage === pages.length - 1 ? 'hidden' : '';
+
+    // Init cells with random symbols
+    function initCells() {
+      for (let r = 0; r < 3; r++)
+        for (let c = 0; c < 3; c++)
+          $(`cell-${r}-${c}`).querySelector('img').src = 'assets/img/' + randomImg();
     }
-    document.getElementById('rules-btn').addEventListener('click', () => { modal.style.display = 'flex'; goPage(0); });
-    document.getElementById('info-close').addEventListener('click', () => { modal.style.display = 'none'; });
-    document.getElementById('info-prev').addEventListener('click', () => goPage(curPage - 1));
-    document.getElementById('info-next').addEventListener('click', () => goPage(curPage + 1));
-    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+
+    // Spin animation: rapid switching → sequential stop
+    function animateSpin(board) {
+      return new Promise(resolve => {
+        spinning = true;
+        const intervals = [];
+        // Start all cells switching rapidly
+        for (let r = 0; r < 3; r++)
+          for (let c = 0; c < 3; c++) {
+            const img = $(`cell-${r}-${c}`).querySelector('img');
+            intervals.push(setInterval(() => { img.src = 'assets/img/' + randomImg(); }, 70));
+          }
+
+        // Stop columns: left(600ms) → right(900ms) → middle(1400ms)
+        const colOrder = [0, 2, 1];
+        const colDelays = [600, 900, 1400];
+
+        colOrder.forEach((col, idx) => {
+          setTimeout(() => {
+            for (let r = 0; r < 3; r++) {
+              const cellIdx = r * 3 + col;
+              clearInterval(intervals[cellIdx]);
+              const img = $(`cell-${r}-${col}`).querySelector('img');
+              img.src = 'assets/img/' + cellImg(board[r][col]);
+            }
+            if (idx === colOrder.length - 1) {
+              setTimeout(() => { spinning = false; resolve(); }, 100);
+            }
+          }, colDelays[idx]);
+        });
+      });
+    }
+
+    async function doSpin() {
+      if (spinning || !gm.canSpin()) return;
+      updateUI();
+      const result = gm.executeSpin();
+      if (!result) return;
+      await animateSpin(result.board);
+      showResult(result);
+      updateUI();
+      // FG auto-continue
+      if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
+        setTimeout(() => doSpin(), 400);
+      }
+      return result;
+    }
+
+    function showResult(result) {
+      // Clear badges
+      for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
+
+      if (result.mode === 'fg') {
+        $('results').textContent = `FG +${fmt(result.spinScore)} | 累積 ${fmt(result.totalScore)}`;
+        if (result.fgDone && result.jpResult) {
+          $('win').textContent = '+' + fmt(result.jpResult.payout);
+        }
+        return;
+      }
+
+      // Update badges
+      result.judgments.forEach(j => {
+        const badge = $(`badge-${j.row}`);
+        const rowCells = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]];
+        const hasSC = rowCells.some(c => c.isScatter);
+        if (hasSC) { badge.textContent = '🐉 ×1'; badge.classList.add('sc'); }
+        else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
+        else if (j.type === 'wall') { badge.textContent = '碰壁\n+' + fmt(Math.round(gm.bet/3*1.2)); badge.classList.add('wall'); }
+        else { badge.textContent = '—'; }
+      });
+
+      // Bottom result
+      const winEl = $('win');
+      if (result.totalPayout > 0) { winEl.textContent = '+' + fmt(result.totalPayout); winEl.style.color = '#ffd700'; }
+      else if (result.totalPayout < 0) { winEl.textContent = fmt(result.totalPayout); winEl.style.color = '#ff5555'; }
+      else { winEl.textContent = '0'; winEl.style.color = '#ffd700'; }
+
+      $('results').textContent = result.fgTriggered ? '🎰 Free Game!' : '';
+    }
+
+    // Auto
+    function toggleAuto() {
+      if (autoSpins > 0) { autoStopped = true; autoSpins = 0; updateUI(); return; }
+      $('auto-overlay').style.display = 'flex';
+    }
+    async function startAuto() {
+      $('auto-overlay').style.display = 'none';
+      autoSpins = autoCount; autoStopped = false;
+      while (autoSpins > 0 && !autoStopped && gm.canSpin()) {
+        await doSpin(); autoSpins--; updateUI();
+        if (autoSpins > 0 && !autoStopped) await new Promise(r => setTimeout(r, 300));
+      }
+      autoSpins = 0; updateUI();
+    }
+
+    // Init
+    initCells();
+    updateUI();
+    $('spin-btn').addEventListener('click', doSpin);
+    $('bet-dec').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex-1); updateUI(); } });
+    $('bet-inc').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex+1); updateUI(); } });
+    $('auto-btn').addEventListener('click', toggleAuto);
+    $('auto-start').addEventListener('click', startAuto);
+    $('auto-cancel').addEventListener('click', () => { $('auto-overlay').style.display = 'none'; });
+    $('auto-dec').addEventListener('click', () => { autoCount = Math.max(10, autoCount-10); $('auto-count-display').textContent = autoCount+' 局'; });
+    $('auto-inc').addEventListener('click', () => { autoCount = Math.min(100, autoCount+10); $('auto-count-display').textContent = autoCount+' 局'; });
+    $('rules-btn').addEventListener('click', () => { alert('基本玩法：3×3盤面，左右決定門寬，中欄穿門。\\n賠率：極窄×6/窄×4/中×2/寬×1/碰壁×1.2\\nScatter 3個觸發 Free Game'); });
+
+    // Hotkeys
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
+      if (e.key === 'f' && !gm.fg.active && !spinning) { gm.triggerFreeGame(); updateUI(); setTimeout(doSpin, 300); }
+    });
   </script>
 </body>
 </html>
