@@ -70,16 +70,17 @@ function updateUI() {
 
 // === Real Reel Scrolling Animation ===
 const CELL_H = 240;
-const GAP = 6;
+const GAP = 0;
 let CELL_TOTAL = CELL_H + GAP; // default, recalculated on init
 
 function recalcCellTotal() {
-  const cell = document.querySelector('.cell');
-  if (cell) {
-    const h = cell.getBoundingClientRect().height;
-    const strip = cell.parentElement;
-    const gap = parseFloat(getComputedStyle(strip).gap) || 0;
-    CELL_TOTAL = h + gap;
+  const reel = document.querySelector('.reel');
+  if (reel) {
+    const reelH = reel.getBoundingClientRect().height;
+    const cellH = Math.floor(reelH / 3);
+    CELL_TOTAL = cellH; // no gap, cells fill reel exactly
+    // Set all cell heights
+    document.querySelectorAll('.cell').forEach(c => { c.style.height = cellH + 'px'; });
   }
 }
 const REEL_SYMBOLS = 40; // lots of symbols for continuous reel feel
