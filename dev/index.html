@@ -90,12 +90,80 @@
       return reel.getBoundingClientRect().height / 3;
     }
 
-    function buildStrip(col, finalCells) {
+    function buildStrip(col, finalCells) { buildStripN(col, finalCells, REEL_SYMBOLS); }
+
+    function animateSpin(board) {
+      return new Promise(resolve => {
+        spinning = true;
+        const cellH = getCellH();
+        const overshoot = Math.round(cellH * 0.05);
+        const MID_SYMBOLS = 50; // middle reel gets longer strip
+
+        for (let col = 0; col < 3; col++) {
+          const numSym = col === 1 ? MID_SYMBOLS : REEL_SYMBOLS;
+          const finalCells = [board[0][col], board[1][col], board[2][col]];
+          buildStripN(col, finalCells, numSym);
+        }
+
+        // Unified high speed: side reels define the speed
+        const sideScrollDist = REEL_SYMBOLS * cellH;
+        const sideFastDur = 700; // ms
+        const highSpeed = sideScrollDist / sideFastDur; // px/ms
+
+        // Side reels: fast linear → easeOutCubic decel to overshoot → bounce
+        // Middle reel: fast linear (longer) → easeOutQuart decel to overshoot → bounce
+        const configs = [
+          { scrollDist: REEL_SYMBOLS * cellH, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+          { scrollDist: MID_SYMBOLS * cellH, decelDist: 18 * cellH, decelMs: 2400, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+          { scrollDist: REEL_SYMBOLS * cellH, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        ];
+
+        let done = 0;
+
+        for (let col = 0; col < 3; col++) {
+          const strip = document.querySelector(`#reel-${col} .reel-strip`);
+          const cfg = configs[col];
+          const targetY = cfg.scrollDist;
+          const fastDist = targetY - cfg.decelDist;
+          const fastDur = Math.round(fastDist / highSpeed);
+
+          // Phase 1: High-speed linear
+          strip.style.transition = `transform ${fastDur}ms linear`;
+          strip.style.transform = `translateY(-${fastDist}px)`;
+
+          // Phase 2: Decel to overshoot position
+          setTimeout(() => {
+            const overshootY = targetY + overshoot;
+            strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
+            strip.style.transform = `translateY(-${overshootY}px)`;
+
+            // Phase 3: Bounce back
+            setTimeout(() => {
+              strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
+              strip.style.transform = `translateY(-${targetY}px)`;
+
+              setTimeout(() => {
+                // Impact: board shake
+                const root = document.querySelector('.game-root');
+                root.style.transform = 'translateY(1px)';
+                setTimeout(() => { root.style.transform = ''; }, 50);
+
+                done++;
+                if (done === 3) { spinning = false; resolve(); }
+              }, 100);
+            }, cfg.decelMs);
+          }, fastDur);
+        }
+      });
+    }
+
+    function buildStripN(col, finalCells, numSym) {
       const strip = document.querySelector(`#reel-${col} .reel-strip`);
       const cellH = getCellH();
       strip.innerHTML = '';
+      strip.style.transition = 'none';
       strip.style.transform = 'translateY(0px)';
-      for (let i = 0; i < REEL_SYMBOLS; i++) {
+      for (let i = 0; i < numSym; i++) {
         const div = document.createElement('div');
         div.className = 'cell';
         div.style.height = cellH + 'px';
@@ -110,43 +178,6 @@
         div.innerHTML = `<img src="assets/img/${cellImg(finalCells[r])}">`;
         strip.appendChild(div);
       }
-      return strip;
-    }
-
-    function animateSpin(board) {
-      return new Promise(resolve => {
-        spinning = true;
-        const cellH = getCellH();
-        const scrollDist = REEL_SYMBOLS * cellH;
-
-        for (let col = 0; col < 3; col++) {
-          const finalCells = [board[0][col], board[1][col], board[2][col]];
-          buildStrip(col, finalCells);
-        }
-
-        // Animate each column: left(0ms) → right(300ms) → middle(700ms)
-        const colOrder = [0, 2, 1];
-        const delays = [0, 300, 700];
-        let done = 0;
-
-        colOrder.forEach((col, idx) => {
-          const strip = document.querySelector(`#reel-${col} .reel-strip`);
-          const dur = 800 + delays[idx];
-
-          // Fast scroll
-          setTimeout(() => {
-            strip.style.transition = `transform ${dur}ms cubic-bezier(0.2, 0, 0.1, 1)`;
-            strip.style.transform = `translateY(-${scrollDist}px)`;
-
-            strip.addEventListener('transitionend', function handler() {
-              strip.removeEventListener('transitionend', handler);
-              strip.style.transition = 'none';
-              done++;
-              if (done === 3) { spinning = false; resolve(); }
-            });
-          }, delays[idx]);
-        });
-      });
     }
 
     function updateUI() {
