@@ -71,7 +71,17 @@ function updateUI() {
 // === Real Reel Scrolling Animation ===
 const CELL_H = 240;
 const GAP = 6;
-const CELL_TOTAL = CELL_H + GAP; // 246px per cell in 1080 design
+let CELL_TOTAL = CELL_H + GAP; // default, recalculated on init
+
+function recalcCellTotal() {
+  const cell = document.querySelector('.cell');
+  if (cell) {
+    const h = cell.getBoundingClientRect().height;
+    const strip = cell.parentElement;
+    const gap = parseFloat(getComputedStyle(strip).gap) || 0;
+    CELL_TOTAL = h + gap;
+  }
+}
 const REEL_SYMBOLS = 40; // lots of symbols for continuous reel feel
 
 function buildReelStrip(col, finalCells, numSymbols) {
@@ -104,7 +114,7 @@ function highlightRow(row, type) {
 
 // With top:0: at translateY=0, first cells (randoms) visible.
 // Animate to translateY=-SCROLL_DIST to show final 3 at bottom.
-const SCROLL_DIST = REEL_SYMBOLS * CELL_TOTAL; // ~4520px
+// SCROLL_DIST computed dynamically from CELL_TOTAL
 const stopAudio = new Audio('assets/sfx/spin_release.mp3');
 stopAudio.volume = 0.5;
 
@@ -112,6 +122,8 @@ function animateSpin(board) {
   return new Promise(resolve => {
     spinning = true;
     onSpinStart();
+    recalcCellTotal();
+    const SCROLL_DIST = REEL_SYMBOLS * CELL_TOTAL;
 
     // Middle reel gets longer strip so it spins longer at same speed
     const MID_SYMBOLS = 80;
@@ -513,6 +525,7 @@ async function autoSpin() {
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 export function init() {
+  recalcCellTotal();
   $('spin-btn').addEventListener('click', doSpin);
   initSpinButton($('spin-btn')); // A. Spin charge
   // Bet +/- controls
