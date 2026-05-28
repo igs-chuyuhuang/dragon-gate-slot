@@ -126,8 +126,11 @@
     // Responsive scale
     function resizeGame() {
       const root = document.getElementById('game-root');
-      const scale = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+      const scaleX = window.innerWidth / 1080;
+      const scaleY = window.innerHeight / 1920;
+      const scale = Math.min(scaleX, scaleY);
       root.style.transform = `scale(${scale})`;
+      root.style.transformOrigin = 'top center';
     }
     window.addEventListener('resize', resizeGame);
     resizeGame();
