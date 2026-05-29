@@ -76,6 +76,10 @@
   <script type="module">
     import { spin, countScatters } from './js/slotEngine.js';
     import { GameManager } from './js/gameManager.js';
+    import { playSfx } from './js/effects/sfxBus.js';
+
+    let muted = false;
+    function sfx(name) { if (!muted) playSfx(name); }
 
     const gm = new GameManager();
     const $ = id => document.getElementById(id);
@@ -206,11 +210,23 @@
 
     async function doSpin() {
       if (spinning || !gm.canSpin()) return;
+      sfx('spin_charge');
       updateUI();
       const result = gm.executeSpin();
       if (!result) return;
       await animateSpin(result.board);
+      sfx('spin_release');
       showResult(result);
+      // Play result sfx
+      if (result.mode === 'normal') {
+        for (const j of result.judgments) {
+          if (j.type === 'wall' || j.type === 'same-hit') sfx('wall_hit');
+          else if (j.type === 'through') sfx('gate_through');
+        }
+        if (result.scatterCount > 0) sfx('dragon_growl');
+        if (result.totalPayout > 0) sfx('coin_count');
+        if (result.fgTriggered) sfx('gate_open');
+      }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
         setTimeout(() => doSpin(), 400);
@@ -283,7 +299,7 @@
     $('auto-dec').addEventListener('click', () => { autoCount = Math.max(10, autoCount-10); $('auto-count-display').textContent = autoCount+' 局'; });
     $('auto-inc').addEventListener('click', () => { autoCount = Math.min(100, autoCount+10); $('auto-count-display').textContent = autoCount+' 局'; });
     $('rules-btn').addEventListener('click', () => { alert('射龍門 Slot\\n\\n左右欄決定門寬，中欄穿門。\\n賠率：極窄×6/窄×4/中×2/寬×1/碰壁×1.2\\nScatter 3個觸發 Free Game (8轉)'); });
-    $('vol-btn').addEventListener('click', () => { $('vol-btn').classList.toggle('muted'); });
+    $('vol-btn').addEventListener('click', () => { muted = !muted; $('vol-btn').classList.toggle('muted', muted); });
     document.addEventListener('keydown', e => {
       if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
       if (e.key === 'f' && !gm.fg.active && !spinning) { gm.triggerFreeGame(); updateUI(); setTimeout(doSpin, 300); }
