@@ -54,6 +54,17 @@ body {
 .badge.wall { color: #ff8c44; }
 .badge.sc { color: #c9a0ff; }
 
+/* Mascot */
+.mascot-dragon {
+  position: absolute;
+  left: 3.1%;
+  top: 73.7%;
+  width: 20%;
+  height: auto;
+  z-index: 5;
+  pointer-events: none;
+}
+
 /* ===== Control Panel ===== */
 .ctrl-panel {
   position: absolute; z-index: 10;
