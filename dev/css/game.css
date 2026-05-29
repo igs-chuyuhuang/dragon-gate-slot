@@ -60,19 +60,18 @@ body {
   bottom: 0; left: 0; right: 0;
   background: transparent;
   border-top: none;
-  padding: 2.5% 4% 3%;
-  display: flex; flex-direction: column; align-items: center; gap: 2.5%;
+  padding: 1.5% 4% 2.5%;
+  display: flex; flex-direction: column; align-items: center; gap: 2%;
 }
 
-/* Info Row */
+/* Info Row — 3 panels */
 .ctrl-info-row {
-  display: flex; width: 100%; justify-content: space-between; align-items: center;
+  display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 2%;
 }
 .ctrl-info-cell {
   display: flex; flex-direction: column; align-items: center; flex: 1;
 }
-.ctrl-bet-cell { flex-direction: row; gap: clamp(6px, 2vw, 12px); }
-.ctrl-bet-inner { display: flex; flex-direction: column; align-items: center; }
+.ctrl-bet-cell { flex-direction: row; gap: clamp(8px, 2.5vw, 14px); }
 .ctrl-label {
   font-size: clamp(9px, 2vw, 12px); font-weight: 600;
   background: linear-gradient(180deg, #FFD700, #C8A84B);
@@ -91,17 +90,14 @@ body {
   color: #FFD700; font-size: clamp(16px, 4vw, 22px); font-weight: bold;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 6px rgba(200,168,75,0.3), inset 0 1px 0 rgba(255,215,0,0.2);
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition: transform 0.1s;
 }
 .ctrl-adj:active { transform: scale(0.92); }
 .ctrl-adj:disabled { opacity: 0.3; cursor: default; }
 
-/* Action Row */
+/* Action Row — vol, auto, SPIN, i */
 .ctrl-action-row {
-  display: flex; width: 100%; align-items: center; justify-content: center; gap: 4%;
-}
-.ctrl-func-group {
-  display: flex; gap: clamp(6px, 2vw, 10px); align-items: center;
+  display: flex; width: 100%; align-items: center; justify-content: center; gap: 3%;
 }
 
 /* SPIN Button */
@@ -120,7 +116,7 @@ body {
   letter-spacing: 2px;
   text-shadow: 0 0 8px rgba(255,215,0,0.5), 0 1px 2px rgba(0,0,0,0.8);
   transition: transform 0.12s, box-shadow 0.12s;
-  position: relative;
+  position: relative; flex-shrink: 0;
 }
 .spin-btn::before {
   content: ''; position: absolute; inset: -8px; border-radius: 50%;

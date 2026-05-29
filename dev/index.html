@@ -22,7 +22,7 @@
 
     <!-- Bottom Control Panel -->
     <div class="ctrl-panel">
-      <!-- Info Row -->
+      <!-- Info Row: 3 panels -->
       <div class="ctrl-info-row">
         <div class="ctrl-info-cell">
           <span class="ctrl-label">餘額</span>
@@ -30,10 +30,7 @@
         </div>
         <div class="ctrl-info-cell ctrl-bet-cell">
           <button class="ctrl-adj" id="bet-dec">−</button>
-          <div class="ctrl-bet-inner">
-            <span class="ctrl-label">投注</span>
-            <span class="ctrl-val" id="bet">10</span>
-          </div>
+          <span class="ctrl-val" id="bet">10</span>
           <button class="ctrl-adj" id="bet-inc">+</button>
         </div>
         <div class="ctrl-info-cell">
@@ -41,21 +38,17 @@
           <span class="ctrl-val" id="win">0</span>
         </div>
       </div>
-      <!-- SPIN + Func Row -->
+      <!-- Button Row -->
       <div class="ctrl-action-row">
-        <div class="ctrl-func-group ctrl-func-left">
-          <button class="ctrl-func" id="vol-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
-          </button>
-          <button class="ctrl-func" id="auto-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-            <span>自動</span>
-          </button>
-        </div>
+        <button class="ctrl-func" id="vol-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
+        </button>
+        <button class="ctrl-func" id="auto-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          <span>自動</span>
+        </button>
         <button class="spin-btn" id="spin-btn">SPIN</button>
-        <div class="ctrl-func-group ctrl-func-right">
-          <button class="ctrl-func" id="rules-btn">i</button>
-        </div>
+        <button class="ctrl-func" id="rules-btn">i</button>
       </div>
     </div>
 
