@@ -62,20 +62,19 @@ body {
 }
 .ctrl-panel > * { pointer-events: auto; }
 
-/* Info cells — absolute positioned */
+/* Info Row — top: 81.5% (688/844) */
 .ctrl-info-row {
   position: absolute;
   left: 0; right: 0;
-  top: 82.2%; /* 694/844 */
-  height: 4%; /* ~34px */
+  top: 81.5%;
+  height: 4%;
   display: flex; justify-content: space-between; align-items: center;
   padding: 0 5.1%; /* 20/390 */
 }
 .ctrl-info-cell {
   display: flex; flex-direction: column; align-items: center;
-  width: 29.5%; /* 115/390 */
+  width: 26.4%; /* 103/390 */
 }
-.ctrl-bet-cell { flex-direction: row; gap: 2vw; }
 .ctrl-label {
   font-size: clamp(9px, 2vw, 12px); font-weight: 600;
   background: linear-gradient(180deg, #FFD700, #C8A84B);
@@ -86,8 +85,13 @@ body {
   font-size: clamp(16px, 4.5vw, 24px); font-weight: bold; color: #fff;
   text-shadow: 0 0 6px rgba(255,215,0,0.2);
 }
+
+/* +/- buttons — top: 84.1% (710/844), 30px */
 .ctrl-adj {
-  width: clamp(24px, 6.9vw, 27px); height: clamp(24px, 6.9vw, 27px);
+  position: absolute;
+  top: 84.1%;
+  width: 7.7%; /* 30/390 */
+  aspect-ratio: 1;
   border-radius: 50%;
   border: 2px solid #C8A84B;
   background: radial-gradient(circle at 40% 30%, rgba(200,168,75,0.15), rgba(0,0,0,0.6));
@@ -95,11 +99,14 @@ body {
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 6px rgba(200,168,75,0.3), inset 0 1px 0 rgba(255,215,0,0.2);
   transition: transform 0.1s;
+  pointer-events: auto;
 }
+#bet-dec { left: 32.8%; /* 128/390 */ }
+#bet-inc { left: 59.5%; /* 232/390 */ }
 .ctrl-adj:active { transform: scale(0.92); }
 .ctrl-adj:disabled { opacity: 0.3; cursor: default; }
 
-/* SPIN Button — absolute centered */
+/* SPIN — top: 81.8% (690/844), width: 27.2% (106/390), red jade */
 .ctrl-action-row {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
@@ -109,19 +116,20 @@ body {
 
 .spin-btn {
   position: absolute;
-  left: 50%; top: 85.3%; /* 720/844 */
+  left: 50%; top: 81.8%;
   transform: translateX(-50%);
-  width: 22.05%; /* 86/390 */
+  width: 27.2%;
   aspect-ratio: 1;
   border-radius: 50%; cursor: pointer;
-  background: radial-gradient(circle at 45% 40%, #2a1f10 0%, #0d0906 70%);
+  background: radial-gradient(circle at 40% 35%, #ff4040 0%, #cc1a1a 40%, #8b0000 75%, #4a0000 100%);
   border: 6px solid #C8A84B;
   box-shadow:
     0 0 0 4px rgba(200,168,75,0.6),
     0 0 0 8px #C8A84B,
     0 0 0 10px rgba(200,168,75,0.3),
     0 6px 20px rgba(0,0,0,0.7),
-    inset 0 2px 6px rgba(255,215,0,0.2);
+    inset 0 -4px 8px rgba(0,0,0,0.4),
+    inset 0 4px 8px rgba(255,100,100,0.3);
   color: #FFD700; font-size: clamp(14px, 4vw, 20px); font-weight: 900;
   letter-spacing: 2px;
   text-shadow: 0 0 10px rgba(255,215,0,0.6), 0 1px 2px rgba(0,0,0,0.8);
@@ -139,33 +147,35 @@ body {
     0 0 0 8px rgba(255,215,0,0.7),
     0 0 0 10px #FFD700,
     0 8px 28px rgba(255,215,0,0.3),
-    inset 0 2px 6px rgba(255,215,0,0.25);
+    inset 0 -4px 8px rgba(0,0,0,0.4),
+    inset 0 4px 8px rgba(255,100,100,0.3);
 }
 .spin-btn:active:not(:disabled) { transform: translateX(-50%) scale(0.95); }
 .spin-btn:disabled { opacity: 0.4; cursor: default; }
 
-/* Func Buttons — absolute positioned below bar */
+/* Func Buttons — top: 93.8% (792/844), larger padding */
 .ctrl-func {
   position: absolute;
-  top: 94.5%; /* 798/844 */
-  display: flex; align-items: center; gap: 4px;
-  padding: clamp(4px, 1vw, 7px) clamp(8px, 2.5vw, 14px);
+  top: 93.8%;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  height: 3.8%; /* 32/844 */
   border-radius: 50px;
   border: 1.5px solid #C8A84B;
   background: rgba(13,9,6,0.8);
-  color: #FFD700; font-size: clamp(10px, 2.2vw, 13px); font-weight: 600;
+  color: #FFD700; font-size: clamp(10px, 2.5vw, 14px); font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,215,0,0.1);
   transition: background 0.15s, box-shadow 0.15s;
+  padding: 0;
 }
 .ctrl-func svg { stroke: #FFD700; flex-shrink: 0; }
 .ctrl-func:hover {
   background: rgba(200,168,75,0.15);
   box-shadow: 0 2px 10px rgba(200,168,75,0.3);
 }
-#vol-btn { left: 10.8%; /* 42/390 */ }
-#auto-btn { left: 41.8%; /* 163/390 */ }
-#rules-btn { left: 81.5%; /* 318/390 */ }
+#vol-btn { left: 9.7%; width: 11.8%; }
+#auto-btn { left: 39.5%; width: 21%; }
+#rules-btn { left: 79.5%; width: 8.7%; }
 
 /* FG info */
 .fg-info {
