@@ -118,7 +118,7 @@ body {
   position: absolute;
   left: 50%; top: 84.6%;
   transform: translateX(-50%);
-  width: 23.6%;
+  width: 13.3%;
   aspect-ratio: 1;
   border-radius: 50%; cursor: pointer;
   background: radial-gradient(circle at 40% 35%, #ff4040 0%, #cc1a1a 40%, #8b0000 75%, #4a0000 100%);
