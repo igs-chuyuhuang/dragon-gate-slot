@@ -116,7 +116,7 @@ body {
 
 .spin-btn {
   position: absolute;
-  left: 50%; top: 84.6%;
+  left: 50%; top: 87.0%;
   transform: translateX(-50%);
   width: 13.3%;
   aspect-ratio: 1;
@@ -153,10 +153,10 @@ body {
 .spin-btn:active:not(:disabled) { transform: translateX(-50%) scale(0.95); }
 .spin-btn:disabled { opacity: 0.4; cursor: default; }
 
-/* Func Buttons — top: 93.8% (792/844), larger padding */
+/* Func Buttons — top: 96.2% (812/844), larger padding */
 .ctrl-func {
   position: absolute;
-  top: 93.8%;
+  top: 96.2%;
   display: flex; align-items: center; justify-content: center; gap: 4px;
   height: 3.8%; /* 32/844 */
   border-radius: 50px;
