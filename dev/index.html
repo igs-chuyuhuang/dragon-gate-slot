@@ -22,34 +22,28 @@
 
     <!-- Bottom Control Panel -->
     <div class="ctrl-panel">
-      <!-- Info Row: 3 panels -->
-      <div class="ctrl-info-row">
-        <div class="ctrl-info-cell">
-          <span class="ctrl-label">餘額</span>
-          <span class="ctrl-val" id="balance">1,000</span>
-        </div>
-        <div class="ctrl-info-cell">
-          <span class="ctrl-label">投注</span>
-          <span class="ctrl-val" id="bet">10</span>
-        </div>
-        <div class="ctrl-info-cell">
-          <span class="ctrl-label">贏分</span>
-          <span class="ctrl-val" id="win">0</span>
+      <div class="ctrl-info-cell" id="cell-balance">
+        <span class="ctrl-label">餘額</span>
+        <span class="ctrl-val" id="balance">1,000</span>
+      </div>
+      <button class="ctrl-auto-upper" id="auto-btn">自動</button>
+      <button class="spin-btn" id="spin-btn">SPIN</button>
+      <div class="ctrl-bet-group">
+        <span class="ctrl-label">投注</span>
+        <span class="ctrl-val" id="bet">10</span>
+        <div class="ctrl-bet-btns">
+          <button class="ctrl-adj" id="bet-dec">−</button>
+          <button class="ctrl-adj" id="bet-inc">+</button>
         </div>
       </div>
-      <!-- +/- buttons (absolute) -->
-      <button class="ctrl-adj" id="bet-dec">−</button>
-      <button class="ctrl-adj" id="bet-inc">+</button>
-      <!-- SPIN + Func buttons -->
+      <div class="ctrl-info-cell" id="cell-win">
+        <span class="ctrl-label">贏分</span>
+        <span class="ctrl-val" id="win">0</span>
+      </div>
       <div class="ctrl-action-row">
         <button class="ctrl-func" id="vol-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
         </button>
-        <button class="ctrl-func" id="auto-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-          <span>自動</span>
-        </button>
-        <button class="spin-btn" id="spin-btn">SPIN</button>
         <button class="ctrl-func" id="rules-btn">i</button>
       </div>
     </div>
@@ -204,9 +198,7 @@
       $('spin-btn').disabled = spinning || !gm.canSpin();
       $('bet-dec').disabled = spinning || gm.betIndex <= 0;
       $('bet-inc').disabled = spinning || gm.betIndex >= 4;
-      $('auto-btn').innerHTML = autoSpins > 0
-        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg><span>${autoSpins}</span>`
-        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg><span>自動</span>`;
+      $('auto-btn').textContent = autoSpins > 0 ? `${autoSpins}` : '自動';
       const fgEl = $('fg-info');
       if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉 | ${fmt(gm.fg.totalScore)}分`; }
       else { fgEl.style.display = 'none'; }

@@ -54,7 +54,7 @@ body {
 .badge.wall { color: #ff8c44; }
 .badge.sc { color: #c9a0ff; }
 
-/* ===== Control Panel (華麗中國風金色金屬) ===== */
+/* ===== Control Panel ===== */
 .ctrl-panel {
   position: absolute; z-index: 10;
   bottom: 0; left: 0; right: 0; top: 0;
@@ -62,21 +62,17 @@ body {
 }
 .ctrl-panel > * { pointer-events: auto; }
 
-/* Info Row — top: 87.9% (742/844) */
-.ctrl-info-row {
-  position: absolute;
-  left: 0; right: 0;
-  top: 87.9%;
-  height: 4%;
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 0 5.1%; /* 20/390 */
-}
+/* 餘額 / 贏分 — absolute positioned */
 .ctrl-info-cell {
+  position: absolute;
   display: flex; flex-direction: column; align-items: center;
-  width: 23.6%; /* 92/390 */
+  pointer-events: auto;
 }
+#cell-balance { left: 5.1%; top: 87.9%; }
+#cell-win { left: 71.3%; top: 87.9%; }
+
 .ctrl-label {
-  font-size: clamp(9px, 2vw, 12px); font-weight: 600;
+  font-size: clamp(11px, 2.6vw, 15px); font-weight: 600;
   background: linear-gradient(180deg, #FFD700, #C8A84B);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text; letter-spacing: 1px;
@@ -86,27 +82,71 @@ body {
   text-shadow: 0 0 6px rgba(255,215,0,0.2);
 }
 
-/* +/- buttons — top: 88.9% (750/844), 27px */
-.ctrl-adj {
+/* 自動按鈕 — x=118, y=738, 62×30 */
+.ctrl-auto-upper {
   position: absolute;
-  top: 88.9%;
-  width: 6.9%; /* 27/390 */
+  left: 30.3%; top: 87.4%; /* 118/390, 738/844 */
+  width: 15.9%; /* 62/390 */
+  height: 3.6%; /* 30/844 */
+  border-radius: 50px;
+  border: 1.5px solid #C8A84B;
+  background: rgba(13,9,6,0.8);
+  color: #FFD700; font-size: clamp(10px, 2.5vw, 14px); font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,215,0,0.1);
+  transition: background 0.15s;
+  pointer-events: auto;
+}
+.ctrl-auto-upper:hover { background: rgba(200,168,75,0.15); }
+
+/* SPIN — x=169, y=734, 52×52, text only */
+.spin-btn {
+  position: absolute;
+  left: 50%; top: 87.0%; /* 734/844 */
+  transform: translateX(-50%);
+  width: 13.3%; /* 52/390 */
   aspect-ratio: 1;
+  border-radius: 50%; cursor: pointer;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #FFD700; font-size: clamp(14px, 4vw, 20px); font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(255,215,0,0.6), 0 1px 2px rgba(0,0,0,0.8);
+  transition: transform 0.12s;
+  display: flex; align-items: center; justify-content: center;
+}
+.spin-btn::before { display: none; }
+.spin-btn:hover:not(:disabled) { transform: translateX(-50%) scale(1.1); }
+.spin-btn:active:not(:disabled) { transform: translateX(-50%) scale(0.95); }
+.spin-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* 投注區 — x=225, y=724, 70×58 */
+.ctrl-bet-group {
+  position: absolute;
+  left: 57.7%; top: 85.8%; /* 225/390, 724/844 */
+  width: 17.9%; /* 70/390 */
+  display: flex; flex-direction: column; align-items: center;
+  pointer-events: auto;
+}
+.ctrl-bet-btns {
+  display: flex; gap: 6px; margin-top: 2px;
+}
+.ctrl-adj {
+  width: 24px; height: 24px;
   border-radius: 50%;
   border: 2px solid #C8A84B;
   background: radial-gradient(circle at 40% 30%, rgba(200,168,75,0.15), rgba(0,0,0,0.6));
-  color: #FFD700; font-size: clamp(14px, 3.5vw, 18px); font-weight: bold;
+  color: #FFD700; font-size: 14px; font-weight: bold;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 6px rgba(200,168,75,0.3), inset 0 1px 0 rgba(255,215,0,0.2);
   transition: transform 0.1s;
-  pointer-events: auto;
 }
-#bet-dec { left: 31.3%; /* 122/390 */ }
-#bet-inc { left: 61.8%; /* 241/390 */ }
 .ctrl-adj:active { transform: scale(0.92); }
 .ctrl-adj:disabled { opacity: 0.3; cursor: default; }
 
-/* SPIN — top: 84.6% (714/844), width: 23.6% (92/390), red jade */
+/* Func Buttons — y=812 */
 .ctrl-action-row {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
@@ -114,67 +154,23 @@ body {
 }
 .ctrl-action-row > * { pointer-events: auto; }
 
-.spin-btn {
-  position: absolute;
-  left: 50%; top: 87.0%;
-  transform: translateX(-50%);
-  width: 13.3%;
-  aspect-ratio: 1;
-  border-radius: 50%; cursor: pointer;
-  background: radial-gradient(circle at 40% 35%, #ff4040 0%, #cc1a1a 40%, #8b0000 75%, #4a0000 100%);
-  border: 6px solid #C8A84B;
-  box-shadow:
-    0 0 0 4px rgba(200,168,75,0.6),
-    0 0 0 8px #C8A84B,
-    0 0 0 10px rgba(200,168,75,0.3),
-    0 6px 20px rgba(0,0,0,0.7),
-    inset 0 -4px 8px rgba(0,0,0,0.4),
-    inset 0 4px 8px rgba(255,100,100,0.3);
-  color: #FFD700; font-size: clamp(14px, 4vw, 20px); font-weight: 900;
-  letter-spacing: 2px;
-  text-shadow: 0 0 10px rgba(255,215,0,0.6), 0 1px 2px rgba(0,0,0,0.8);
-  transition: transform 0.12s, box-shadow 0.12s;
-}
-.spin-btn::before {
-  content: ''; position: absolute; inset: -12px; border-radius: 50%;
-  background: conic-gradient(from 0deg, transparent 0%, rgba(200,168,75,0.15) 25%, transparent 50%, rgba(200,168,75,0.15) 75%, transparent 100%);
-  pointer-events: none;
-}
-.spin-btn:hover:not(:disabled) {
-  transform: translateX(-50%) scale(1.06);
-  box-shadow:
-    0 0 0 4px #FFD700,
-    0 0 0 8px rgba(255,215,0,0.7),
-    0 0 0 10px #FFD700,
-    0 8px 28px rgba(255,215,0,0.3),
-    inset 0 -4px 8px rgba(0,0,0,0.4),
-    inset 0 4px 8px rgba(255,100,100,0.3);
-}
-.spin-btn:active:not(:disabled) { transform: translateX(-50%) scale(0.95); }
-.spin-btn:disabled { opacity: 0.4; cursor: default; }
-
-/* Func Buttons — top: 96.2% (812/844), larger padding */
 .ctrl-func {
   position: absolute;
-  top: 96.2%;
+  top: 96.2%; /* 812/844 */
   display: flex; align-items: center; justify-content: center; gap: 4px;
-  height: 3.8%; /* 32/844 */
+  height: 3.8%;
   border-radius: 50px;
   border: 1.5px solid #C8A84B;
   background: rgba(13,9,6,0.8);
   color: #FFD700; font-size: clamp(10px, 2.5vw, 14px); font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,215,0,0.1);
-  transition: background 0.15s, box-shadow 0.15s;
+  transition: background 0.15s;
   padding: 0;
 }
 .ctrl-func svg { stroke: #FFD700; flex-shrink: 0; }
-.ctrl-func:hover {
-  background: rgba(200,168,75,0.15);
-  box-shadow: 0 2px 10px rgba(200,168,75,0.3);
-}
+.ctrl-func:hover { background: rgba(200,168,75,0.15); }
 #vol-btn { left: 9.7%; width: 11.8%; }
-#auto-btn { left: 39.5%; width: 21%; }
 #rules-btn { left: 79.5%; width: 8.7%; }
 
 /* FG info */
