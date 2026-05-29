@@ -57,7 +57,7 @@ body {
 /* ===== Control Panel (華麗中國風金色金屬) ===== */
 .ctrl-panel {
   position: absolute; z-index: 10;
-  bottom: 2%; left: 0; right: 0;
+  bottom: 3%; left: 0; right: 0;
   background: transparent;
   padding: 0 4%;
   display: flex; flex-direction: column; align-items: center; gap: 0;
@@ -66,7 +66,7 @@ body {
 /* Info Row — 3 panels */
 .ctrl-info-row {
   display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 2%;
-  margin-bottom: clamp(6px, 2vw, 14px);
+  margin-bottom: clamp(10px, 3vw, 20px);
 }
 .ctrl-info-cell {
   display: flex; flex-direction: column; align-items: center; flex: 1;
@@ -97,41 +97,46 @@ body {
 
 /* Action Row — vol, auto, SPIN, i */
 .ctrl-action-row {
-  display: flex; width: 100%; align-items: center; justify-content: center; gap: clamp(8px, 2.5vw, 16px);
+  display: flex; width: 100%; align-items: center; justify-content: center;
+  position: relative;
 }
+.ctrl-action-row .spin-btn {
+  margin: 0 clamp(12px, 4vw, 24px);
+}
+.ctrl-action-row .ctrl-func { margin: 0 clamp(4px, 1vw, 8px); }
 
-/* SPIN Button — large, overlapping */
+/* SPIN Button — large, centered, overlapping */
 .spin-btn {
-  width: clamp(64px, 18vw, 96px); height: clamp(64px, 18vw, 96px);
-  margin-top: clamp(-20px, -5vw, -32px);
+  width: clamp(72px, 22vw, 110px); height: clamp(72px, 22vw, 110px);
+  margin-top: clamp(-28px, -7vw, -44px);
   border-radius: 50%; cursor: pointer;
   background: radial-gradient(circle at 45% 40%, #2a1f10 0%, #0d0906 70%);
-  border: 5px solid #C8A84B;
+  border: 6px solid #C8A84B;
   box-shadow:
-    0 0 0 4px rgba(200,168,75,0.5),
-    0 0 0 7px #C8A84B,
-    0 0 0 9px rgba(200,168,75,0.3),
-    0 4px 16px rgba(0,0,0,0.6),
-    inset 0 2px 4px rgba(255,215,0,0.15);
-  color: #FFD700; font-size: clamp(14px, 4vw, 20px); font-weight: 900;
+    0 0 0 4px rgba(200,168,75,0.6),
+    0 0 0 8px #C8A84B,
+    0 0 0 10px rgba(200,168,75,0.3),
+    0 6px 20px rgba(0,0,0,0.7),
+    inset 0 2px 6px rgba(255,215,0,0.2);
+  color: #FFD700; font-size: clamp(16px, 4.5vw, 22px); font-weight: 900;
   letter-spacing: 2px;
-  text-shadow: 0 0 8px rgba(255,215,0,0.5), 0 1px 2px rgba(0,0,0,0.8);
+  text-shadow: 0 0 10px rgba(255,215,0,0.6), 0 1px 2px rgba(0,0,0,0.8);
   transition: transform 0.12s, box-shadow 0.12s;
   position: relative; flex-shrink: 0;
 }
 .spin-btn::before {
-  content: ''; position: absolute; inset: -10px; border-radius: 50%;
-  background: conic-gradient(from 0deg, transparent 0%, rgba(200,168,75,0.12) 25%, transparent 50%, rgba(200,168,75,0.12) 75%, transparent 100%);
+  content: ''; position: absolute; inset: -12px; border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0%, rgba(200,168,75,0.15) 25%, transparent 50%, rgba(200,168,75,0.15) 75%, transparent 100%);
   pointer-events: none;
 }
 .spin-btn:hover:not(:disabled) {
   transform: scale(1.06);
   box-shadow:
     0 0 0 4px #FFD700,
-    0 0 0 7px rgba(255,215,0,0.6),
-    0 0 0 9px #FFD700,
-    0 6px 24px rgba(255,215,0,0.3),
-    inset 0 2px 4px rgba(255,215,0,0.2);
+    0 0 0 8px rgba(255,215,0,0.7),
+    0 0 0 10px #FFD700,
+    0 8px 28px rgba(255,215,0,0.3),
+    inset 0 2px 6px rgba(255,215,0,0.25);
 }
 .spin-btn:active:not(:disabled) { transform: scale(0.95); }
 .spin-btn:disabled { opacity: 0.4; cursor: default; }
