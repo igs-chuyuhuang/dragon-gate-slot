@@ -1,11 +1,11 @@
 const SCATTER_RATE = 0.05;
 
-export function spin() {
+export function spin(fgMode = false) {
   const board = [];
   for (let r = 0; r < 3; r++) {
     board[r] = [];
     for (let c = 0; c < 3; c++)
-      board[r][c] = { value: Math.floor(Math.random() * 13) + 1, isScatter: Math.random() < SCATTER_RATE };
+      board[r][c] = { value: Math.floor(Math.random() * 13) + 1, isScatter: !fgMode && Math.random() < SCATTER_RATE };
   }
   return board;
 }

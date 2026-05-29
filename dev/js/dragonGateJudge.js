@@ -7,17 +7,17 @@ function judgeRow(row, left, mid, right) {
 
   // Same-value gate
   if (l === r2) {
-    if (m === l) return { row, type: 'same-hit', mult: -3, gap: 0 };
-    return { row, type: 'same-miss', mult: 0, gap: 0 };
+    if (m === l) return { row, type: 'same-hit', lampChange: -2, gap: 0 };
+    return { row, type: 'same-miss', lampChange: 0, gap: 0 };
   }
 
   // Normal gate
   const lo = Math.min(l, r2), hi = Math.max(l, r2);
   const gap = hi - lo - 1;
 
-  if (m === lo || m === hi) return { row, type: 'wall', mult: 1.2, gap };
+  if (m === lo || m === hi) return { row, type: 'wall', lampChange: -1, gap };
   if (m > lo && m < hi) return { row, type: 'through', mult: getPassMult(gap), gap };
-  return { row, type: 'miss', mult: 0, gap };
+  return { row, type: 'miss', lampChange: 0, gap };
 }
 
 function getPassMult(gap) {

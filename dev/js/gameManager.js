@@ -5,11 +5,13 @@ import { FreeGame } from './freeGame.js';
 import { JpSystem } from './jpSystem.js';
 
 const BET_OPTIONS = [5, 10, 20, 50, 100];
+const SCATTER_LAMP_THRESHOLD = 10;
 
 export class GameManager {
   constructor() {
     this.balance = 1000;
     this.betIndex = 1;
+    this.scatterLamps = 0;
     this.fg = new FreeGame();
     this.jp = new JpSystem(this.bet);
   }
@@ -29,41 +31,47 @@ export class GameManager {
   executeSpin() {
     if (!this.canSpin()) return null;
 
-    const board = spin();
     const isFG = this.fg.active;
+    const board = spin(isFG);
 
     if (!isFG) {
       this.balance -= this.bet * 3;
       this.jp.contribute(this.bet * 3);
     }
 
-    const sc = countScatters(board);
-
     if (isFG) {
-      const spinScore = this.fg.scoreSpin(board);
-      let extended = false;
-      if (sc >= 3) extended = this.fg.extend();
-      if (extended) this.fg.active = true;
+      const spinScore = this.fg.scoreSpin(board, this.bet);
       const fgDone = !this.fg.active;
       let jpResult = null;
       if (fgDone) {
         jpResult = this.jp.evalJpGate(this.fg.totalScore);
-        this.balance += jpResult.payout;
+        this.balance += this.fg.totalScore + jpResult.payout;
       }
-      return { board, mode: 'fg', spinScore, totalScore: this.fg.totalScore, spinsLeft: this.fg.spinsLeft, fgDone, jpResult, scatterCount: sc, extended };
+      return { board, mode: 'fg', spinScore, totalScore: this.fg.totalScore, spinsLeft: this.fg.spinsLeft, fgDone, jpResult };
     }
 
+    // Normal mode
     const judgments = judgeBoard(board);
     const totalPayout = calculate(judgments, this.bet);
     this.balance += totalPayout;
 
+    // Scatter lamp accumulation
+    const sc = countScatters(board);
+    let lampDelta = sc; // each scatter +1
+    for (const j of judgments) {
+      if (j.lampChange) lampDelta += j.lampChange;
+    }
+    this.scatterLamps = Math.max(0, this.scatterLamps + lampDelta);
+
+    // Check FG trigger
     let fgTriggered = false;
-    if (sc >= 3) {
+    if (this.scatterLamps >= SCATTER_LAMP_THRESHOLD) {
+      this.scatterLamps = 0;
       this.fg.start();
       fgTriggered = true;
     }
 
-    return { board, mode: 'normal', judgments, totalPayout, scatterCount: sc, fgTriggered };
+    return { board, mode: 'normal', judgments, totalPayout, scatterCount: sc, fgTriggered, scatterLamps: this.scatterLamps, lampDelta };
   }
 
   triggerFreeGame() {

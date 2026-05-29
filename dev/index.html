@@ -228,16 +228,16 @@
       result.judgments.forEach(j => {
         const badge = $(`badge-${j.row}`);
         const hasSC = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].some(c => c.isScatter);
-        if (hasSC) { badge.textContent = '🐉 ×1'; badge.classList.add('sc'); }
+        if (hasSC) { badge.textContent = '🐉 +1'; badge.classList.add('sc'); }
         else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
-        else if (j.type === 'wall') { badge.textContent = '碰壁\n+' + fmt(Math.round(gm.bet/3*1.2)); badge.classList.add('wall'); }
+        else if (j.type === 'wall') { badge.textContent = '🔥 -1'; badge.classList.add('wall'); }
+        else if (j.type === 'same-hit') { badge.textContent = '🔥 -2'; badge.classList.add('wall'); }
         else { badge.textContent = '—'; }
       });
       const winEl = $('win');
       if (result.totalPayout > 0) { winEl.textContent = '+' + fmt(result.totalPayout); winEl.style.color = '#ffd700'; }
-      else if (result.totalPayout < 0) { winEl.textContent = fmt(result.totalPayout); winEl.style.color = '#ff5555'; }
       else { winEl.textContent = '0'; winEl.style.color = '#ffd700'; }
-      $('results').textContent = result.fgTriggered ? '🎰 Free Game!' : '';
+      $('results').textContent = result.fgTriggered ? '🎰 Free Game!' : `🐉 ${gm.scatterLamps}/10`;
     }
 
     // Auto
