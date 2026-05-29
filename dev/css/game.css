@@ -126,7 +126,7 @@ body {
 /* 投注區 — x=225, y=724, 70×58 */
 .ctrl-bet-group {
   position: absolute;
-  left: 57.9%; top: 87.9%; /* 226/390, 742/844 */
+  left: 56.9%; top: 87.9%; /* 222/390, 742/844 */
   width: 20%; /* 78/390 */
   display: flex; flex-direction: column; align-items: center;
   pointer-events: auto;
