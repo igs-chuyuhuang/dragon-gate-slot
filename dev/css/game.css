@@ -68,7 +68,7 @@ body {
   display: flex; flex-direction: column; align-items: center;
   pointer-events: auto;
 }
-#cell-balance { left: 5.1%; top: 87.9%; }
+#cell-balance { left: 7.7%; top: 87.9%; }
 #cell-win { left: 80.8%; top: 87.9%; }
 
 .ctrl-label {
@@ -85,8 +85,8 @@ body {
 /* 自動按鈕 — x=118, y=738, 62×30 */
 .ctrl-auto-upper {
   position: absolute;
-  left: 25.6%; top: 89.8%; /* 100/390, 758/844 */
-  width: 14.9%; /* 58/390 */
+  left: 26.7%; top: 89.8%; /* 104/390, 758/844 */
+  width: 12.3%; /* 48/390 */
   height: 2.6%; /* 22/844 */
   border-radius: 50px;
   border: 1.5px solid #C8A84B;
@@ -116,6 +116,7 @@ body {
   text-shadow: 0 0 10px rgba(255,215,0,0.6), 0 1px 2px rgba(0,0,0,0.8);
   transition: transform 0.12s;
   display: flex; align-items: center; justify-content: center;
+  padding-top: 4px;
 }
 .spin-btn::before { display: none; }
 .spin-btn:hover:not(:disabled) { transform: translateX(-50%) scale(1.1); }
@@ -125,7 +126,7 @@ body {
 /* 投注區 — x=225, y=724, 70×58 */
 .ctrl-bet-group {
   position: absolute;
-  left: 55.9%; top: 87.9%; /* 218/390, 742/844 */
+  left: 57.9%; top: 87.9%; /* 226/390, 742/844 */
   width: 20%; /* 78/390 */
   display: flex; flex-direction: column; align-items: center;
   pointer-events: auto;
