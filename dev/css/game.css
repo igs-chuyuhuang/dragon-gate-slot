@@ -222,6 +222,39 @@ body {
 .win-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
+/* Rules overlay */
+.rules-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+}
+.rules-panel {
+  position: relative; width: 85%; max-height: 75vh;
+  background: rgba(20,10,10,0.97); border: 2px solid rgba(255,215,0,0.5);
+  border-radius: 12px; padding: 16px; display: flex; flex-direction: column;
+}
+.rules-close {
+  position: absolute; top: 10px; right: 14px;
+  background: none; border: none; color: #ffd700;
+  font-size: 22px; cursor: pointer;
+}
+.rules-tabs {
+  display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 8px;
+}
+.rules-tab {
+  background: none; border: none; color: rgba(255,215,0,0.6);
+  font-size: 14px; font-weight: 600; cursor: pointer; padding: 4px 10px;
+  border-bottom: 2px solid transparent; transition: color 0.2s;
+}
+.rules-tab.active { color: #ffd700; border-bottom-color: #ffd700; }
+.rules-content {
+  color: #eee; font-size: 13px; line-height: 1.7; overflow-y: auto; flex: 1;
+}
+.rules-content h3 { color: #ffd700; margin: 0 0 8px; font-size: 15px; }
+.rules-content ul { padding-left: 18px; margin: 6px 0; }
+.rules-content li { margin: 4px 0; }
+.rules-content p { margin: 6px 0; }
+
 /* Auto overlay */
 .auto-overlay {
   position: fixed; inset: 0; z-index: 100;
