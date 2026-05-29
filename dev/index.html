@@ -296,6 +296,7 @@
 
     initReels();
     updateUI();
+    $('results').textContent = `🐉 ${gm.scatterLamps}/10`;
     $('spin-btn').addEventListener('click', doSpin);
     $('bet-dec').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex-1); updateUI(); } });
     $('bet-inc').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex+1); updateUI(); } });
