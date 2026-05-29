@@ -57,21 +57,25 @@ body {
 /* ===== Control Panel (華麗中國風金色金屬) ===== */
 .ctrl-panel {
   position: absolute; z-index: 10;
-  bottom: 3%; left: 0; right: 0;
-  background: transparent;
-  padding: 0 4%;
-  display: flex; flex-direction: column; align-items: center; gap: 0;
+  bottom: 0; left: 0; right: 0; top: 0;
+  pointer-events: none;
 }
+.ctrl-panel > * { pointer-events: auto; }
 
-/* Info Row — 3 panels */
+/* Info cells — absolute positioned */
 .ctrl-info-row {
-  display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 2%;
-  margin-bottom: clamp(10px, 3vw, 20px);
+  position: absolute;
+  left: 0; right: 0;
+  top: 82.2%; /* 694/844 */
+  height: 4%; /* ~34px */
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 5.1%; /* 20/390 */
 }
 .ctrl-info-cell {
-  display: flex; flex-direction: column; align-items: center; flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  width: 29.5%; /* 115/390 */
 }
-.ctrl-bet-cell { flex-direction: row; gap: clamp(8px, 2.5vw, 14px); }
+.ctrl-bet-cell { flex-direction: row; gap: 2vw; }
 .ctrl-label {
   font-size: clamp(9px, 2vw, 12px); font-weight: 600;
   background: linear-gradient(180deg, #FFD700, #C8A84B);
@@ -83,11 +87,11 @@ body {
   text-shadow: 0 0 6px rgba(255,215,0,0.2);
 }
 .ctrl-adj {
-  width: clamp(26px, 7vw, 36px); height: clamp(26px, 7vw, 36px);
+  width: clamp(24px, 6.9vw, 27px); height: clamp(24px, 6.9vw, 27px);
   border-radius: 50%;
   border: 2px solid #C8A84B;
   background: radial-gradient(circle at 40% 30%, rgba(200,168,75,0.15), rgba(0,0,0,0.6));
-  color: #FFD700; font-size: clamp(16px, 4vw, 22px); font-weight: bold;
+  color: #FFD700; font-size: clamp(14px, 3.5vw, 18px); font-weight: bold;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 6px rgba(200,168,75,0.3), inset 0 1px 0 rgba(255,215,0,0.2);
   transition: transform 0.1s;
@@ -95,20 +99,20 @@ body {
 .ctrl-adj:active { transform: scale(0.92); }
 .ctrl-adj:disabled { opacity: 0.3; cursor: default; }
 
-/* Action Row — vol, auto, SPIN, i */
+/* SPIN Button — absolute centered */
 .ctrl-action-row {
-  display: flex; width: 100%; align-items: center; justify-content: center;
-  position: relative;
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  pointer-events: none;
 }
-.ctrl-action-row .spin-btn {
-  margin: 0 clamp(12px, 4vw, 24px);
-}
-.ctrl-action-row .ctrl-func { margin: 0 clamp(4px, 1vw, 8px); }
+.ctrl-action-row > * { pointer-events: auto; }
 
-/* SPIN Button — large, centered, overlapping */
 .spin-btn {
-  width: clamp(72px, 22vw, 110px); height: clamp(72px, 22vw, 110px);
-  margin-top: clamp(-28px, -7vw, -44px);
+  position: absolute;
+  left: 50%; top: 85.3%; /* 720/844 */
+  transform: translateX(-50%);
+  width: 22.05%; /* 86/390 */
+  aspect-ratio: 1;
   border-radius: 50%; cursor: pointer;
   background: radial-gradient(circle at 45% 40%, #2a1f10 0%, #0d0906 70%);
   border: 6px solid #C8A84B;
@@ -118,11 +122,10 @@ body {
     0 0 0 10px rgba(200,168,75,0.3),
     0 6px 20px rgba(0,0,0,0.7),
     inset 0 2px 6px rgba(255,215,0,0.2);
-  color: #FFD700; font-size: clamp(16px, 4.5vw, 22px); font-weight: 900;
+  color: #FFD700; font-size: clamp(14px, 4vw, 20px); font-weight: 900;
   letter-spacing: 2px;
   text-shadow: 0 0 10px rgba(255,215,0,0.6), 0 1px 2px rgba(0,0,0,0.8);
   transition: transform 0.12s, box-shadow 0.12s;
-  position: relative; flex-shrink: 0;
 }
 .spin-btn::before {
   content: ''; position: absolute; inset: -12px; border-radius: 50%;
@@ -130,7 +133,7 @@ body {
   pointer-events: none;
 }
 .spin-btn:hover:not(:disabled) {
-  transform: scale(1.06);
+  transform: translateX(-50%) scale(1.06);
   box-shadow:
     0 0 0 4px #FFD700,
     0 0 0 8px rgba(255,215,0,0.7),
@@ -138,13 +141,15 @@ body {
     0 8px 28px rgba(255,215,0,0.3),
     inset 0 2px 6px rgba(255,215,0,0.25);
 }
-.spin-btn:active:not(:disabled) { transform: scale(0.95); }
+.spin-btn:active:not(:disabled) { transform: translateX(-50%) scale(0.95); }
 .spin-btn:disabled { opacity: 0.4; cursor: default; }
 
-/* Func Buttons (pill shape) */
+/* Func Buttons — absolute positioned below bar */
 .ctrl-func {
+  position: absolute;
+  top: 94.5%; /* 798/844 */
   display: flex; align-items: center; gap: 4px;
-  padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 18px);
+  padding: clamp(4px, 1vw, 7px) clamp(8px, 2.5vw, 14px);
   border-radius: 50px;
   border: 1.5px solid #C8A84B;
   background: rgba(13,9,6,0.8);
@@ -158,6 +163,9 @@ body {
   background: rgba(200,168,75,0.15);
   box-shadow: 0 2px 10px rgba(200,168,75,0.3);
 }
+#vol-btn { left: 10.8%; /* 42/390 */ }
+#auto-btn { left: 41.8%; /* 163/390 */ }
+#rules-btn { left: 81.5%; /* 318/390 */ }
 
 /* FG info */
 .fg-info {
