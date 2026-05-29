@@ -200,18 +200,6 @@ body {
   font-size: clamp(10px, 2.5vw, 16px); color: #ffd700;
   font-weight: bold; text-align: center;
 }
-.scatter-ring {
-  position: absolute; z-index: 6;
-  left: 50%; top: 83%; transform: translateX(-50%);
-  width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
-}
-.scatter-ring svg { position: absolute; inset: 0; }
-.scatter-ring-num {
-  position: relative; z-index: 1;
-  font-size: 14px; font-weight: 900; color: #FFD700;
-  text-shadow: 0 0 6px rgba(255,215,0,0.5);
-}
 
 /* Win line effects */
 .win-dimmed .cell { opacity: 0.3; transition: opacity 0.2s; }
