@@ -1,11 +1,10 @@
 // winLine.js — Win line celebration animation
-import { anime } from '../gameFeel.js';
 
 // Play win animation for a single row
 export function playWinLine(row, badgeEl) {
   return new Promise(resolve => {
     const cells = [0, 1, 2].map(c => document.getElementById(`cell-${row}-${c}`));
-    const board = document.querySelector('.board');
+    const board = document.querySelector('.game-root');
 
     // 1. Dim non-winning cells
     board.classList.add('win-dimmed');

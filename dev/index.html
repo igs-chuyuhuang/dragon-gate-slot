@@ -77,6 +77,7 @@
     import { spin, countScatters } from './js/slotEngine.js';
     import { GameManager } from './js/gameManager.js';
     import { playSfx } from './js/effects/sfxBus.js';
+    import { playWinLines } from './js/effects/winLine.js';
 
     let muted = false;
     function sfx(name) { if (!muted) playSfx(name); }
@@ -217,7 +218,7 @@
       await animateSpin(result.board);
       sfx('spin_release');
       showResult(result);
-      // Play result sfx
+      // Play result sfx + win line effect
       if (result.mode === 'normal') {
         for (const j of result.judgments) {
           if (j.type === 'wall' || j.type === 'same-hit') sfx('wall_hit');
@@ -226,6 +227,10 @@
         if (result.scatterCount > 0) sfx('dragon_growl');
         if (result.totalPayout > 0) sfx('coin_count');
         if (result.fgTriggered) sfx('gate_open');
+        const winRows = result.judgments
+          .filter(j => j.type === 'through')
+          .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
+        if (winRows.length > 0) await playWinLines(winRows);
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {

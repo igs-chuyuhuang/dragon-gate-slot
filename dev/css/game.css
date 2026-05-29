@@ -201,6 +201,27 @@ body {
   font-weight: bold; text-align: center;
 }
 
+/* Win line effects */
+.win-dimmed .cell { opacity: 0.3; transition: opacity 0.2s; }
+.win-dimmed .cell.win-active { opacity: 1; }
+.win-glow { box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 10px rgba(255,215,0,0.3); }
+.win-pulse { animation: winPulse 0.4s ease-in-out 2; }
+@keyframes winPulse { 50% { transform: scale(1.08); } }
+.win-sweep {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,215,0,0.6), transparent);
+  animation: sweepAnim 0.5s ease-out forwards;
+}
+@keyframes sweepAnim { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.win-particle {
+  position: absolute; width: 4px; height: 4px;
+  background: #ffd700; border-radius: 50%;
+  animation: particleFly 0.7s ease-out forwards;
+}
+@keyframes particleFly { to { transform: translate(var(--px), var(--py)); opacity: 0; } }
+.win-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
 /* Auto overlay */
 .auto-overlay {
   position: fixed; inset: 0; z-index: 100;
