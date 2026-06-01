@@ -362,3 +362,43 @@ body {
   background: transparent; color: #999; border: 1px solid #666;
   border-radius: 6px; cursor: pointer;
 }
+
+/* FG Result Overlay */
+.fg-result-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center;
+  animation: fgFadeIn 0.3s ease;
+}
+@keyframes fgFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.fg-result-panel {
+  text-align: center; position: relative;
+}
+.fg-result-panel::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 300px; height: 300px; transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%);
+  animation: fgGlow 2s ease-in-out infinite;
+}
+@keyframes fgGlow { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity:0.8; } 50% { transform: translate(-50%,-50%) scale(1.3); opacity:1; } }
+.fg-result-title {
+  font-size: 2.5rem; font-weight: bold; color: #ffd700;
+  text-shadow: 0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,165,0,0.5);
+  position: relative; margin-bottom: 0.5rem;
+}
+.fg-result-big {
+  font-size: 2rem; font-weight: bold; color: #ff4500;
+  text-shadow: 0 0 15px rgba(255,69,0,0.8);
+  animation: fgPulse 0.5s ease-in-out infinite alternate;
+  margin-bottom: 0.3rem;
+}
+@keyframes fgPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+.fg-result-label {
+  font-size: 1rem; color: #ccc; position: relative; margin-bottom: 0.3rem;
+}
+.fg-result-amount {
+  font-size: 3.5rem; font-weight: bold; color: #ffd700;
+  text-shadow: 0 0 10px rgba(255,215,0,0.6), 0 2px 4px rgba(0,0,0,0.5);
+  position: relative;
+}

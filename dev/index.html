@@ -65,6 +65,16 @@
     <div class="fg-info" id="fg-info" style="display:none"></div>
     <div class="results-bar" id="results"></div>
 
+    <!-- FG Result Overlay -->
+    <div class="fg-result-overlay" id="fg-result-overlay" style="display:none">
+      <div class="fg-result-panel">
+        <div class="fg-result-title">FREE GAME</div>
+        <div class="fg-result-big" id="fg-result-big" style="display:none">BIG WIN!</div>
+        <div class="fg-result-label">總贏分</div>
+        <div class="fg-result-amount" id="fg-result-amount">0</div>
+      </div>
+    </div>
+
     <!-- Scatter Progress Ring -->
     <div class="scatter-ring" id="scatter-ring">
       <div class="ring-bg"></div>
@@ -312,6 +322,27 @@
       }
     }
 
+    function showFGResult(total) {
+      const overlay = $('fg-result-overlay');
+      const amountEl = $('fg-result-amount');
+      const bigEl = $('fg-result-big');
+      overlay.style.display = 'flex';
+      bigEl.style.display = total > gm.bet * 20 ? 'block' : 'none';
+      amountEl.textContent = '0';
+      const duration = 2000;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / duration, 1);
+        amountEl.textContent = fmt(Math.round(total * p));
+        if (p < 1) requestAnimationFrame(tick);
+        else sfx('coin_count');
+      }
+      requestAnimationFrame(tick);
+      const close = () => { overlay.style.display = 'none'; };
+      overlay.onclick = close;
+      setTimeout(close, 3500);
+    }
+
     function updateUI() {
       $('balance').textContent = fmt(gm.balance);
       $('bet').textContent = fmt(gm.bet);
@@ -369,7 +400,7 @@
           else if (j.type === 'wall') { badge.textContent = '碰壁'; badge.classList.add('wall'); }
           else { badge.textContent = '—'; }
         });
-        if (result.fgDone) { $('win').textContent = `FG 總獎金 +${fmt(result.totalScore)}`; }
+        if (result.fgDone) { showFGResult(result.totalScore); }
         return;
       }
       result.judgments.forEach(j => {
