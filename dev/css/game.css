@@ -21,10 +21,10 @@ body {
 /* Jackpot Pool */
 .jp-pool {
   position: absolute;
-  left: 4.6%;
+  left: 5.6%;
   top: 25.1%;
   width: 92.3%;
-  height: 9.7%;
+  height: 10.1%;
   z-index: 2;
 }
 
