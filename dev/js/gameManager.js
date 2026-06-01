@@ -4,7 +4,7 @@ import { calculate } from './payoutCalculator.js';
 import { FreeGame } from './freeGame.js';
 import { JpSystem } from './jpSystem.js';
 
-const BET_OPTIONS = [5, 10, 20, 50, 100];
+const BET_OPTIONS = [15, 30, 60, 150, 300];
 const SCATTER_LAMP_THRESHOLD = 10;
 
 export class GameManager {
@@ -25,7 +25,7 @@ export class GameManager {
 
   canSpin() {
     if (this.fg.active) return true;
-    return this.balance >= this.bet * 3;
+    return this.balance >= this.bet;
   }
 
   executeSpin() {
@@ -35,8 +35,8 @@ export class GameManager {
     const board = spin(isFG);
 
     if (!isFG) {
-      this.balance -= this.bet * 3;
-      this.jp.contribute(this.bet * 3);
+      this.balance -= this.bet;
+      this.jp.contribute(this.bet);
     }
 
     if (isFG) {
