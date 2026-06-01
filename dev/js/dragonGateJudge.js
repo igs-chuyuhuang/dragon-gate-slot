@@ -3,6 +3,11 @@ export function judgeBoard(board) {
 }
 
 function judgeRow(row, left, mid, right) {
+  // 有 Scatter 的列不做穿門/碰壁判定
+  if (left.isScatter || mid.isScatter || right.isScatter) {
+    return { row, type: 'scatter', lampChange: 0, gap: 0 };
+  }
+
   const l = left.value, m = mid.value, r2 = right.value;
 
   // Same-value gate
