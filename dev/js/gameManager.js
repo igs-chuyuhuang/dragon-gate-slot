@@ -52,7 +52,7 @@ export class GameManager {
 
     // Normal mode
     const judgments = judgeBoard(board);
-    const totalPayout = calculate(judgments, this.bet);
+    const totalPayout = calculate(judgments, this.bet, board);
     this.balance += totalPayout;
 
     // Scatter lamp accumulation
