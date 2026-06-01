@@ -369,7 +369,7 @@ body {
   position: absolute; z-index: 4;
   left: 77.6%; top: 35.4%; width: 14.4%; height: 35.3%;
   overflow: hidden; border-radius: 8px;
-  background: rgba(0,0,0,0.7); border: 2px solid #ffd700;
+  background: transparent; border: none;
 }
 .fg-reel-strip {
   position: absolute; left: 0; width: 100%;
