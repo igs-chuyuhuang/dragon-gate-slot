@@ -266,3 +266,49 @@
 **關鍵 prompt / 指令：** 分析玩法大改方案可行性；回應挑戰者對時程、辨識度、折衷方案的質疑
 **人工修正：** 無
 **耗時：** ~20 分鐘
+
+### [2026-06-01] — 設定音檔轉文字環境 + AgEnD STT 設定
+
+**環節：** 企劃 / 環境設定
+**AI 工具：** Kiro Agent
+**做了什麼：** 應用戶需求設定會議錄音轉文字整理功能：找到 OpenAI API Key（~/.openai_key）、加入 ~/.bashrc 自動載入、加入 .agend/.env、在 fleet.yaml 加入 stt 設定區塊（provider: openai）、確認 ffmpeg 已安裝。
+**Before：** 環境無 STT 能力，無法處理音檔
+**After：** OPENAI_API_KEY 自動載入、ffmpeg 就緒、fleet.yaml 含 stt 設定。Agent 可用 Whisper API 處理 m4a 附件轉文字。
+**關鍵 prompt / 指令：** 用戶要求能直接傳 m4a 錄音檔整理會議重點
+**人工修正：** 用戶自行安裝 ffmpeg、重啟 bot
+**耗時：** ~10 分鐘
+
+### [2026-06-01] — 音訊轉文字功能設定
+
+**環節：** 企劃 / 環境設定
+**AI 工具：** Kiro Agent
+**做了什麼：** 為用戶 chuyu 設定會議錄音轉文字功能：找到 OpenAI API Key（~/.openai_key）、加入 ~/.bashrc 自動載入、加入 AgEnD bot .env、確認 ffmpeg 安裝、在 fleet.yaml 加入 STT 設定區塊（provider: openai）。
+**Before：** 無法處理語音/音訊檔案，環境無 ffmpeg、無 API Key 環境變數
+**After：** ffmpeg 已安裝、OPENAI_API_KEY 自動載入（.bashrc + .agend/.env）、fleet.yaml 加入 stt config。Agent 可用 Whisper API 處理 m4a 附件。Bot 層級 STT 待用戶重啟驗證。
+**關鍵 prompt / 指令：** 用戶要求能直接傳 m4a 錄音檔整理會議重點
+**人工修正：** 用戶自行安裝 ffmpeg、重啟 bot
+**耗時：** ~10 分鐘
+
+### [2026-06-01] — 音檔轉文字功能設定 + 排查 bot STT 問題
+
+**環節：** 企劃 / 測試
+**AI 工具：** Kiro Agent
+**做了什麼：** 用戶需求：傳 m4a 會議錄音讓 Agent 整理重點。排查 AgEnD bot 語音轉文字失敗原因，最終確認三個問題：(1) bot STT 用的是 GROQ_API_KEY 非 OPENAI_API_KEY (2) Telegram 把 .m4a 歸類為 audio 觸發 STT 流程 (3) Telegram Bot API 有 20MB 下載限制，36.9MB 檔案無法下載。已設定 OpenAI Key 到 ~/.bashrc、安裝 ffmpeg、提供替代方案。
+**Before：** 無法處理用戶傳送的音檔
+**After：** 確認 OpenAI Whisper API 可用（環境就緒）、找到 bot 限制（需 GROQ_API_KEY + 20MB 上限）、提供用戶分割檔案/雲端/SSH 三種替代方案
+**關鍵 prompt / 指令：** 用戶要求能直接傳 m4a 檔案整理會議重點
+**人工修正：** 無
+**耗時：** ~30 分鐘
+
+### [2026-06-01] — Scatter 進度環 Visual QA + 音訊轉文字環境設定
+
+**環節：** 測試 / 環境設定
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 為用戶 chuyu 設定音訊轉文字環境：找到 OpenAI API Key（~/.openai_key），加入 ~/.bashrc 自動載入，加入 .agend/.env，在 fleet.yaml 加入 STT 設定區塊，確認 ffmpeg 已安裝
+2. Visual QA 檢查 dev/index.html 的 Scatter 進度環元件：驗算 SVG 圓環幾何（radius=47, stroke-width=5, icon 88%），確認圓環可見且緊貼圖片（間隙僅 0.5 unit），但發現桌面版尺寸問題（scatter-ring 用 vw 而盤面用 %，導致桌面版進度環比 symbol 大近 2 倍）
+**Before：** 無 STT 設定；Scatter 進度環未經 QA 驗證
+**After：** STT 環境就緒（待 bot 重啟生效）；回報美術 Agent 桌面版尺寸 bug + 修復建議（改用 % 相對 game-root）
+**關鍵 prompt / 指令：** 設定音訊轉文字讓 agent 能處理 m4a；檢查 Scatter 進度環可見性、間隙、尺寸一致性
+**人工修正：** 無
+**耗時：** ~20 分鐘
