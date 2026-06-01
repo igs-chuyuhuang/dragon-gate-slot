@@ -58,13 +58,14 @@
       <svg class="ring-svg" viewBox="0 0 100 100">
         <defs>
           <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
-            <feFlood flood-color="#00ffc8" flood-opacity="0.8" result="color"/>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+            <feFlood flood-color="#00ffc8" flood-opacity="0.7" result="color"/>
             <feComposite in="color" in2="blur" operator="in" result="glow"/>
             <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
         <g id="ring-segments"></g>
+        <g id="ring-glow" filter="url(#glow-filter)"></g>
       </svg>
       <div class="ring-orb" id="ring-orb"></div>
       <img class="ring-icon" src="assets/img/SC-01_scatter_dragon.png" alt="scatter">
@@ -139,10 +140,18 @@
 
     function updateRing(count) {
       const segs = document.querySelectorAll('.ring-segment');
+      const glowG = $('ring-glow');
+      glowG.innerHTML = '';
       segs.forEach((s, i) => {
         const active = i < count;
         s.classList.toggle('active', active);
-        s.setAttribute('filter', active ? 'url(#glow-filter)' : '');
+        s.removeAttribute('filter');
+        if (active) {
+          const clone = s.cloneNode(true);
+          clone.setAttribute('stroke', '#ffd700');
+          clone.setAttribute('stroke-width', '9');
+          glowG.appendChild(clone);
+        }
       });
       $('ring-label').textContent = `${count}/10`;
       // Position orb at end of progress
