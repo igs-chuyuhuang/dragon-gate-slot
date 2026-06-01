@@ -59,7 +59,10 @@ export class GameManager {
     const sc = countScatters(board);
     let lampDelta = sc; // each scatter +1
     for (const j of judgments) {
-      if (j.lampChange) lampDelta += j.lampChange;
+      if (j.lampChange) {
+        const rowHasScatter = board[j.row].some(c => c.isScatter);
+        if (!rowHasScatter) lampDelta += j.lampChange;
+      }
     }
     this.scatterLamps = Math.max(0, this.scatterLamps + lampDelta);
 
