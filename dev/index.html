@@ -338,7 +338,7 @@
       fgReelEl.style.display = 'none';
       for (let r = 0; r < 3; r++) $(`badge-${r}`).style.display = '';
     }
-    function animateFgReel(finalSymbol) {
+    function animateFgReel(bonusSymbols) {
       const cellH = Math.round(fgReelEl.clientHeight / 3);
       const numSym = 30;
       fgStripEl.innerHTML = '';
@@ -351,21 +351,14 @@
         div.textContent = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
         fgStripEl.appendChild(div);
       }
-      // Final 3 cells: random, result in middle, random below
-      const before = document.createElement('div');
-      before.className = 'fg-reel-cell'; before.style.height = cellH + 'px';
-      before.textContent = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
-      fgStripEl.appendChild(before);
-      const finalDiv = document.createElement('div');
-      finalDiv.className = 'fg-reel-cell'; finalDiv.style.height = cellH + 'px';
-      finalDiv.textContent = finalSymbol;
-      fgStripEl.appendChild(finalDiv);
-      const after = document.createElement('div');
-      after.className = 'fg-reel-cell'; after.style.height = cellH + 'px';
-      after.textContent = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
-      fgStripEl.appendChild(after);
-
-      // Stop so middle (index numSym+1) is centered: offset = numSym * cellH
+      // Final 3 cells = the 3 bonus symbols (row 0, 1, 2)
+      for (let r = 0; r < 3; r++) {
+        const div = document.createElement('div');
+        div.className = 'fg-reel-cell';
+        div.style.height = cellH + 'px';
+        div.textContent = bonusSymbols[r];
+        fgStripEl.appendChild(div);
+      }
       const totalDist = numSym * cellH;
       requestAnimationFrame(() => {
         fgStripEl.style.transition = `transform 700ms linear`;
@@ -423,7 +416,7 @@
       updateUI();
       const result = gm.executeSpin();
       if (!result) return;
-      if (result.mode === 'fg') animateFgReel(result.bonusSymbol);
+      if (result.mode === 'fg') animateFgReel(result.bonusSymbols);
       await animateSpin(result.board);
       sfx('spin_release');
       showResult(result);
@@ -451,7 +444,7 @@
     function showResult(result) {
       for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
       if (result.mode === 'fg') {
-        $('results').textContent = `FG ${result.bonusSymbol} | +${fmt(result.spinScore)} | 累積 ${fmt(result.totalScore)}`;
+        $('results').textContent = `FG ${result.bonusSymbols.join(' ')} | +${fmt(result.spinScore)} | 累積 ${fmt(result.totalScore)}`;
         if (result.fgDone) { hideFgReel(); showFGResult(result.totalScore); }
         return;
       }

@@ -1,5 +1,4 @@
 import { judgeBoard } from './dragonGateJudge.js';
-import { calculate } from './payoutCalculator.js';
 
 export const FG_SYMBOLS = ['×2','×3','×5','×10','+15','+30','+60','+90','—'];
 
@@ -18,18 +17,23 @@ export class FreeGame {
     this.totalScore = 0;
   }
 
-  scoreSpin(board, bet, bonusSymbol) {
+  scoreSpin(board, bet, bonusSymbols) {
     if (!this.active) return null;
     this.spinsLeft--;
     const judgments = judgeBoard(board);
-    const basePayout = calculate(judgments, bet, board);
-    let spinScore = basePayout;
-    if (basePayout > 0 && bonusSymbol !== '—') {
-      if (bonusSymbol.startsWith('×')) spinScore = basePayout * parseInt(bonusSymbol.slice(1));
-      else if (bonusSymbol.startsWith('+')) spinScore = basePayout + parseInt(bonusSymbol.slice(1));
+    let spinScore = 0;
+    for (const j of judgments) {
+      if (j.type === 'through') {
+        if (board[j.row].some(c => c.isScatter)) continue;
+        let rowPayout = (bet / 3) * j.mult;
+        const sym = bonusSymbols[j.row];
+        if (sym.startsWith('×')) rowPayout *= parseInt(sym.slice(1));
+        else if (sym.startsWith('+')) rowPayout += parseInt(sym.slice(1));
+        spinScore += rowPayout;
+      }
     }
     this.totalScore += spinScore;
     if (this.spinsLeft <= 0) this.active = false;
-    return { spinScore, bonusSymbol, totalScore: this.totalScore, spinsLeft: this.spinsLeft, judgments };
+    return { spinScore, bonusSymbols, totalScore: this.totalScore, spinsLeft: this.spinsLeft, judgments };
   }
 }

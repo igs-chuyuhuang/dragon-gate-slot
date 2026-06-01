@@ -40,13 +40,13 @@ export class GameManager {
     }
 
     if (isFG) {
-      const bonusSymbol = FG_SYMBOLS[Math.floor(Math.random() * FG_SYMBOLS.length)];
-      const fgResult = this.fg.scoreSpin(board, this.bet, bonusSymbol);
+      const bonusSymbols = [0,1,2].map(() => FG_SYMBOLS[Math.floor(Math.random() * FG_SYMBOLS.length)]);
+      const fgResult = this.fg.scoreSpin(board, this.bet, bonusSymbols);
       const fgDone = !this.fg.active;
       if (fgDone) {
         this.balance += this.fg.totalScore;
       }
-      return { board, mode: 'fg', spinScore: fgResult.spinScore, bonusSymbol, totalScore: fgResult.totalScore, spinsLeft: fgResult.spinsLeft, judgments: fgResult.judgments, fgDone };
+      return { board, mode: 'fg', spinScore: fgResult.spinScore, bonusSymbols, totalScore: fgResult.totalScore, spinsLeft: fgResult.spinsLeft, judgments: fgResult.judgments, fgDone };
     }
 
     // Normal mode
