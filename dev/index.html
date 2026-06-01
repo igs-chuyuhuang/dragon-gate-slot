@@ -56,6 +56,14 @@
     <div class="scatter-ring" id="scatter-ring">
       <div class="ring-bg"></div>
       <svg class="ring-svg" viewBox="0 0 100 100">
+        <defs>
+          <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+            <feFlood flood-color="#00ffc8" flood-opacity="0.8" result="color"/>
+            <feComposite in="color" in2="blur" operator="in" result="glow"/>
+            <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
         <g id="ring-segments"></g>
       </svg>
       <div class="ring-orb" id="ring-orb"></div>
@@ -131,16 +139,20 @@
 
     function updateRing(count) {
       const segs = document.querySelectorAll('.ring-segment');
-      segs.forEach((s, i) => s.classList.toggle('active', i < count));
+      segs.forEach((s, i) => {
+        const active = i < count;
+        s.classList.toggle('active', active);
+        s.setAttribute('filter', active ? 'url(#glow-filter)' : '');
+      });
       $('ring-label').textContent = `${count}/10`;
       // Position orb at end of progress
       const orb = $('ring-orb');
       if (count === 0) { orb.style.display = 'none'; return; }
       orb.style.display = 'block';
       const SEG = 10, GAP = 4, arcLen = (360 - GAP * SEG) / SEG;
-      const angle = (count * (arcLen + GAP) - GAP / 2) - 90; // -90 for top start
+      const angle = (count * (arcLen + GAP) - GAP / 2) - 90;
       const rad = angle * Math.PI / 180;
-      const R = 47; // match SVG radius
+      const R = 47;
       orb.style.left = `${50 + R * Math.cos(rad) - 6}%`;
       orb.style.top = `${50 + R * Math.sin(rad) - 6}%`;
     }
