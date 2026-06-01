@@ -222,11 +222,11 @@ body {
 /* FG info */
 .fg-info {
   position: absolute; z-index: 6;
-  top: 30%; left: 50%; transform: translateX(-50%);
+  top: 72%; left: 77.6%; width: 14.4%;
   background: rgba(0,0,0,0.8); border: 1px solid #ffd700;
-  border-radius: 6px; padding: 0.5% 2%;
-  font-size: clamp(9px, 2vw, 14px); color: #ffd700;
-  white-space: nowrap;
+  border-radius: 6px; padding: 0.5% 1%;
+  font-size: clamp(8px, 1.8vw, 12px); color: #ffd700;
+  white-space: nowrap; text-align: center;
 }
 .results-bar {
   position: absolute; z-index: 5;
