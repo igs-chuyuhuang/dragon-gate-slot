@@ -363,6 +363,25 @@ body {
   border-radius: 6px; cursor: pointer;
 }
 
+
+/* FG Bonus Reel */
+.fg-reel {
+  position: absolute; z-index: 4;
+  left: 77.6%; top: 35.4%; width: 14.4%; height: 29.7%;
+  overflow: hidden; border-radius: 8px;
+  background: rgba(0,0,0,0.7); border: 2px solid #ffd700;
+}
+.fg-reel-strip {
+  position: absolute; left: 0; width: 100%;
+  display: flex; flex-direction: column;
+  transition: transform 0s linear;
+}
+.fg-reel-cell {
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(14px, 3.5vw, 22px); font-weight: bold;
+  color: #ffd700; text-shadow: 0 0 6px rgba(255,215,0,0.6);
+}
+
 /* FG Result Overlay */
 .fg-result-overlay {
   position: fixed; inset: 0; z-index: 2000;

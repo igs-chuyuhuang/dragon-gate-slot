@@ -1,7 +1,7 @@
 import { spin, countScatters } from './slotEngine.js';
 import { judgeBoard } from './dragonGateJudge.js';
 import { calculate } from './payoutCalculator.js';
-import { FreeGame } from './freeGame.js';
+import { FreeGame, FG_SYMBOLS } from './freeGame.js';
 import { JpSystem } from './jpSystem.js';
 
 const BET_OPTIONS = [15, 30, 60, 150, 300];
@@ -40,12 +40,13 @@ export class GameManager {
     }
 
     if (isFG) {
-      const fgResult = this.fg.scoreSpin(board, this.bet);
+      const bonusSymbol = FG_SYMBOLS[Math.floor(Math.random() * FG_SYMBOLS.length)];
+      const fgResult = this.fg.scoreSpin(board, this.bet, bonusSymbol);
       const fgDone = !this.fg.active;
       if (fgDone) {
         this.balance += this.fg.totalScore;
       }
-      return { board, mode: 'fg', spinScore: fgResult.spinScore, multiplier: fgResult.multiplier, totalScore: fgResult.totalScore, spinsLeft: fgResult.spinsLeft, judgments: fgResult.judgments, fgDone };
+      return { board, mode: 'fg', spinScore: fgResult.spinScore, bonusSymbol, totalScore: fgResult.totalScore, spinsLeft: fgResult.spinsLeft, judgments: fgResult.judgments, fgDone };
     }
 
     // Normal mode
