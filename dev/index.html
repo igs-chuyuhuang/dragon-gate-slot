@@ -54,9 +54,11 @@
 
     <!-- Scatter Progress Ring -->
     <div class="scatter-ring" id="scatter-ring">
+      <div class="ring-bg"></div>
       <svg class="ring-svg" viewBox="0 0 100 100">
         <g id="ring-segments"></g>
       </svg>
+      <div class="ring-orb" id="ring-orb"></div>
       <img class="ring-icon" src="assets/img/SC-01_scatter_dragon.png" alt="scatter">
       <span class="ring-label" id="ring-label">0/10</span>
     </div>
@@ -131,6 +133,16 @@
       const segs = document.querySelectorAll('.ring-segment');
       segs.forEach((s, i) => s.classList.toggle('active', i < count));
       $('ring-label').textContent = `${count}/10`;
+      // Position orb at end of progress
+      const orb = $('ring-orb');
+      if (count === 0) { orb.style.display = 'none'; return; }
+      orb.style.display = 'block';
+      const SEG = 10, GAP = 4, arcLen = (360 - GAP * SEG) / SEG;
+      const angle = (count * (arcLen + GAP) - GAP / 2) - 90; // -90 for top start
+      const rad = angle * Math.PI / 180;
+      const R = 47; // match SVG radius
+      orb.style.left = `${50 + R * Math.cos(rad) - 6}%`;
+      orb.style.top = `${50 + R * Math.sin(rad) - 6}%`;
     }
     let autoSpins = 0, autoStopped = false, autoCount = 50;
 
