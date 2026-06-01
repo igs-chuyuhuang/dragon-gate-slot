@@ -58,6 +58,7 @@
         <g id="ring-segments"></g>
       </svg>
       <img class="ring-icon" src="assets/img/SC-01_scatter_dragon.png" alt="scatter">
+      <span class="ring-label" id="ring-label">0/10</span>
     </div>
 
     <!-- JP hidden -->
@@ -129,6 +130,7 @@
     function updateRing(count) {
       const segs = document.querySelectorAll('.ring-segment');
       segs.forEach((s, i) => s.classList.toggle('active', i < count));
+      $('ring-label').textContent = `${count}/10`;
     }
     let autoSpins = 0, autoStopped = false, autoCount = 50;
 
