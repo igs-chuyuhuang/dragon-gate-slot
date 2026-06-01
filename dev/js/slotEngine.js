@@ -5,7 +5,10 @@ export function spin(fgMode = false) {
   for (let r = 0; r < 3; r++) {
     board[r] = [];
     for (let c = 0; c < 3; c++)
-      board[r][c] = { value: Math.floor(Math.random() * 13) + 1, isScatter: !fgMode && Math.random() < SCATTER_RATE };
+      const isScatter = !fgMode && Math.random() < SCATTER_RATE;
+      board[r][c] = isScatter
+        ? { value: null, isScatter: true }
+        : { value: Math.floor(Math.random() * 13) + 1, isScatter: false };
   }
   return board;
 }
