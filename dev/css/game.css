@@ -183,6 +183,7 @@ body {
 .ctrl-func svg { stroke: #FFD700; flex-shrink: 0; }
 .ctrl-func:hover { background: rgba(200,168,75,0.15); }
 #vol-btn { left: 9.7%; width: 11.8%; }
+#turbo-btn { left: 24%; width: 11.8%; }
 #rules-btn { left: 79.5%; width: 8.7%; }
 
 /* FG info */
