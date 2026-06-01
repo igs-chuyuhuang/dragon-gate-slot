@@ -40,14 +40,12 @@ export class GameManager {
     }
 
     if (isFG) {
-      const spinScore = this.fg.scoreSpin(board, this.bet);
+      const fgResult = this.fg.scoreSpin(board, this.bet);
       const fgDone = !this.fg.active;
-      let jpResult = null;
       if (fgDone) {
-        jpResult = this.jp.evalJpGate(this.fg.totalScore);
-        this.balance += this.fg.totalScore + jpResult.payout;
+        this.balance += this.fg.totalScore;
       }
-      return { board, mode: 'fg', spinScore, totalScore: this.fg.totalScore, spinsLeft: this.fg.spinsLeft, fgDone, jpResult };
+      return { board, mode: 'fg', spinScore: fgResult.spinScore, multiplier: fgResult.multiplier, totalScore: fgResult.totalScore, spinsLeft: fgResult.spinsLeft, judgments: fgResult.judgments, fgDone };
     }
 
     // Normal mode

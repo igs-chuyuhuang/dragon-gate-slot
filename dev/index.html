@@ -362,8 +362,14 @@
     function showResult(result) {
       for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
       if (result.mode === 'fg') {
-        $('results').textContent = `FG +${fmt(result.spinScore)} | 累積 ${fmt(result.totalScore)}`;
-        if (result.fgDone && result.jpResult) $('win').textContent = '+' + fmt(result.jpResult.payout);
+        $('results').textContent = `FG ×${result.multiplier} | +${fmt(result.spinScore)} | 累積 ${fmt(result.totalScore)}`;
+        result.judgments.forEach(j => {
+          const badge = $(`badge-${j.row}`);
+          if (j.type === 'through') { badge.textContent = `×${result.multiplier} 穿門`; badge.classList.add('win'); }
+          else if (j.type === 'wall') { badge.textContent = '碰壁'; badge.classList.add('wall'); }
+          else { badge.textContent = '—'; }
+        });
+        if (result.fgDone) { $('win').textContent = `FG 總獎金 +${fmt(result.totalScore)}`; }
         return;
       }
       result.judgments.forEach(j => {
