@@ -35,7 +35,7 @@ function scoreFGRow(left, mid, right, bet) {
 
 function getPassMult(gap) {
   if (gap <= 1) return 15;
-  if (gap <= 3) return 8;
-  if (gap <= 6) return 3;
-  return 2;
+  if (gap <= 3) return 6;
+  if (gap <= 7) return 3;
+  return 1;
 }
