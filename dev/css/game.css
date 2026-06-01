@@ -205,15 +205,15 @@ body {
 /* Scatter Progress Ring */
 .scatter-ring {
   position: absolute; z-index: 5;
-  top: 74%; left: 50%; transform: translateX(-50%);
-  width: 17.5%; height: 0; padding-bottom: 17.5%;
+  top: 72%; left: 50%; transform: translateX(-50%);
+  width: 13%; height: 0; padding-bottom: 13%;
 }
 .ring-svg {
   position: absolute; inset: 0; width: 100%; height: 100%;
   transform: rotate(-90deg);
 }
 .ring-segment {
-  fill: none; stroke: rgba(255,215,0,0.2); stroke-width: 5;
+  fill: none; stroke: rgba(255,215,0,0.2); stroke-width: 8;
   stroke-linecap: round;
   transition: stroke 0.3s, filter 0.3s;
 }
@@ -224,7 +224,7 @@ body {
 .ring-icon {
   position: absolute;
   top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 88%; height: 88%; object-fit: contain;
+  width: 80%; height: 80%; object-fit: contain;
 }
 
 /* Win line effects */
