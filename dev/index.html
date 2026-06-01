@@ -110,7 +110,7 @@
     // Build scatter ring segments (10 arcs with gaps)
     (function initRing() {
       const g = $('ring-segments');
-      const R = 44, SEG = 10, GAP = 4;
+      const R = 42, SEG = 10, GAP = 5;
       const arcLen = (360 - GAP * SEG) / SEG;
       for (let i = 0; i < SEG; i++) {
         const startAngle = i * (arcLen + GAP);
