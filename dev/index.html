@@ -322,6 +322,10 @@
       const fgEl = $('fg-info');
       if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉 | ${fmt(gm.fg.totalScore)}分`; }
       else { fgEl.style.display = 'none'; }
+      // Update JP pool display
+      $('jp-grand-val').textContent = fmt(Math.round(gm.jp.pools.grand));
+      $('jp-major-val').textContent = fmt(Math.round(gm.jp.pools.major));
+      $('jp-mini-val').textContent = fmt(Math.round(gm.jp.pools.basic));
     }
 
     async function doSpin() {
