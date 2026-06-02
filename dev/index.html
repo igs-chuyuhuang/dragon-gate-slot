@@ -69,11 +69,11 @@
 
     <!-- BG Control Panel (hidden by default) -->
     <div class="ctrl-panel" id="bg-ctrl-panel" style="display:none">
-      <div class="ctrl-info-cell" id="cell-balance-bg">
+      <div class="ctrl-info-cell" style="position:absolute;left:7.7%;top:87.9%;">
         <span class="ctrl-label">BALANCE</span>
         <span class="ctrl-val" id="bg-balance">0</span>
       </div>
-      <div class="ctrl-info-cell" style="position:absolute;left:26.7%;top:89.8%;">
+      <div class="ctrl-info-cell" style="position:absolute;left:26.7%;top:91%;">
         <span class="ctrl-label">ROUND</span>
         <span class="ctrl-val" id="bg-round-timer">15</span>
       </div>
@@ -82,7 +82,7 @@
         <span class="ctrl-label">TOTAL</span>
         <span class="ctrl-val" id="bg-total-timer">90</span>
       </div>
-      <div class="ctrl-info-cell" id="cell-win-bg" style="position:absolute;left:80.8%;top:87.9%;">
+      <div class="ctrl-info-cell" style="position:absolute;left:80.8%;top:87.9%;">
         <span class="ctrl-label">WIN</span>
         <span class="ctrl-val" id="bg-win">0</span>
       </div>
@@ -90,7 +90,9 @@
         <button class="ctrl-func" id="bg-vol-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
         </button>
-        <button class="ctrl-func" id="bg-cashout-btn">收手</button>
+        <button class="ctrl-func" id="bg-turbo-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </button>
         <button class="ctrl-func" id="bg-rules-btn">i</button>
       </div>
     </div>
@@ -803,7 +805,6 @@
     updateRing(gm.scatterLamps);
     $('spin-btn').addEventListener('click', doSpin);
     $('bg-deal-btn').addEventListener('click', () => { if (bgInstance) bgDeal(); });
-    $('bg-cashout-btn').addEventListener('click', () => { if (bgInstance) bgEnd(); });
     $('bet-dec').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex-1); updateUI(); } });
     $('bet-inc').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex+1); updateUI(); } });
     $('auto-btn').addEventListener('click', toggleAuto);
