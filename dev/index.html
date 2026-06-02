@@ -303,7 +303,7 @@
           const fgTotalDist = numSym * fgCellH;
           const fgFastDist = Math.round(fgTotalDist * 0.35);
           const fgFastDur = Math.round(fgFastDist / highSpeed);
-          const fgDecelMs = 2900; // middle=2400 + 500
+          const fgDecelMs = 3600; // right bonus reel: slowest
 
           fgStripEl.style.transition = `transform ${fgFastDur}ms linear`;
           fgStripEl.style.transform = `translateY(-${fgFastDist}px)`;
