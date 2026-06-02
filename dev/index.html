@@ -476,7 +476,7 @@
       $('scatter-ring').style.display = 'none';
       const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = 'none';
       const jpEl = document.querySelector('.jp-pool'); if (jpEl) jpEl.style.display = 'none';
-      $('bg-overlay').style.display = 'flex';
+      $('bg-overlay').style.display = 'none'; // TEMP: hide BG UI, only show bg-bonus.png
       bgUpdateUI();
       bgNewRound();
       let totalLeft = bgInstance.totalTime;
