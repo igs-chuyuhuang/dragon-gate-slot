@@ -684,7 +684,7 @@
       $('bet-inc').disabled = spinning || gm.betIndex >= 4;
       $('auto-btn').textContent = autoSpins > 0 ? `${autoSpins}` : 'AUTO';
       const fgEl = $('fg-info');
-      if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉 | ${fmt(gm.fg.totalScore)}分`; }
+      if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉`; }
       else { fgEl.style.display = 'none'; }
       // Update JP pool display
       $('jp-grand-val').textContent = fmt(Math.round(gm.jp.pools.grand));
@@ -710,7 +710,7 @@
           .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
         if (winRows.length > 0) await playWinLines(winRows);
         // Now update FG info
-        $('results').textContent = `FG ${result.bonusSymbols.join(' ')} | +${fmt(result.spinScore)} | 累積 ${fmt(result.totalScore)}`;
+        $('win').textContent = fmt(result.totalScore);
         updateUI();
         if (result.fgDone) { hideFgReel(); showFGResult(result.totalScore); }
         else { setTimeout(() => doSpin(), 400); }
