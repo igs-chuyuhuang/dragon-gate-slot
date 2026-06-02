@@ -455,16 +455,18 @@ body {
 .bg-info-bar b { color: #ffd700; }
 .bg-chip-bar {
   position: absolute; z-index: 10;
-  top: 79%; left: 50%; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 0.5rem;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
 }
-.bg-chip-btns { display: flex; gap: 0.3rem; }
+.bg-chip-btns { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
 .bg-chip-btn {
-  width: clamp(36px, 9vw, 50px); height: clamp(36px, 9vw, 50px); border-radius: 50%;
+  position: absolute;
+  width: 36px; height: 36px; border-radius: 50%;
   border: none; background: transparent; color: #fff;
   font-size: clamp(0.55rem, 1.6vw, 0.75rem); cursor: pointer; display: flex; align-items: center; justify-content: center;
   text-align: center; line-height: 1.1; font-weight: bold;
   text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  pointer-events: auto;
 }
 .bg-chip-btn.selected { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.6); }
 .bg-chip-btn:disabled { opacity: 0.4; cursor: not-allowed; }

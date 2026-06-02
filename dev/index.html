@@ -529,13 +529,21 @@
     function bgBuildChips() {
       const container = $('bg-chip-btns');
       container.innerHTML = '';
-      const pcts = [10, 20, 30, 50, 100];
-      pcts.forEach(p => {
-        const amt = Math.round(bgInstance.chips * p / 100);
+      const chips = [
+        { pct: 10, x: 89, y: 693 },
+        { pct: 20, x: 130, y: 693 },
+        { pct: 100, x: 171, y: 693 },
+        { pct: 30, x: 212, y: 693 },
+        { pct: 50, x: 252, y: 693 },
+      ];
+      chips.forEach(c => {
+        const amt = Math.round(bgInstance.chips * c.pct / 100);
         const btn = document.createElement('button');
         btn.className = 'bg-chip-btn';
-        btn.textContent = `${p}%\n${fmt(amt)}`;
+        btn.textContent = `${c.pct}%\n${fmt(amt)}`;
         btn.style.whiteSpace = 'pre-line';
+        btn.style.left = (c.x / 390 * 100) + '%';
+        btn.style.top = (c.y / 844 * 100) + '%';
         btn.disabled = amt <= 0;
         btn.addEventListener('click', () => {
           container.querySelectorAll('.bg-chip-btn').forEach(b => b.classList.remove('selected'));
