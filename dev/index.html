@@ -40,19 +40,19 @@
     <!-- Bottom Control Panel -->
     <div class="ctrl-panel">
       <div class="ctrl-info-cell" id="cell-balance">
-        <span class="ctrl-label">餘額</span>
+        <span class="ctrl-label">BALANCE</span>
         <span class="ctrl-val" id="balance">1,000</span>
       </div>
-      <button class="ctrl-auto-upper" id="auto-btn">自動</button>
+      <button class="ctrl-auto-upper" id="auto-btn">AUTO</button>
       <button class="spin-btn" id="spin-btn">SPIN</button>
       <div class="ctrl-bet-group">
-        <span class="ctrl-label">投注</span>
+        <span class="ctrl-label">BET</span>
         <span class="ctrl-val" id="bet">10</span>
       </div>
       <button class="ctrl-adj" id="bet-dec">−</button>
       <button class="ctrl-adj" id="bet-inc">+</button>
       <div class="ctrl-info-cell" id="cell-win">
-        <span class="ctrl-label">贏分</span>
+        <span class="ctrl-label">WIN</span>
         <span class="ctrl-val" id="win">0</span>
       </div>
       <div class="ctrl-action-row">
@@ -415,7 +415,7 @@
       $('spin-btn').disabled = spinning || !gm.canSpin();
       $('bet-dec').disabled = spinning || gm.betIndex <= 0;
       $('bet-inc').disabled = spinning || gm.betIndex >= 4;
-      $('auto-btn').textContent = autoSpins > 0 ? `${autoSpins}` : '自動';
+      $('auto-btn').textContent = autoSpins > 0 ? `${autoSpins}` : 'AUTO';
       const fgEl = $('fg-info');
       if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉 | ${fmt(gm.fg.totalScore)}分`; }
       else { fgEl.style.display = 'none'; }
