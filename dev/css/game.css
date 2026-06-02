@@ -424,6 +424,10 @@ body {
 }
 
 /* Bonus Game Overlay */
+.bg-bonus {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 50; display: none;
+}
 .bg-overlay {
   position: fixed; inset: 0; z-index: 3000;
   background: rgba(10,5,20,0.95);

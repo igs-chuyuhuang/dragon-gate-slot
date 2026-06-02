@@ -9,6 +9,7 @@
 <body>
   <div class="game-root">
     <img class="bg-layer" src="assets/img/BG.png" alt="">
+    <img class="bg-bonus" id="bg-bonus" src="assets/img/BG-bonus.png" style="display:none" alt="">
 
     <!-- Jackpot Pool -->
     <div class="jp-pool-container">
@@ -468,10 +469,16 @@
     function startBonusGame() {
       const pool = gm.jp.pools.basic + gm.jp.pools.major + gm.jp.pools.grand;
       bgInstance = new BonusGame(gm.bet, pool);
+      // Hide main game elements
+      $('bg-bonus').style.display = 'block';
+      for (let i = 0; i < 3; i++) { document.getElementById(`reel-${i}`).style.display = 'none'; $(`badge-${i}`).style.display = 'none'; }
+      $('results').style.display = 'none';
+      $('scatter-ring').style.display = 'none';
+      const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = 'none';
+      const jpEl = document.querySelector('.jp-pool'); if (jpEl) jpEl.style.display = 'none';
       $('bg-overlay').style.display = 'flex';
       bgUpdateUI();
       bgNewRound();
-      // Total timer
       let totalLeft = bgInstance.totalTime;
       $('bg-total-time').textContent = totalLeft;
       bgTotalTimer = setInterval(() => {
@@ -585,6 +592,13 @@
       bgInstance.active = false;
       const winnings = bgInstance.winnings;
       $('bg-overlay').style.display = 'none';
+      // Restore main game elements
+      $('bg-bonus').style.display = 'none';
+      for (let i = 0; i < 3; i++) { document.getElementById(`reel-${i}`).style.display = ''; $(`badge-${i}`).style.display = ''; }
+      $('results').style.display = '';
+      $('scatter-ring').style.display = '';
+      const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = '';
+      const jpEl = document.querySelector('.jp-pool'); if (jpEl) jpEl.style.display = '';
       bgInstance = null;
       showBGResult(winnings);
     }
