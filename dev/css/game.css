@@ -431,7 +431,7 @@ body {
 }
 .bg-inline {
   position: absolute; z-index: 5;
-  top: 39.2%; left: 50%; transform: translateX(-50%);
+  top: 41.6%; left: 50%; transform: translateX(-50%);
   width: 75%; text-align: center;
 }
 .bg-cards { display: flex; gap: 5%; justify-content: center; margin-bottom: 0.5rem; }
