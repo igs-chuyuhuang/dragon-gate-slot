@@ -392,7 +392,7 @@ body {
 }
 @keyframes fgFadeIn { from { opacity: 0; } to { opacity: 1; } }
 .fg-result-panel {
-  text-align: center; position: relative;
+  text-align: center; position: relative; pointer-events: auto;
 }
 .fg-result-panel::before {
   content: ''; position: absolute; top: 50%; left: 50%;
