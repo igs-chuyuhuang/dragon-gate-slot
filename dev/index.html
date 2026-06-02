@@ -584,13 +584,37 @@
       if (bgTotalTimer) clearInterval(bgTotalTimer);
       bgInstance.active = false;
       const winnings = bgInstance.winnings;
-      gm.balance += winnings;
       $('bg-overlay').style.display = 'none';
-      if (winnings > 0) {
-        $('win').textContent = `BG +${fmt(winnings)}`;
-      }
       bgInstance = null;
-      updateUI();
+      showBGResult(winnings);
+    }
+
+    function showBGResult(total) {
+      const overlay = $('fg-result-overlay');
+      const amountEl = $('fg-result-amount');
+      const bigEl = $('fg-result-big');
+      const titleEl = overlay.querySelector('.fg-result-title');
+      titleEl.textContent = 'BONUS GAME';
+      overlay.style.display = 'flex';
+      bigEl.style.display = total > gm.bet * 20 ? 'block' : 'none';
+      amountEl.textContent = '0';
+      const duration = 2000;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / duration, 1);
+        amountEl.textContent = fmt(Math.round(total * p));
+        if (p < 1) requestAnimationFrame(tick);
+        else sfx('coin_count');
+      }
+      requestAnimationFrame(tick);
+      const close = () => {
+        overlay.style.display = 'none';
+        titleEl.textContent = 'FREE GAME';
+        gm.balance += total;
+        updateUI();
+      };
+      overlay.onclick = close;
+      setTimeout(close, 3500);
     }
 
     $('bg-deal-btn').addEventListener('click', bgDeal);
