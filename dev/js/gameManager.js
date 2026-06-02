@@ -65,12 +65,11 @@ export class GameManager {
     }
     this.scatterLamps = Math.max(0, this.scatterLamps + lampDelta);
 
-    // Check FG trigger
+    // Check FG/BG trigger
     let fgTriggered = false;
     if (this.scatterLamps >= SCATTER_LAMP_THRESHOLD) {
       this.scatterLamps = 0;
-      this.fg.start();
-      fgTriggered = true;
+      fgTriggered = true; // UI handles choice (FG or BG)
     }
 
     return { board, mode: 'normal', judgments, totalPayout, scatterCount: sc, fgTriggered, scatterLamps: this.scatterLamps, lampDelta };

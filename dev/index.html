@@ -80,6 +80,42 @@
       </div>
     </div>
 
+    <!-- Bonus Game Overlay -->
+    <div class="bg-overlay" id="bg-overlay" style="display:none">
+      <div class="bg-title">BONUS GAME</div>
+      <div class="bg-subtitle">龍門獎勵</div>
+      <div class="bg-cards">
+        <div class="bg-card face" id="bg-card-l">?</div>
+        <div class="bg-card back" id="bg-card-m">🐉</div>
+        <div class="bg-card face" id="bg-card-r">?</div>
+      </div>
+      <div class="bg-gate-info" id="bg-gate-info"></div>
+      <div class="bg-result-text" id="bg-result-text"></div>
+      <div class="bg-chips-section">
+        <div class="bg-chips-label">請選擇下注金額</div>
+        <div class="bg-chip-btns" id="bg-chip-btns"></div>
+      </div>
+      <button class="bg-deal-btn" id="bg-deal-btn" disabled>發牌</button>
+      <div class="bg-info">
+        <span>籌碼<span class="val" id="bg-chips">0</span></span>
+        <span>已贏<span class="val" id="bg-winnings">0</span></span>
+        <span><div class="bg-timer" id="bg-timer">15</div></span>
+        <span>總時間<span class="val" id="bg-total-time">90</span></span>
+      </div>
+      <button class="bg-cashout" id="bg-cashout">收手（帶走獎金）</button>
+    </div>
+
+    <!-- FG/BG Choice Overlay -->
+    <div class="fg-result-overlay" id="fgbg-choice" style="display:none">
+      <div class="fg-result-panel">
+        <div class="fg-result-title">選擇獎勵模式</div>
+        <div style="display:flex;gap:1.5rem;margin-top:1.5rem;">
+          <button class="bg-deal-btn" id="choose-fg" style="background:linear-gradient(135deg,#1a8c5c,#2ecc71)">FREE GAME</button>
+          <button class="bg-deal-btn" id="choose-bg">BONUS GAME</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Scatter Progress Ring -->
     <div class="scatter-ring" id="scatter-ring">
       <div class="ring-bg"></div>
@@ -137,6 +173,7 @@
   <script type="module">
     import { spin, countScatters } from './js/slotEngine.js';
     import { GameManager } from './js/gameManager.js';
+    import { BonusGame } from './js/bonusGame.js';
     import { playSfx } from './js/effects/sfxBus.js';
     import { playWinLines } from './js/effects/winLine.js';
 
@@ -409,6 +446,156 @@
       setTimeout(close, 3500);
     }
 
+    // === Bonus Game Controller ===
+    const CARD_NAMES = ['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    let bgInstance = null, bgRoundTimer = null, bgTotalTimer = null;
+
+    function showFgBgChoice() {
+      $('fgbg-choice').style.display = 'flex';
+    }
+
+    $('choose-fg').addEventListener('click', () => {
+      $('fgbg-choice').style.display = 'none';
+      gm.fg.start();
+      setTimeout(doSpin, 300);
+    });
+
+    $('choose-bg').addEventListener('click', () => {
+      $('fgbg-choice').style.display = 'none';
+      startBonusGame();
+    });
+
+    function startBonusGame() {
+      const pool = gm.jp.pools.basic + gm.jp.pools.major + gm.jp.pools.grand;
+      bgInstance = new BonusGame(gm.bet, pool);
+      $('bg-overlay').style.display = 'flex';
+      bgUpdateUI();
+      bgNewRound();
+      // Total timer
+      let totalLeft = bgInstance.totalTime;
+      $('bg-total-time').textContent = totalLeft;
+      bgTotalTimer = setInterval(() => {
+        totalLeft--;
+        $('bg-total-time').textContent = totalLeft;
+        if (totalLeft <= 0) { clearInterval(bgTotalTimer); bgEnd(); }
+      }, 1000);
+    }
+
+    function bgNewRound() {
+      if (!bgInstance.active) { bgEnd(); return; }
+      $('bg-result-text').textContent = '';
+      $('bg-result-text').className = 'bg-result-text';
+      const { left, right } = bgInstance.deal();
+      $('bg-card-l').textContent = CARD_NAMES[left];
+      $('bg-card-l').className = 'bg-card face';
+      $('bg-card-r').textContent = CARD_NAMES[right];
+      $('bg-card-r').className = 'bg-card face';
+      $('bg-card-m').textContent = '🐉';
+      $('bg-card-m').className = 'bg-card back';
+      const info = bgInstance.getGateInfo();
+      $('bg-gate-info').textContent = `${info.label} ×${info.mult}`;
+      bgBuildChips();
+      $('bg-deal-btn').disabled = true;
+      bgInstance.roundBet = 0;
+      // Round timer
+      let roundLeft = bgInstance.roundTime;
+      $('bg-timer').textContent = roundLeft;
+      if (bgRoundTimer) clearInterval(bgRoundTimer);
+      bgRoundTimer = setInterval(() => {
+        roundLeft--;
+        $('bg-timer').textContent = roundLeft;
+        if (roundLeft <= 0) {
+          clearInterval(bgRoundTimer);
+          // Auto min bet
+          const minBet = Math.round(bgInstance.chips * 0.1);
+          if (minBet > 0) { bgInstance.roundBet = minBet; bgDeal(); }
+          else bgEnd();
+        }
+      }, 1000);
+    }
+
+    function bgBuildChips() {
+      const container = $('bg-chip-btns');
+      container.innerHTML = '';
+      const pcts = [10, 20, 30, 50, 100];
+      pcts.forEach(p => {
+        const amt = Math.round(bgInstance.chips * p / 100);
+        const btn = document.createElement('button');
+        btn.className = 'bg-chip-btn';
+        btn.textContent = `${p}%\n${fmt(amt)}`;
+        btn.style.whiteSpace = 'pre-line';
+        btn.disabled = amt <= 0;
+        btn.addEventListener('click', () => {
+          container.querySelectorAll('.bg-chip-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          bgInstance.roundBet = amt;
+          $('bg-deal-btn').disabled = false;
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function bgDeal() {
+      if (bgRoundTimer) clearInterval(bgRoundTimer);
+      $('bg-deal-btn').disabled = true;
+      $('bg-chip-btns').querySelectorAll('.bg-chip-btn').forEach(b => { b.disabled = true; });
+      // Flip animation
+      const midCard = $('bg-card-m');
+      midCard.classList.add('flip');
+      setTimeout(() => {
+        const result = bgInstance.reveal();
+        midCard.textContent = CARD_NAMES[result.mid];
+        midCard.className = 'bg-card face';
+        bgInstance.applyResult(result);
+        // Show result
+        const resEl = $('bg-result-text');
+        if (result.mult > 0) {
+          resEl.textContent = `穿門！×${result.mult} +${fmt(bgInstance.roundBet * result.mult)}`;
+          resEl.className = 'bg-result-text win';
+          sfx('gate_through');
+        } else if (result.type === 'wall') {
+          resEl.textContent = `碰壁！-${fmt(Math.abs(bgInstance.roundBet * result.mult))}`;
+          resEl.className = 'bg-result-text lose';
+          sfx('wall_hit');
+        } else if (result.type === 'same-hit') {
+          resEl.textContent = `同值撞柱！-${fmt(Math.abs(bgInstance.roundBet * result.mult))}`;
+          resEl.className = 'bg-result-text lose';
+          sfx('wall_hit');
+        } else {
+          resEl.textContent = `未穿 -${fmt(Math.abs(bgInstance.roundBet * result.mult))}`;
+          resEl.className = 'bg-result-text lose';
+        }
+        bgUpdateUI();
+        // Next round after delay
+        setTimeout(() => {
+          if (bgInstance.active && bgInstance.chips > 0) bgNewRound();
+          else bgEnd();
+        }, 2000);
+      }, 750); // halfway through flip
+    }
+
+    function bgUpdateUI() {
+      $('bg-chips').textContent = fmt(bgInstance.chips);
+      $('bg-winnings').textContent = fmt(bgInstance.winnings);
+    }
+
+    function bgEnd() {
+      if (bgRoundTimer) clearInterval(bgRoundTimer);
+      if (bgTotalTimer) clearInterval(bgTotalTimer);
+      bgInstance.active = false;
+      const winnings = bgInstance.winnings;
+      gm.balance += winnings;
+      $('bg-overlay').style.display = 'none';
+      if (winnings > 0) {
+        $('win').textContent = `BG +${fmt(winnings)}`;
+      }
+      bgInstance = null;
+      updateUI();
+    }
+
+    $('bg-deal-btn').addEventListener('click', bgDeal);
+    $('bg-cashout').addEventListener('click', () => { if (bgInstance) bgEnd(); });
+
     function updateUI() {
       $('balance').textContent = fmt(gm.balance);
       $('bet').textContent = fmt(gm.bet);
@@ -468,7 +655,8 @@
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
-        setTimeout(() => doSpin(), 400);
+        if (result.fgTriggered) { showFgBgChoice(); }
+        else { setTimeout(() => doSpin(), 400); }
       }
       return result;
     }
@@ -564,7 +752,7 @@
     });
     document.addEventListener('keydown', e => {
       if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
-      if (e.key === 'f' && !gm.fg.active && !spinning) { gm.triggerFreeGame(); updateUI(); setTimeout(doSpin, 300); }
+      if (e.key === 'f' && !gm.fg.active && !spinning) { showFgBgChoice(); }
     });
   </script>
 </body>
