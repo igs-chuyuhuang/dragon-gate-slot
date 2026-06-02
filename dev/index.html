@@ -124,7 +124,6 @@
     <!-- BG chip buttons (replaces bet area) -->
     <div class="bg-chip-bar" id="bg-chip-bar" style="display:none">
       <div class="bg-chip-btns" id="bg-chip-btns"></div>
-      <button class="bg-cashout" id="bg-cashout">收手</button>
     </div>
 
     <!-- FG/BG Choice Overlay -->
@@ -533,12 +532,12 @@
       bgInstance.roundBet = 0;
       // Round timer
       let roundLeft = bgInstance.roundTime;
-      $('bg-timer').textContent = roundLeft;
+      
       $('bg-round-timer').textContent = roundLeft;
       if (bgRoundTimer) clearInterval(bgRoundTimer);
       bgRoundTimer = setInterval(() => {
         roundLeft--;
-        $('bg-timer').textContent = roundLeft;
+        
         $('bg-round-timer').textContent = roundLeft;
         if (roundLeft <= 0) {
           clearInterval(bgRoundTimer);
