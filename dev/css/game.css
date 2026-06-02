@@ -426,7 +426,7 @@ body {
 /* Bonus Game Overlay */
 .bg-bonus {
   position: absolute;
-  left: 15%; top: 34%; width: 78%; height: 40%;
+  left: 11.5%; top: 30.8%; width: 85.9%; height: 49.6%;
   object-fit: contain; z-index: 3; display: none;
 }
 .bg-overlay {
