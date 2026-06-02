@@ -476,19 +476,23 @@
       // Show BG inline UI
       $('bg-inline').style.display = 'block';
       $('bg-chip-bar').style.display = 'flex';
-      // SPIN → 發, hide bet controls
+      // SPIN → 發, hide bet +/- buttons but keep bet display for timer
       $('spin-btn').textContent = '發';
       $('spin-btn').disabled = true;
-      const betGroup = document.querySelector('.ctrl-bet-group'); if (betGroup) betGroup.style.display = 'none';
-      $('auto-btn').style.display = 'none';
+      $('bet-dec').style.display = 'none';
+      $('bet-inc').style.display = 'none';
+      $('auto-btn').style.display = '';
+      $('auto-btn').textContent = '15';
       const turboBtn = document.getElementById('turbo-btn'); if (turboBtn) turboBtn.style.display = 'none';
+      // Hide bet group, use bet display for total timer
+      $('bet').textContent = '90';
       bgUpdateUI();
       bgNewRound();
       let totalLeft = bgInstance.totalTime;
-      $('bg-total-time').textContent = totalLeft;
+      $('bet').textContent = totalLeft;
       bgTotalTimer = setInterval(() => {
         totalLeft--;
-        $('bg-total-time').textContent = totalLeft;
+        $('bet').textContent = totalLeft;
         if (totalLeft <= 0) { clearInterval(bgTotalTimer); bgEnd(); }
       }, 1000);
     }
@@ -512,10 +516,12 @@
       // Round timer
       let roundLeft = bgInstance.roundTime;
       $('bg-timer').textContent = roundLeft;
+      $('auto-btn').textContent = roundLeft;
       if (bgRoundTimer) clearInterval(bgRoundTimer);
       bgRoundTimer = setInterval(() => {
         roundLeft--;
         $('bg-timer').textContent = roundLeft;
+        $('auto-btn').textContent = roundLeft;
         if (roundLeft <= 0) {
           clearInterval(bgRoundTimer);
           // Auto min bet
@@ -595,8 +601,9 @@
     }
 
     function bgUpdateUI() {
-      $('bg-chips').textContent = fmt(bgInstance.chips);
-      $('bg-winnings').textContent = fmt(bgInstance.winnings);
+      // BG mode: repurpose bottom panel
+      $('balance').textContent = fmt(bgInstance.chips); // BALANCE → 籌碼
+      $('win').textContent = fmt(bgInstance.winnings); // WIN → 已贏
     }
 
     function bgEnd() {
@@ -617,10 +624,13 @@
       // Restore controls
       $('spin-btn').textContent = 'SPIN';
       $('spin-btn').disabled = false;
-      const betGroup = document.querySelector('.ctrl-bet-group'); if (betGroup) betGroup.style.display = '';
+      $('bet-dec').style.display = '';
+      $('bet-inc').style.display = '';
+      $('auto-btn').textContent = 'AUTO';
       $('auto-btn').style.display = '';
       const turboBtn = document.getElementById('turbo-btn'); if (turboBtn) turboBtn.style.display = '';
       bgInstance = null;
+      updateUI();
       showBGResult(winnings);
     }
 
