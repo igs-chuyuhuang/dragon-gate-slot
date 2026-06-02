@@ -431,10 +431,11 @@ body {
 }
 .bg-overlay {
   position: fixed; inset: 0; z-index: 3000;
-  background: rgba(10,5,20,0.95);
+  background: transparent;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  animation: fgFadeIn 0.3s ease;
+  pointer-events: none;
 }
+.bg-overlay > * { pointer-events: auto; }
 .bg-title { font-size: 2.2rem; font-weight: bold; color: #ffd700; text-shadow: 0 0 20px rgba(255,215,0,0.6); }
 .bg-subtitle { font-size: 1rem; color: #aaa; margin-bottom: 1rem; }
 .bg-cards { display: flex; gap: 1rem; margin: 1.5rem 0; align-items: center; }
