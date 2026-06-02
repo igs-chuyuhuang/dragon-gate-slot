@@ -325,3 +325,20 @@
 **關鍵 prompt / 指令：** 用戶多次截圖反饋調整大小、位置、光暈效果、加底盤、加龍珠、文字位置
 **人工修正：** 用戶截圖反饋 8+ 次微調（大小、位置、光暈直角、文字位置）
 **耗時：** ~1.5 小時（含多次迭代）
+
+### [2026-06-02] — Free Game v2.0 重寫 + FG 轉軸系統 + Bonus Game 完整實作
+
+**環節：** 程式 / 企劃
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. Free Game 重寫：改用 judgeBoard+calculate 判定，每轉隨機倍率 → 改為右側三格獨立獎勵轉軸（×2/×3/×5/×10/+15/+30/+60/+90/—）
+2. FG 全螢幕結算 overlay（數字跳動 + BIG WIN）
+3. FG 右側轉軸動畫：定位修正（覆蓋三格 badge）、四軸同步轉動（左右→中→右側最後停）
+4. Bonus Game 完整實作：bonusGame.js（籌碼/發牌/判定/賠付）、FG/BG 選擇畫面、瞇牌 flip 動畫、每局15秒+總90秒倒數、收手機制
+5. BG 全螢幕結算 overlay（共用 FG 結算畫面）
+6. BG 進場改為 inline UI：bonus game.png 在轉軸區域、三張牌定位、SPIN→「發」、BET→五個圓形籌碼按鈕
+**Before：** FG 用舊版 scoreFGRow 邏輯、無 Bonus Game、無 FG/BG 選擇
+**After：** FG v2.0（三格獨立獎勵轉軸 + 四軸同步動畫 + 結算 overlay）、BG 完整可玩（inline UI + 籌碼下注 + 瞇牌 + 倒數 + 收手 + 結算）
+**關鍵 prompt / 指令：** 依 v2.0 規格重寫 FG；實作完整 BG 功能；FG 轉軸四軸同步；BG UI 改 inline 不用 overlay
+**人工修正：** FG 轉軸位置/時序經多次迭代調整；BG 從 overlay 改 inline 經用戶反饋修正
+**耗時：** ~3 小時（含多次迭代）
