@@ -520,11 +520,11 @@
       $('bg-result-text').textContent = '';
       $('bg-result-text').className = 'bg-result-text';
       const { left, right } = bgInstance.deal();
-      $('bg-card-l').textContent = CARD_NAMES[left];
+      $('bg-card-l').innerHTML = `<img src="assets/img/${CARD_IMG[left]}">`;
       $('bg-card-l').className = 'bg-card face';
-      $('bg-card-r').textContent = CARD_NAMES[right];
+      $('bg-card-r').innerHTML = `<img src="assets/img/${CARD_IMG[right]}">`;
       $('bg-card-r').className = 'bg-card face';
-      $('bg-card-m').textContent = '🐉';
+      $('bg-card-m').innerHTML = `<img src="assets/img/back.png">`;
       $('bg-card-m').className = 'bg-card back';
       const info = bgInstance.getGateInfo();
       $('bg-gate-info').textContent = `${info.label} ×${info.mult}`;
@@ -588,7 +588,7 @@
       midCard.classList.add('flip');
       setTimeout(() => {
         const result = bgInstance.reveal();
-        midCard.textContent = CARD_NAMES[result.mid];
+        midCard.innerHTML = `<img src="assets/img/${CARD_IMG[result.mid]}">`;
         midCard.className = 'bg-card face';
         bgInstance.applyResult(result);
         // Show result
