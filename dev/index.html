@@ -475,7 +475,10 @@
       $('results').style.display = 'none';
       $('scatter-ring').style.display = 'none';
       const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = 'none';
-      const jpEl = document.querySelector('.jp-pool'); if (jpEl) jpEl.style.display = 'none';
+      const jpContainer = document.querySelector('.jp-pool-container'); if (jpContainer) jpContainer.style.display = 'none';
+      $('spin-btn').style.display = 'none';
+      $('auto-btn').style.display = 'none';
+      const turboBtn = document.getElementById('turbo-btn'); if (turboBtn) turboBtn.style.display = 'none';
       $('bg-overlay').style.display = 'none'; // TEMP: hide BG UI, only show bg-bonus.png
       bgUpdateUI();
       bgNewRound();
@@ -598,7 +601,10 @@
       $('results').style.display = '';
       $('scatter-ring').style.display = '';
       const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = '';
-      const jpEl = document.querySelector('.jp-pool'); if (jpEl) jpEl.style.display = '';
+      const jpContainer = document.querySelector('.jp-pool-container'); if (jpContainer) jpContainer.style.display = '';
+      $('spin-btn').style.display = '';
+      $('auto-btn').style.display = '';
+      const turboBtn = document.getElementById('turbo-btn'); if (turboBtn) turboBtn.style.display = '';
       bgInstance = null;
       showBGResult(winnings);
     }
