@@ -1,6 +1,6 @@
 import { judgeBoard } from './dragonGateJudge.js';
 
-export const FG_SYMBOLS = ['×2','×3','×5','×10','+15','+30','+60','+90','—'];
+export const FG_SYMBOLS = ['+15','+30','+60','+90','+120','+200','+500','—'];
 
 export class FreeGame {
   constructor() { this.reset(); }
@@ -25,11 +25,9 @@ export class FreeGame {
     for (const j of judgments) {
       if (j.type === 'through') {
         if (board[j.row].some(c => c.isScatter)) continue;
-        let rowPayout = (bet / 3) * j.mult;
         const sym = bonusSymbols[j.row];
-        if (sym.startsWith('×')) rowPayout *= parseInt(sym.slice(1));
-        else if (sym.startsWith('+')) rowPayout += parseInt(sym.slice(1));
-        spinScore += rowPayout;
+        if (sym.startsWith('+')) spinScore += parseInt(sym.slice(1));
+        // '—' = no reward
       }
     }
     this.totalScore += spinScore;

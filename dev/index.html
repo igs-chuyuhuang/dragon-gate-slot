@@ -458,7 +458,7 @@
         else { badge.textContent = '—'; }
       });
       const winEl = $('win');
-      if (result.totalPayout > 0) { winEl.textContent = '+' + fmt(result.totalPayout); winEl.style.color = '#ffd700'; }
+      if (result.totalPayout > 0) { winEl.textContent = fmt(result.totalPayout); winEl.style.color = '#ffd700'; }
       else { winEl.textContent = '0'; winEl.style.color = '#ffd700'; }
       $('results').textContent = result.fgTriggered ? '🎰 Free Game!' : '';
       updateRing(gm.scatterLamps);
