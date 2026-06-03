@@ -71,6 +71,12 @@ body {
   flex-shrink: 0; overflow: hidden;
 }
 .cell img { width: 85%; height: 85%; object-fit: contain; }
+.cell { position: relative; }
+.cell-bonus {
+  position: absolute; bottom: 2px; right: 2px;
+  background: rgba(0,0,0,0.7); border-radius: 10px;
+  padding: 1px 5px; font-size: 10px; color: #ffd700; font-weight: bold;
+}
 
 /* Badges */
 .badge {

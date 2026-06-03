@@ -438,14 +438,8 @@
     const FG_SYMS = ['+15','+30','+60','+90','+120','+200','+500','—'];
     const fgReelEl = $('fg-reel'), fgStripEl = $('fg-reel-strip');
 
-    function showFgReel() {
-      for (let r = 0; r < 3; r++) $(`badge-${r}`).style.display = 'none';
-      fgReelEl.style.display = 'block';
-    }
-    function hideFgReel() {
-      fgReelEl.style.display = 'none';
-      for (let r = 0; r < 3; r++) $(`badge-${r}`).style.display = '';
-    }
+    function showFgReel() {}
+    function hideFgReel() {}
     function showFGResult(total) {
       const overlay = $('fg-result-overlay');
       const amountEl = $('fg-result-amount');
@@ -696,23 +690,34 @@
       if (spinning || !gm.canSpin()) return;
       for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
       const isFG = gm.fg.active;
-      if (isFG) showFgReel(); else hideFgReel();
       sfx('spin_charge');
       updateUI();
       const result = gm.executeSpin();
       if (!result) return;
       if (result.mode === 'fg') {
-        await animateSpin(result.board, result.bonusSymbols);
+        await animateSpin(result.board);
         sfx('spin_release');
+        // Add bonus labels to middle column cells
+        for (let r = 0; r < 3; r++) {
+          const sym = result.bonusSymbols[r];
+          if (sym !== '—') {
+            const cell = document.getElementById(`cell-${r}-1`);
+            if (cell) {
+              const lbl = document.createElement('span');
+              lbl.className = 'cell-bonus';
+              lbl.textContent = `💰${sym.slice(1)}`;
+              cell.appendChild(lbl);
+            }
+          }
+        }
         // Win lines for rows that scored
         const winRows = result.judgments
           .filter(j => j.type === 'through' && result.bonusSymbols[j.row] !== '—')
           .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
         if (winRows.length > 0) await playWinLines(winRows);
-        // Now update FG info
         $('win').textContent = fmt(result.totalScore);
         updateUI();
-        if (result.fgDone) { hideFgReel(); showFGResult(result.totalScore); }
+        if (result.fgDone) { showFGResult(result.totalScore); }
         else { setTimeout(() => doSpin(), 400); }
         return result;
       }
