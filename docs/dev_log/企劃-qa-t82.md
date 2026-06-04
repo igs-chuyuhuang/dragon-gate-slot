@@ -413,3 +413,21 @@
 **關鍵 prompt / 指令：** 跑最新版 RTP 模擬確認數值；精算調參使 RTP 回到 96.4%
 **人工修正：** 無
 **耗時：** ~30 分鐘
+
+### [2026-06-04] — BG 競態 bug 修復 + QA 報告 + P2 視覺修正 + Scatter 揭曉接入 + RTP 驗證
+
+**環節：** 測試 / 程式
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. BG 流程完整性測試：發現並修復 3 個競態條件 crash bug（翻牌中 timer 歸零、bgEnd 重複呼叫、自動下注與手動競態）
+2. 產出 BG/FG QA 報告（docs/qa_report_bg_fg_20240604.md）：功能測試 + Visual QA 6.5/10
+3. UX-001 修復：BG 籌碼歸零顯示「💸 籌碼用盡！」提示
+4. P2 CSS 修正：FG 💰標籤加大（clamp 11-14px）、BG 翻牌加 perspective 3D、BG 牌面+籌碼改響應式
+5. Scatter 揭曉動畫接入 dev/index.html（import revealScatters + await 呼叫）
+6. RTP 驗證模擬（10M 轉）：確認調參後 RTP 96.81%，合規通過
+7. 更新 CURRENT_STATUS.md 反映 6/1~6/3 所有進度
+**Before：** BG 有競態 crash 風險、Scatter 揭曉未接入 dev/、RTP 未驗證
+**After：** BG 穩定不 crash、Scatter 光柱動畫正常觸發、RTP 96.81% 確認合規、QA 報告+改善建議完整
+**關鍵 prompt / 指令：** BG 流程完整性測試→Visual QA→P1 追蹤；Scatter 接入；RTP 重跑驗證
+**人工修正：** 無
+**耗時：** ~40 分鐘
