@@ -198,6 +198,7 @@
     import { playSfx } from './js/effects/sfxBus.js';
     import { playWinLines } from './js/effects/winLine.js';
     import { playWallHit } from './js/effects/wallHit.js';
+    import { revealScatters } from './js/effects/scatterReveal.js';
 
     let muted = false;
     let turbo = false;
@@ -756,7 +757,7 @@
         for (const j of result.judgments) {
           if (j.type === 'through') sfx('gate_through');
         }
-        if (result.scatterCount > 0) sfx('dragon_growl');
+        if (result.scatterCount > 0) await revealScatters(result.board, result.scatterCount);
         if (result.totalPayout > 0) sfx('coin_count');
         if (result.fgTriggered) sfx('gate_open');
         const winRows = result.judgments
