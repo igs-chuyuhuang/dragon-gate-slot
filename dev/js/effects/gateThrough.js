@@ -26,8 +26,8 @@ export async function playGateThrough(row, mult) {
   // === IMPACT (300ms) ===
   playLayered([{ name: 'gate_through' }, { name: 'score_fly', delay: 200, volume: 0.5 }]);
 
-  // Flash
-  flashScreen('#ffd700', 0.4, 300);
+  // Flash — reduced opacity to avoid covering board
+  flashScreen('#ffd700', 0.28, 300);
 
   // Shockwave
   shockwaveDOM(cx, cy, '#ffd700', 7, 400);

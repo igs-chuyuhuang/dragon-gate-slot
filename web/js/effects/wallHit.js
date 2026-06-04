@@ -14,21 +14,28 @@ export async function playWallHit(row) {
 
   // === ANTICIPATION (60ms) — immediate red flash ===
   anime({ targets: mid, backgroundColor: '#5c1a1a', boxShadow: '0 0 14px 6px rgba(233,69,96,0.5)', duration: 60, easing: 'easeOutQuad' });
-  flashScreen('#e94560', 0.12, 120); // immediate so screenshot catches it
+  flashScreen('#e94560', 0.15, 150);
 
-  await hitStop(60);
+  await hitStop(80);
 
-  // === HIT STOP (60ms) ===
-  await hitStop(60);
+  // === HIT STOP (80ms) ===
+  await hitStop(80);
 
-  // === IMPACT (300ms) ===
-  playLayered([{ name: 'wall_hit' }, { name: 'crack', delay: 80, volume: 0.7 }]);
+  // === IMPACT (450ms) ===
+  playLayered([{ name: 'wall_hit' }, { name: 'crack', delay: 80, volume: 0.8 }]);
 
-  // Red flash
-  flashScreen('#e94560', 0.35, 300);
+  // Red flash — stronger + longer
+  flashScreen('#e94560', 0.4, 400);
 
-  // Board shake 10px
-  shakeBoard(10, 150);
+  // Board shake 14px, 300ms — much more visible
+  shakeBoard(14, 300);
+
+  // Crack overlay — persists 1.2s so player sees it
+  const crack = document.createElement('div');
+  crack.style.cssText = `position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10 L48 30 L42 45 L50 50 L45 65 L50 80 L47 95' stroke='%23e94560' stroke-width='2' fill='none'/%3E%3Cpath d='M50 50 L60 55 L70 52' stroke='%23e94560' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;z-index:5;pointer-events:none;opacity:0.9`;
+  mid.style.position = 'relative';
+  mid.appendChild(crack);
+  anime({ targets: crack, opacity: [0.9, 0], duration: 1200, delay: 200, easing: 'easeInQuad', complete: () => crack.remove() });
 
   // Red vignette
   const vig = document.createElement('div');

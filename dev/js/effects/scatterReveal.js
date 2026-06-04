@@ -5,6 +5,7 @@ const dragonGrowl = new Audio('assets/sfx/dragon_growl.mp3');
 const heartbeat = new Audio('assets/sfx/heartbeat.mp3');
 const dragonRoar = new Audio('assets/sfx/dragon_roar.mp3');
 heartbeat.loop = true;
+let _vibId = null;
 
 // Reveal scatter cells sequentially based on count
 export function revealScatters(board, scatterCount) {
@@ -33,40 +34,63 @@ export function revealScatters(board, scatterCount) {
 }
 
 function revealFirst(el) {
-  // Gold frame + dragon growl tail
+  // Light pillar + dragon growl
   dragonGrowl.currentTime = 0;
   dragonGrowl.volume = 0.4;
   dragonGrowl.play().catch(() => {});
+
+  // Light pillar effect
+  const pillar = document.createElement('div');
+  pillar.style.cssText = 'position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,215,0,0.8) 0%,transparent 100%);z-index:6;pointer-events:none;opacity:0';
+  el.style.position = 'relative';
+  el.appendChild(pillar);
+  anime({ targets: pillar, opacity: [0, 0.9, 0], scaleY: [0.3, 1.5], duration: 600, easing: 'easeOutQuad', complete: () => pillar.remove() });
 
   el.classList.add('sc-reveal');
   anime({
     targets: el,
     boxShadow: ['0 0 0px #ffd700', '0 0 20px 8px #ffd700'],
-    scale: [1, 1.1, 1],
-    duration: 400,
+    scale: [1, 1.15, 1],
+    duration: 500,
     easing: 'easeOutElastic(1, 0.6)'
   });
 }
 
 function revealSecond(el, totalCount) {
-  // Darken screen + heartbeat + "再一龍！"
+  // Darken screen + heartbeat + vibration + "再一龍！"
   heartbeat.currentTime = 0;
   heartbeat.play().catch(() => {});
+
+  // Light pillar for second scatter
+  const pillar = document.createElement('div');
+  pillar.style.cssText = 'position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,215,0,0.9) 0%,transparent 100%);z-index:6;pointer-events:none;opacity:0';
+  el.style.position = 'relative';
+  el.appendChild(pillar);
+  anime({ targets: pillar, opacity: [0, 1, 0], scaleY: [0.3, 1.8], duration: 700, easing: 'easeOutQuad', complete: () => pillar.remove() });
 
   el.classList.add('sc-reveal');
   anime({
     targets: el,
-    boxShadow: ['0 0 0px #ffd700', '0 0 24px 10px #ffd700'],
-    scale: [1, 1.15, 1],
-    duration: 400,
+    boxShadow: ['0 0 0px #ffd700', '0 0 28px 12px #ffd700'],
+    scale: [1, 1.2, 1],
+    duration: 500,
     easing: 'easeOutElastic(1, 0.6)'
   });
+
+  // Board vibration — subtle continuous shake
+  const b = document.querySelector('.board');
+  clearInterval(_vibId);
+  _vibId = setInterval(() => {
+    const dx = (Math.random() - 0.5) * 4;
+    const dy = (Math.random() - 0.5) * 3;
+    if (b) b.style.transform = `translate(${dx}px, ${dy}px)`;
+  }, 30);
 
   // Darken overlay
   const overlay = document.createElement('div');
   overlay.className = 'sc-darken';
   document.body.appendChild(overlay);
-  anime({ targets: overlay, opacity: [0, 0.4], duration: 300, easing: 'easeOutQuad' });
+  anime({ targets: overlay, opacity: [0, 0.5], duration: 300, easing: 'easeOutQuad' });
 
   // "再一龍！" text if only 2 total
   if (totalCount === 2) {
@@ -77,16 +101,22 @@ function revealSecond(el, totalCount) {
     anime({ targets: txt, scale: [0.3, 1], opacity: [0, 1], duration: 350, easing: 'easeOutElastic(1, 0.5)' });
     setTimeout(() => {
       heartbeat.pause();
+      clearInterval(_vibId);
+      const brd = document.querySelector('.board');
+      if (brd) brd.style.transform = '';
       anime({ targets: [txt, overlay], opacity: 0, duration: 400, easing: 'easeInQuad', complete: () => { txt.remove(); overlay.remove(); } });
     }, 1200);
   } else {
     // Will be cleaned up by third reveal
-    setTimeout(() => { heartbeat.pause(); overlay.remove(); }, 1500);
+    setTimeout(() => { heartbeat.pause(); clearInterval(_vibId); const brd = document.querySelector('.board'); if (brd) brd.style.transform = ''; overlay.remove(); }, 1500);
   }
 }
 
 function revealThird(el, allCells, resolve) {
   heartbeat.pause();
+  clearInterval(_vibId);
+  const brd = document.querySelector('.board');
+  if (brd) brd.style.transform = '';
   dragonRoar.currentTime = 0;
   dragonRoar.play().catch(() => {});
 
