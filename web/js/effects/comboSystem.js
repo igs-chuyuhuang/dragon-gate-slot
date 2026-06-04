@@ -42,7 +42,7 @@ async function applyLevel(count) {
     explodeText('3 COMBO!', { size: 52, holdMs: 900 });
   } else if (count === 4) {
     await hitStop(80);
-    flashScreen('#ffd700', 0.45, 350);
+    flashScreen('#ffd700', 0.3, 350);
     shockwaveDOM(cx, cy, '#ffd700', 9, 500);
     shakeBoard(12, 300);
     burst(cx, cy, { texture: 'star', count: 50, spread: 140, duration: 420 });
@@ -52,12 +52,12 @@ async function applyLevel(count) {
   } else {
     await hitStop(100);
     playSfx('dragon_growl', { volume: 0.7 });
-    flashScreen('#fffacd', 0.55, 400);
+    flashScreen('#fffacd', 0.35, 400);
     shockwaveDOM(cx, cy, '#ffd700', 11, 550);
     setTimeout(() => shockwaveDOM(cx, cy, '#ffd700', 8, 450), 130);
     shakeBoard(14, 350);
     burst(cx, cy, { texture: 'star', count: 60, spread: 160, duration: 450 });
-    burst(cx, cy, { texture: 'glow', count: 10, spread: 130, duration: 500, sizeMin: 1, sizeMax: 2.5 });
+    burst(cx, cy, { texture: 'glow', count: 6, spread: 130, duration: 500, sizeMin: 0.8, sizeMax: 1.8 });
     burst(cx, cy, { texture: 'diamond', count: 15, spread: 120, duration: 420 });
     explodeText(`🐉 龍門狂熱 ×${count}!`, { size: 64, color: '#ff4444', holdMs: 1200 });
     // Burning border 3s
