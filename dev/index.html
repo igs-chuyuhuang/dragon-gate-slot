@@ -197,6 +197,7 @@
     import { BonusGame } from './js/bonusGame.js';
     import { playSfx } from './js/effects/sfxBus.js';
     import { playWinLines } from './js/effects/winLine.js';
+    import { playWallHit } from './js/effects/wallHit.js';
 
     let muted = false;
     let turbo = false;
@@ -738,7 +739,7 @@
       // Play result sfx + win line effect
       if (result.mode === 'normal') {
         for (const j of result.judgments) {
-          if (j.type === 'wall' || j.type === 'same-hit') sfx('wall_hit');
+          if (j.type === 'wall' || j.type === 'same-hit') playWallHit(j.row);
           else if (j.type === 'through') sfx('gate_through');
         }
         if (result.scatterCount > 0) sfx('dragon_growl');
