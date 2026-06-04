@@ -532,7 +532,7 @@
     }
 
     function bgNewRound() {
-      if (!bgInstance.active) { bgEnd(); return; }
+      if (!bgInstance || !bgInstance.active) { if (bgInstance) bgEnd(); return; }
       $('bg-result-text').textContent = '';
       $('bg-result-text').className = 'bg-result-text';
       const { left, right } = bgInstance.deal();
@@ -558,6 +558,7 @@
         $('bg-round-timer').textContent = roundLeft;
         if (roundLeft <= 0) {
           clearInterval(bgRoundTimer);
+          if (!bgInstance || !bgInstance.active) return;
           // Auto min bet
           const minBet = Math.round(bgInstance.chips * 0.1);
           if (minBet > 0) { bgInstance.roundBet = minBet; bgDeal(); }
@@ -596,6 +597,7 @@
     }
 
     function bgDeal() {
+      if (!bgInstance || !bgInstance.active) return;
       if (bgRoundTimer) clearInterval(bgRoundTimer);
       $('bg-deal-btn').disabled = true;
       $('bg-chip-btns').querySelectorAll('.bg-chip-btn').forEach(b => { b.disabled = true; });
@@ -603,6 +605,7 @@
       const midCard = $('bg-card-m');
       midCard.classList.add('flip');
       setTimeout(() => {
+        if (!bgInstance) return; // guard against race with bgEnd
         const result = bgInstance.reveal();
         midCard.innerHTML = `<img src="assets/img/${CARD_IMG[result.mid]}">`;
         midCard.className = 'bg-card face';
@@ -628,6 +631,7 @@
         bgUpdateUI();
         // Next round after delay
         setTimeout(() => {
+          if (!bgInstance) return;
           if (bgInstance.active && bgInstance.chips > 0) bgNewRound();
           else bgEnd();
         }, 2000);
@@ -641,6 +645,7 @@
     }
 
     function bgEnd() {
+      if (!bgInstance) return;
       if (bgRoundTimer) clearInterval(bgRoundTimer);
       if (bgTotalTimer) clearInterval(bgTotalTimer);
       bgInstance.active = false;
