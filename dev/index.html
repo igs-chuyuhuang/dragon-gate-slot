@@ -738,9 +738,12 @@
       showResult(result);
       // Play result sfx + win line effect
       if (result.mode === 'normal') {
+        // Wall hits — await each so the effect is visible
         for (const j of result.judgments) {
-          if (j.type === 'wall' || j.type === 'same-hit') playWallHit(j.row);
-          else if (j.type === 'through') sfx('gate_through');
+          if (j.type === 'wall' || j.type === 'same-hit') await playWallHit(j.row);
+        }
+        for (const j of result.judgments) {
+          if (j.type === 'through') sfx('gate_through');
         }
         if (result.scatterCount > 0) sfx('dragon_growl');
         if (result.totalPayout > 0) sfx('coin_count');
