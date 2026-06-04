@@ -357,3 +357,44 @@
 **關鍵 prompt / 指令：** 移除右側轉軸改中輪自帶分數；錢幣跟著轉動；穿門時飛移到 badge
 **人工修正：** 飛移動畫從 clone 整個 cell 改為只飛小 span
 **耗時：** ~20 分鐘
+
+### [2026-06-04] — 修正碰壁特效 P1 + 狀態更新
+
+**環節：** 測試 / 程式
+**AI 工具：** Kiro Agent
+**做了什麼：** 修正 Visual QA P1「碰壁特效太弱」問題。根因：playWallHit() 沒有 await，動畫 fire-and-forget 被後續流程覆蓋。改為 await playWallHit(j.row) 逐列等待，確保 680ms 完整動畫可見（camera shake + red flash + squash + particles）。
+**Before：** playWallHit 是 fire-and-forget，效果被立即覆蓋幾乎看不到
+**After：** await 逐列播放，碰壁特效完整可見
+**關鍵 prompt / 指令：** 推進 V3 品質微調，修正 Visual QA P1 待修項目
+**人工修正：** 無
+**耗時：** ~10 分鐘
+
+### [2026-06-04] — CURRENT_STATUS 更新 + 市場調查整合 + RTP 調參
+
+**環節：** 企劃 / 程式
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 更新 CURRENT_STATUS.md 反映 6/1~6/3 所有進度（FG v2.0、BG、錢幣飛移等）
+2. 整合市場調查 agent 報告到主 repo（2025-2026_slot_market_trends.md、jackpot_system_comparison.md）
+3. RTP 調參套用：FG 獎金 [+5/+10/+15/+30/+50/—]、BG 賠率 ×10/×5/×2.5/×1 + 15局上限、Scatter 門檻改 12（RTP 122.6%→96.15%）
+**Before：** CURRENT_STATUS 停在 5/28；市場調查報告在外部 workspace；RTP 122.6%
+**After：** 狀態文件最新；市場報告整合到 docs/market_research/；RTP 降至 96.15%
+**關鍵 prompt / 指令：** 更新狀態；copy 市場調查報告到主 repo；套用 RTP 調參配置
+**人工修正：** 無
+**耗時：** ~15 分鐘
+
+### [2026-06-04] — 合併 Visual QA 修正 + V3 Phase 1 可行性評估
+
+**環節：** 測試 / 企劃
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 更新 CURRENT_STATUS.md 反映 6/1~6/3 所有進展
+2. 修復 P1 碰壁特效：發現 playWallHit 從未被 import/呼叫（只有 sfx），接入主迴圈
+3. Cherry-pick game-feel 分支的 Visual QA P1+P2 修正（Scatter 光柱、穿門降透明、Combo 降光暈、碰壁強化）到 main，同步 dev/ 和 web/
+4. 帶入 docs/v3_animation_specs.md 到 main
+5. 評估 Phase 1（瞇牌節奏改造 ~1.5天 + 龍息連擊 ~1天）的實作可行性、風險、依賴
+**Before：** Visual QA P1/P2 修正只在 game-feel 分支；playWallHit 從未被呼叫；無 Phase 1 評估
+**After：** 4 個 effect 檔案修正合併到 main；碰壁特效完整接入；Phase 1 評估報告完成（建議暫緩連擊、先做瞇牌骨架）
+**關鍵 prompt / 指令：** 確認合併無衝突；評估 Phase 1 可行性和工時
+**人工修正：** 無
+**耗時：** ~20 分鐘
