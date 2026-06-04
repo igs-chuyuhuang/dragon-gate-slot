@@ -633,7 +633,13 @@
         setTimeout(() => {
           if (!bgInstance) return;
           if (bgInstance.active && bgInstance.chips > 0) bgNewRound();
-          else bgEnd();
+          else {
+            if (bgInstance.chips <= 0) {
+              $('bg-result-text').textContent = '💸 籌碼用盡！';
+              $('bg-result-text').className = 'bg-result-text lose';
+              setTimeout(() => bgEnd(), 1500);
+            } else bgEnd();
+          }
         }, 2000);
       }, 750); // halfway through flip
     }
