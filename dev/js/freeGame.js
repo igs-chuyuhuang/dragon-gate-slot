@@ -1,6 +1,6 @@
 import { judgeBoard } from './dragonGateJudge.js';
 
-export const FG_SYMBOLS = ['+15','+30','+60','+90','+120','+200','+500','—'];
+export const FG_SYMBOLS = ['+5','+10','+15','+30','+50','—'];
 
 export class FreeGame {
   constructor() { this.reset(); }

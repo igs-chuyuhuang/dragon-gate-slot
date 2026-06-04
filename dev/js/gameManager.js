@@ -5,7 +5,7 @@ import { FreeGame, FG_SYMBOLS } from './freeGame.js';
 import { JpSystem } from './jpSystem.js';
 
 const BET_OPTIONS = [15, 30, 60, 150, 300];
-const SCATTER_LAMP_THRESHOLD = 10;
+const SCATTER_LAMP_THRESHOLD = 12;
 
 export class GameManager {
   constructor() {

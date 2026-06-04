@@ -1,7 +1,7 @@
 function getPassMult(gap) {
-  if (gap <= 1) return 15;
-  if (gap <= 3) return 6;
-  if (gap <= 7) return 3;
+  if (gap <= 1) return 10;
+  if (gap <= 3) return 5;
+  if (gap <= 7) return 2.5;
   return 1;
 }
 
@@ -13,6 +13,8 @@ export class BonusGame {
     this.roundBet = 0;
     this.totalTime = 90;
     this.roundTime = 15;
+    this.maxRounds = 15;
+    this.rounds = 0;
     this.active = true;
     this.left = 0;
     this.right = 0;
@@ -65,7 +67,8 @@ export class BonusGame {
       this.chips += this.roundBet * result.mult;
       if (this.chips < 0) this.chips = 0;
     }
-    if (this.chips <= 0) this.active = false;
+    this.rounds++;
+    if (this.chips <= 0 || this.rounds >= this.maxRounds) this.active = false;
   }
 
   cashOut() {
