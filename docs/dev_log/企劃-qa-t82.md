@@ -431,3 +431,51 @@
 **關鍵 prompt / 指令：** BG 流程完整性測試→Visual QA→P1 追蹤；Scatter 接入；RTP 重跑驗證
 **人工修正：** 無
 **耗時：** ~40 分鐘
+
+### [2026-06-05] — BGM 設計與實作 + 碰壁特效修正 + 配置備份
+
+**環節：** 程式 / 音效
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 碰壁特效 P1 修正：playWallHit 改為 await 逐列播放，確保 680ms 動畫完整可見
+2. BGM 實作（多次迭代）：
+   - v1: Web Audio API 五聲音階生成（被否決：太單調）
+   - v2: Python 合成中式財運風格（古箏+笛子+低鼓+風鈴+鑼）（被否決：不夠緊張）
+   - v3: Python 合成緊張澎湃風格（鋼琴ostinato+弦樂tremolo+銅管staccato+鼓），130bpm D小調
+   - v4: 移除 kick drum + 裁剪前 6 秒 → 最終版 6.75 秒循環
+3. 完整配置備份回報（角色、steering、decisions、設定檔）
+**Before：** 無背景音樂；碰壁特效 fire-and-forget 看不到
+**After：** dev/assets/audio/bgm.mp3（6.75秒循環，緊張澎湃風格）；碰壁特效完整可見
+**關鍵 prompt / 指令：** 設計並加入 BGM（多次風格調整）；碰壁特效太弱修正
+**人工修正：** BGM 經用戶 4+ 次反饋迭代（風格/音量/裁剪）
+**耗時：** ~1.5 小時（含多次 BGM 迭代）
+
+### [2026-06-05] — 配置備份 + BG 局數模擬推薦
+
+**環節：** 數學 / 企劃
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 回報完整配置資訊供 GitHub 備份（角色、steering、決策、設定檔）
+2. BG 局數模擬：測試 5/8/10/12/15 局對 RTP 影響（200 萬轉），推薦 12 局（RTP 95.82%，體驗 ~50-60 秒）
+**Before：** BG 用「總時間 90 秒」限制，實際局數不確定
+**After：** 推薦改為固定 12 局，RTP 95.82% 達標
+**關鍵 prompt / 指令：** BG 總時間改固定局數，計算幾局恰當
+**人工修正：** 無
+**耗時：** ~15 分鐘
+
+### [2026-06-05] — 固定舞台等比縮放（feature branch）+ 備份配置
+
+**環節：** 程式 / 企劃
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 回報完整配置備份（角色、steering、decisions、設定檔）供 GitHub 備份
+2. 在 feature/fixed-stage-scaling 分支實作「固定舞台等比縮放」，經 3 次迭代：
+   - v2: 固定 390×844 + transform:scale + 所有 vw→px（失敗：getBoundingClientRect 受 scale 影響）
+   - v3: 不動佈局，只加 container-type:inline-size + vw→cqw（解決左右縮放）
+   - v4: container-type:size + 固定 px 改 cqw/cqh（解決上下縮放）
+3. 最終方案：CSS container queries（cqw/cqh），不需 JS，不改佈局邏輯
+**Before：** 桌機縮小視窗時元素跑位（clamp(vw) 參照 viewport 而非容器）
+**After：** feature/fixed-stage-scaling 分支 commit 563366d，待合併測試
+**關鍵 prompt / 指令：** 讓遊戲畫面在任何視窗大小下等比縮放不跑位
+**人工修正：** 每次迭代後用戶測試反饋方向調整（3 次）
+**耗時：** ~1.5 小時（含 3 次迭代）
