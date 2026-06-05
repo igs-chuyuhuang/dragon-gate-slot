@@ -5,34 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>射龍門 Slot</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  background: #000;
-  width: 100vw; height: 100dvh;
-  overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-iframe {
-  border: none;
-  width: 390px;
-  height: 844px;
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+#game-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+}
+
+#game-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
   transform-origin: center center;
+}
+
+#game {
+  display: block;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
 }
 </style>
 </head>
+
 <body>
-<iframe id="game" src="index.html"></iframe>
+  <div id="game-viewport">
+    <div id="game-wrap">
+      <iframe id="game" src="index.html?embed=1" allow="autoplay"></iframe>
+    </div>
+  </div>
+
 <script>
-(function(){
-  var BASE_W = 390, BASE_H = 844;
-  var frame = document.getElementById('game');
-  function resize(){
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
-    var scale = Math.min(vw / BASE_W, vh / BASE_H);
-    frame.style.transform = 'scale(' + scale + ')';
+(function () {
+  const BASE_W = 390;
+  const BASE_H = 844;
+
+  const wrap = document.getElementById('game-wrap');
+  const frame = document.getElementById('game');
+
+  wrap.style.width = BASE_W + 'px';
+  wrap.style.height = BASE_H + 'px';
+
+  function resize() {
+    const vv = window.visualViewport;
+    const vw = vv ? vv.width : window.innerWidth;
+    const vh = vv ? vv.height : window.innerHeight;
+
+    const scale = Math.min(
+      vw / BASE_W,
+      vh / BASE_H
+    );
+
+    wrap.style.transform =
+      'translate(-50%, -50%) scale(' + scale + ')';
   }
+
   window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', resize);
+  window.visualViewport?.addEventListener('resize', resize);
+
   resize();
 })();
 </script>
