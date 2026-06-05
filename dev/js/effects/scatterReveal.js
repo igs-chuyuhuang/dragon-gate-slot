@@ -20,12 +20,10 @@ export function revealScatters(board, scatterCount) {
 
 function flashAndFly(el) {
   if (!el) return;
-  // Yellow flash on cell
-  const flash = document.createElement('div');
-  flash.style.cssText = 'position:absolute;inset:0;background:rgba(255,215,0,0.7);z-index:10;pointer-events:none;border-radius:50%;';
+  // Yellow border glow on cell (square, outline only)
   el.style.position = 'relative';
-  el.appendChild(flash);
-  setTimeout(() => flash.remove(), 300);
+  el.style.boxShadow = '0 0 16px 6px rgba(255,215,0,0.7), inset 0 0 8px rgba(255,215,0,0.3)';
+  setTimeout(() => { el.style.boxShadow = ''; }, 300);
 
   // After flash, fly scatter icon to ring
   setTimeout(() => {
@@ -46,8 +44,9 @@ function flashAndFly(el) {
     });
     setTimeout(() => {
       flyer.remove();
-      // Ring glow
-      ring.style.boxShadow = '0 0 20px rgba(255,215,0,0.9)';
+      // Ring glow — circular
+      ring.style.boxShadow = '0 0 20px 8px rgba(255,215,0,0.9)';
+      ring.style.borderRadius = '50%';
       setTimeout(() => { ring.style.boxShadow = ''; }, 400);
     }, 550);
   }, 300);
