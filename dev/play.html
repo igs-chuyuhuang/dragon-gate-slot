@@ -54,24 +54,26 @@ body {
 
 <script>
 (function () {
-  const BASE_W = 390;
-  const BASE_H = 844;
+  // iframe 尺寸 = 正常版 .game-root 的 layout 尺寸
+  // game-root CSS: height=100dvh, width=100vw, max-width=calc(100dvh*9/16)
+  // 所以在初始載入時，game-root 的尺寸 = (vh * 9/16) × vh（假設桌機寬度夠）
+  // 我們用初始 viewport 高度作為基準，鎖定後不再變
+  var vh = window.innerHeight;
+  var vw = window.innerWidth;
+  var BASE_H = vh;
+  var BASE_W = Math.min(vw, Math.floor(vh * 9 / 16));
 
-  const wrap = document.getElementById('game-wrap');
-  const frame = document.getElementById('game');
+  var wrap = document.getElementById('game-wrap');
 
   wrap.style.width = BASE_W + 'px';
   wrap.style.height = BASE_H + 'px';
 
   function resize() {
-    const vv = window.visualViewport;
-    const vw = vv ? vv.width : window.innerWidth;
-    const vh = vv ? vv.height : window.innerHeight;
+    var vv = window.visualViewport;
+    var cvw = vv ? vv.width : window.innerWidth;
+    var cvh = vv ? vv.height : window.innerHeight;
 
-    const scale = Math.min(
-      vw / BASE_W,
-      vh / BASE_H
-    );
+    var scale = Math.min(cvw / BASE_W, cvh / BASE_H);
 
     wrap.style.transform =
       'translate(-50%, -50%) scale(' + scale + ')';
@@ -79,7 +81,9 @@ body {
 
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);
-  window.visualViewport?.addEventListener('resize', resize);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', resize);
+  }
 
   resize();
 })();
