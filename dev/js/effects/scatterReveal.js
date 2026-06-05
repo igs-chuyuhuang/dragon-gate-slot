@@ -1,6 +1,4 @@
 // scatterReveal.js — Scatter flash + fly to ring
-import { anime } from '../gameFeel.js';
-
 export function revealScatters(board, scatterCount) {
   const scCells = [];
   for (let r = 0; r < 3; r++)
@@ -12,25 +10,24 @@ export function revealScatters(board, scatterCount) {
 
   return new Promise(resolve => {
     let delay = 0;
-    scCells.forEach(() => { delay += 400; });
     scCells.forEach((sc, i) => {
-      setTimeout(() => flashAndFly(sc.el), i * 400);
+      setTimeout(() => flashAndFly(sc.el), delay);
+      delay += 400;
     });
-    setTimeout(resolve, delay + 1000);
+    setTimeout(resolve, delay + 600);
   });
 }
 
 function flashAndFly(el) {
   if (!el) return;
+  // Yellow flash on cell
+  const flash = document.createElement('div');
+  flash.style.cssText = 'position:absolute;inset:0;background:rgba(255,215,0,0.7);z-index:10;pointer-events:none;border-radius:4px;';
+  el.style.position = 'relative';
+  el.appendChild(flash);
+  setTimeout(() => flash.remove(), 300);
 
-  anime({
-    targets: el,
-    backgroundColor: ['#16213e', '#3a2800', '#16213e'],
-    boxShadow: ['0 0 0px transparent', '0 0 16px 6px rgba(255,215,0,0.5)', '0 0 0px transparent'],
-    duration: 500,
-    easing: 'easeOutQuad'
-  });
-
+  // After flash, fly scatter icon to ring
   setTimeout(() => {
     const ring = document.querySelector('.scatter-ring');
     if (!ring) return;
@@ -49,10 +46,11 @@ function flashAndFly(el) {
     });
     setTimeout(() => {
       flyer.remove();
+      // Ring glow
       ring.style.boxShadow = '0 0 20px rgba(255,215,0,0.9)';
       setTimeout(() => { ring.style.boxShadow = ''; }, 400);
     }, 550);
-  }, 500);
+  }, 300);
 }
 
 export function initScatterDebug() {}
