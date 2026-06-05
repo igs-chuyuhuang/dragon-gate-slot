@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>射龍門 Slot</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #000;
+  width: 100vw; height: 100dvh;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+iframe {
+  border: none;
+  width: 390px;
+  height: 844px;
+  transform-origin: center center;
+}
+</style>
+</head>
+<body>
+<iframe id="game" src="index.html"></iframe>
+<script>
+(function(){
+  var BASE_W = 390, BASE_H = 844;
+  var frame = document.getElementById('game');
+  function resize(){
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var scale = Math.min(vw / BASE_W, vh / BASE_H);
+    frame.style.transform = 'scale(' + scale + ')';
+  }
+  window.addEventListener('resize', resize);
+  resize();
+})();
+</script>
+</body>
+</html>
