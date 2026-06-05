@@ -490,3 +490,9 @@ body {
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .bg-deal-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.choice-info-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid #ffd700; background: rgba(0,0,0,0.6);
+  font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  pointer-events: auto;
+}
