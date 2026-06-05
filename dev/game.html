@@ -129,17 +129,11 @@
     <!-- FG/BG Choice Overlay -->
     <div class="fg-result-overlay" id="fgbg-choice" style="display:none">
       <div class="fg-result-panel" style="position:relative;">
-        <button class="rules-close" id="fgbg-close" style="position:absolute;top:-10px;right:-10px;">✕</button>
+        <button class="rules-close" id="fgbg-close" style="position:absolute;top:-30px;right:-10px;">✕</button>
         <div class="fg-result-title">選擇獎勵模式</div>
         <div style="display:flex;flex-direction:column;gap:1rem;margin-top:1.5rem;width:100%;padding:0 1rem;pointer-events:auto;position:relative;z-index:9999;">
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <button class="bg-deal-btn" id="choose-fg" style="background:linear-gradient(135deg,#1a8c5c,#2ecc71);flex:1;padding:1rem;pointer-events:auto;">FREE GAME</button>
-            <button class="choice-info-btn" id="info-fg">ℹ️</button>
-          </div>
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <button class="bg-deal-btn" id="choose-bg" style="flex:1;padding:1rem;pointer-events:auto;">BONUS GAME</button>
-            <button class="choice-info-btn" id="info-bg">ℹ️</button>
-          </div>
+          <button class="bg-deal-btn" id="choose-fg" style="background:linear-gradient(135deg,#1a8c5c,#2ecc71);padding:1rem;pointer-events:auto;">FREE GAME <span id="info-fg" style="cursor:pointer;margin-left:6px;font-size:0.8em;opacity:0.8;">ℹ️</span></button>
+          <button class="bg-deal-btn" id="choose-bg" style="padding:1rem;pointer-events:auto;">BONUS GAME <span id="info-bg" style="cursor:pointer;margin-left:6px;font-size:0.8em;opacity:0.8;">ℹ️</span></button>
         </div>
       </div>
     </div>
@@ -521,8 +515,8 @@
 
     const FG_INFO = '<h3 style="color:#ffd700">FREE GAME</h3><ul><li>獲得 8 次免費轉動</li><li>中輪帶有💰金額符號</li><li>穿門時金額飛向餘額</li><li>符號池：+5, +10, +15, +30, +50, —</li></ul>';
     const BG_INFO = '<h3 style="color:#ffd700">BONUS GAME</h3><ul><li>獲得 12 局射龍門對決</li><li>每局 10 秒下注時間</li><li>看兩張底牌，猜中間牌能否穿門</li><li>賠率：極窄門×10 / 窄門×5 / 中門×2.5 / 寬門×1</li><li>碰壁 -2× / 同值撞柱 -3×</li></ul>';
-    $('info-fg').addEventListener('click', () => { $('choice-info-content').innerHTML = FG_INFO; $('choice-info-overlay').style.display = 'flex'; });
-    $('info-bg').addEventListener('click', () => { $('choice-info-content').innerHTML = BG_INFO; $('choice-info-overlay').style.display = 'flex'; });
+    $('info-fg').addEventListener('click', (e) => { e.stopPropagation(); $('choice-info-content').innerHTML = FG_INFO; $('choice-info-overlay').style.display = 'flex'; });
+    $('info-bg').addEventListener('click', (e) => { e.stopPropagation(); $('choice-info-content').innerHTML = BG_INFO; $('choice-info-overlay').style.display = 'flex'; });
     $('choice-info-close').addEventListener('click', () => { $('choice-info-overlay').style.display = 'none'; });
 
     function startBonusGame() {
