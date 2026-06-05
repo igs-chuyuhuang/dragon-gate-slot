@@ -1,4 +1,6 @@
 // scatterReveal.js — Scatter flash + fly to ring
+import { anime } from '../gameFeel.js';
+
 export function revealScatters(board, scatterCount) {
   const scCells = [];
   for (let r = 0; r < 3; r++)
@@ -20,12 +22,14 @@ export function revealScatters(board, scatterCount) {
 
 function flashAndFly(el) {
   if (!el) return;
-  // Yellow flash on cell
-  const flash = document.createElement('div');
-  flash.style.cssText = 'position:absolute;inset:0;background:rgba(255,215,0,0.7);z-index:10;pointer-events:none;border-radius:4px;';
-  el.style.position = 'relative';
-  el.appendChild(flash);
-  setTimeout(() => flash.remove(), 300);
+  // Yellow glow like gateThrough
+  anime({
+    targets: el,
+    boxShadow: ['0 0 0px transparent', '0 0 16px 6px rgba(255,215,0,0.6)', '0 0 0px transparent'],
+    backgroundColor: ['transparent', 'rgba(255,215,0,0.3)', 'transparent'],
+    duration: 400,
+    easing: 'easeOutQuad'
+  });
 
   // After flash, fly scatter icon to ring
   setTimeout(() => {
@@ -46,11 +50,10 @@ function flashAndFly(el) {
     });
     setTimeout(() => {
       flyer.remove();
-      // Ring glow
       ring.style.boxShadow = '0 0 20px rgba(255,215,0,0.9)';
       setTimeout(() => { ring.style.boxShadow = ''; }, 400);
     }, 550);
-  }, 300);
+  }, 400);
 }
 
 export function initScatterDebug() {}
