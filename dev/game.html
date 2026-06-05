@@ -765,6 +765,8 @@
       showResult(result);
       // Play result sfx + win line effect
       if (result.mode === 'normal') {
+        // Scatter first (top-to-bottom, left-to-right), with fly to collector
+        if (result.scatterCount > 0) await revealScatters(result.board, result.scatterCount);
         // Wall hits — await each so the effect is visible
         for (const j of result.judgments) {
           if (j.type === 'wall' || j.type === 'same-hit') await playWallHit(j.row);
@@ -772,7 +774,6 @@
         for (const j of result.judgments) {
           if (j.type === 'through') sfx('gate_through');
         }
-        if (result.scatterCount > 0) await revealScatters(result.board, result.scatterCount);
         if (result.totalPayout > 0) sfx('coin_count');
         if (result.fgTriggered) sfx('gate_open');
         const winRows = result.judgments
