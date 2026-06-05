@@ -22,7 +22,7 @@ function flashAndFly(el) {
   if (!el) return;
   // Yellow border glow on cell (square, outline only)
   el.style.position = 'relative';
-  el.style.boxShadow = '0 0 16px 6px rgba(255,215,0,0.7), inset 0 0 8px rgba(255,215,0,0.3)';
+  el.style.boxShadow = '0 0 24px 10px rgba(255,215,0,0.9), inset 0 0 12px rgba(255,215,0,0.4)';
   setTimeout(() => { el.style.boxShadow = ''; }, 300);
 
   // After flash, fly scatter icon to ring
