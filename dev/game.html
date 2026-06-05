@@ -213,36 +213,11 @@
     let turbo = false;
     function sfx(name) { if (!muted) playSfx(name); }
 
-    // === BGM: Chinese pentatonic generative loop ===
-    let bgmStarted = false;
-    let bgmGain = null;
-    function startBGM() {
-      if (bgmStarted) return;
-      bgmStarted = true;
-      const ctx = new AudioContext();
-      bgmGain = ctx.createGain();
-      bgmGain.gain.value = 0.35;
-      bgmGain.connect(ctx.destination);
-      // Pentatonic scale (C D E G A) in multiple octaves
-      const notes = [261.6,293.7,329.6,392.0,440.0,523.3,587.3,659.3];
-      let step = 0;
-      function playNote() {
-        if (!bgmGain) return;
-        const osc = ctx.createOscillator();
-        const env = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = notes[step % notes.length];
-        env.gain.setValueAtTime(0.5, ctx.currentTime);
-        env.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.8);
-        osc.connect(env);
-        env.connect(bgmGain);
-        osc.start();
-        osc.stop(ctx.currentTime + 2);
-        step = (step + Math.floor(Math.random() * 3) + 1) % notes.length;
-        setTimeout(playNote, 2000 + Math.random() * 500);
-      }
-      playNote();
-    }
+    // === BGM ===
+    const bgm = new Audio('assets/audio/bgm.mp3');
+    bgm.loop = true;
+    bgm.volume = 0.3;
+    function startBGM() { bgm.play().catch(() => {}); }
     document.addEventListener('click', startBGM, { once: true });
     document.addEventListener('keydown', startBGM, { once: true });
 
@@ -897,7 +872,7 @@
       $('vol-btn').innerHTML = muted
         ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>'
         : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>';
-      if (bgmGain) bgmGain.gain.value = muted ? 0 : 0.35;
+      bgm.volume = muted ? 0 : 0.3;
     });
     $('turbo-btn').addEventListener('click', () => {
       turbo = !turbo;
