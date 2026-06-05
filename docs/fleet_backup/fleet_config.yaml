@@ -1,0 +1,95 @@
+# Fleet Configuration Backup (sensitive tokens removed)
+# Date: 2026-06-05
+
+channels:
+  - type: telegram
+    mode: topic
+    access:
+      mode: locked
+
+defaults:
+  backend: kiro-cli
+  restart_policy:
+    max_retries: 10
+    backoff: exponential
+    reset_after: 300
+
+instances:
+  general:
+    working_directory: ~/.agend/general
+    topic_id: 1
+    general_topic: true
+    role: Fleet Coordinator — 路由任務、管理 instances、執行政策、整合結果
+
+  知識庫-t24:
+    working_directory: /opt/kb-bot
+    topic_id: 24
+    description: 企業知識庫 agent。收到問題後呼叫 FastAPI (localhost:8321) 查詢 Confluence/Redmine/SharePoint 知識庫。
+    tags: [kb, knowledge-base]
+
+  企劃-qa-t82:
+    working_directory: /home/acd_rd3/Projects/dragon-gate-slot
+    topic_id: 82
+    description: 企劃/QA Agent。負責遊戲規格細化、玩法規則確認、測試計畫撰寫、Bug 追蹤。
+    tags: [dragon-gate, design, qa]
+
+  數學模型-t83:
+    working_directory: /home/acd_rd3/Projects/dragon-gate-slot
+    topic_id: 83
+    description: 數學模型 Agent。負責賠付表設計、RTP 模擬（Python）、機率驗算、Scatter 觸發率計算、JP 貢獻比例。
+    tags: [dragon-gate, math]
+
+  美術音效-t84:
+    working_directory: /home/acd_rd3/Projects/dragon-gate-slot
+    topic_id: 84
+    description: 美術/音效 Agent。負責 AI 生圖 prompt、素材管理、音效規劃、視覺風格把控。
+    tags: [dragon-gate, art]
+
+  程式核心-t85:
+    working_directory: /home/acd_rd3/Projects/dragon-gate-slot
+    topic_id: 85
+    description: 程式核心邏輯 Agent。負責穿門判定、Free Game、JP 系統、派彩計算。
+    tags: [dragon-gate, unity, core]
+
+  程式前端-t86:
+    working_directory: /home/acd_rd3/Projects/dragon-gate-slot
+    topic_id: 86
+    description: 程式前端/UI Agent。負責 UI、動畫、素材整合、場景搭建。
+    tags: [dragon-gate, unity, ui]
+
+  特效爽感-gf-t326:
+    working_directory: /home/acd_rd3/Projects/dragon-gate-slot-game-feel
+    topic_id: 326
+    description: Game Feel / 特效爽感 Agent。負責體感設計：Spin 蓄力震動金光、穿門火花鏡頭 shake、碰壁裂痕音效、Scatter 差一顆心跳龍吟、Free Game 龍門打開金龍飛出、JP 多段揭曉。
+    tags: [dragon-gate, game-feel, vfx]
+    tools: [Anime.js, Lottie, PixiJS, Phaser]
+    systemPrompt: |
+      你是《射龍門 Slot》的 Game Feel / 特效爽感 Agent。你跟美術不一樣——美術是「圖好不好看」，你負責的是「按下去爽不爽」。
+      職責場景：Spin 按鈕蓄力震動金光、穿門火花鏡頭 shake、碰壁撞門裂痕、Scatter 差一顆心跳龍吟、觸發 FG 龍門打開金龍飛出、JP 多段揭曉。
+      輸出要具體到：用什麼工具、動畫時間軸、easing 曲線、音效觸發點、效能考量。
+
+  創意總監-cd-t327:
+    working_directory: /home/acd_rd3/Projects/dragon-gate-slot-creative-director
+    topic_id: 327
+    description: Creative Director / 創意總監 Agent。負責把「射龍門」變成視覺、節奏、互動亮點。
+    tags: [dragon-gate, creative-director]
+    systemPrompt: |
+      你是《射龍門 Slot》的 Creative Director（創意總監）。職責：
+      1. 提出能在當前版本加入、但不會讓工程爆炸的創新玩法
+      2. 每個玩法要包含：玩家看到什麼、玩家做什麼、數學模型影響、需要的美術/音效、開發難度、Demo 展示價值
+      3. 把「射龍門」變成視覺、節奏、互動亮點
+      4. 設計 30 秒內能讓評審記住的 wow moment
+      5. 每次功能更新都檢查是否有「爽感」
+      6. 提出小遊戲、特殊事件、連擊、儀式感
+
+  市場調查-dragon-gate-t907:
+    working_directory: ~/.agend/workspaces/市場調查-dragon-gate-t907
+    topic_id: 907
+    description: 市場調查 Agent。負責競品分析、線上老虎機市場趨勢收集、PG Soft/Pragmatic Play/NetEnt 等廠商產品研究、UI/UX/特效/JP系統比較、玩家偏好分析。
+    tags: [dragon-gate, market-research]
+
+  挑戰者-challenger-t1554:
+    working_directory: ~/.agend/workspaces/挑戰者-challenger-t1554
+    topic_id: 1554
+    description: Challenger Agent。專門質疑和挑戰其他 Agent 的設計決策，找出潛在問題、邏輯漏洞、玩家體驗風險、數學矛盾。扮演魔鬼代言人角色，不提供解法，只提出尖銳問題。
+    tags: [dragon-gate, challenger]
