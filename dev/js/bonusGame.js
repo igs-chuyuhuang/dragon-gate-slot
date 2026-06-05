@@ -11,9 +11,8 @@ export class BonusGame {
     this.winnings = 0;
     this.pool = pool;
     this.roundBet = 0;
-    this.totalTime = 90;
-    this.roundTime = 15;
-    this.maxRounds = 15;
+    this.roundTime = 10;
+    this.maxRounds = 12;
     this.rounds = 0;
     this.active = true;
     this.left = 0;
