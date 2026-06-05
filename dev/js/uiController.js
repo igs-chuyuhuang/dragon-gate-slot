@@ -76,7 +76,7 @@ let CELL_TOTAL = CELL_H + GAP; // default, recalculated on init
 function recalcCellTotal() {
   const reel = document.querySelector('.reel');
   if (reel) {
-    const reelH = reel.offsetHeight;
+    const reelH = reel.getBoundingClientRect().height;
     const cellH = Math.floor(reelH / 3);
     CELL_TOTAL = cellH; // no gap, cells fill reel exactly
     // Set all cell heights
