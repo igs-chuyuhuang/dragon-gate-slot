@@ -860,24 +860,5 @@
       if (e.key === 'f' && !gm.fg.active && !spinning) { showFgBgChoice(); }
     });
   </script>
-<script>
-(function(){
-  var root = document.querySelector('.game-root');
-  function fit(){
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
-    var rw = root.offsetWidth;
-    var rh = root.offsetHeight;
-    var scale = Math.min(vw / rw, vh / rh, 1);
-    if(scale < 1){
-      root.style.transform = 'scale(' + scale + ')';
-    } else {
-      root.style.transform = '';
-    }
-  }
-  window.addEventListener('resize', fit);
-  fit();
-})();
-</script>
 </body>
 </html>

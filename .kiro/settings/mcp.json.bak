@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "agend-企劃-qa-t82": {
+      "command": "/home/acd_rd3/.agend/instances/企劃-qa-t82/mcp-wrapper-agend.sh",
+      "args": []
+    },
+    "agend-美術音效-t84": {
+      "command": "/home/acd_rd3/.agend/instances/美術音效-t84/mcp-wrapper-agend.sh",
+      "args": []
+    },
+    "agend-程式核心-t85": {
+      "command": "/home/acd_rd3/.agend/instances/程式核心-t85/mcp-wrapper-agend.sh",
+      "args": []
+    },
+    "agend-程式前端-t86": {
+      "command": "/home/acd_rd3/.agend/instances/程式前端-t86/mcp-wrapper-agend.sh",
+      "args": []
+    },
+    "agend-數學模型-t83": {
+      "command": "/home/acd_rd3/.agend/instances/數學模型-t83/mcp-wrapper-agend.sh",
+      "args": []
+    }
+  }
+}
