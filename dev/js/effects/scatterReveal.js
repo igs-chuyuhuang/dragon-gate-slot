@@ -12,26 +12,25 @@ export function revealScatters(board, scatterCount) {
 
   return new Promise(resolve => {
     let delay = 0;
+    scCells.forEach(() => { delay += 400; });
     scCells.forEach((sc, i) => {
-      setTimeout(() => flashAndFly(sc.el), delay);
-      delay += 400;
+      setTimeout(() => flashAndFly(sc.el), i * 400);
     });
-    setTimeout(resolve, delay + 600);
+    setTimeout(resolve, delay + 1000);
   });
 }
 
 function flashAndFly(el) {
   if (!el) return;
-  // Yellow glow like gateThrough
+
   anime({
     targets: el,
-    boxShadow: ['0 0 0px transparent', '0 0 16px 6px rgba(255,215,0,0.6)', '0 0 0px transparent'],
-    backgroundColor: ['transparent', 'rgba(255,215,0,0.3)', 'transparent'],
-    duration: 400,
+    backgroundColor: ['#16213e', '#3a2800', '#16213e'],
+    boxShadow: ['0 0 0px transparent', '0 0 16px 6px rgba(255,215,0,0.5)', '0 0 0px transparent'],
+    duration: 500,
     easing: 'easeOutQuad'
   });
 
-  // After flash, fly scatter icon to ring
   setTimeout(() => {
     const ring = document.querySelector('.scatter-ring');
     if (!ring) return;
@@ -53,7 +52,7 @@ function flashAndFly(el) {
       ring.style.boxShadow = '0 0 20px rgba(255,215,0,0.9)';
       setTimeout(() => { ring.style.boxShadow = ''; }, 400);
     }, 550);
-  }, 400);
+  }, 500);
 }
 
 export function initScatterDebug() {}
