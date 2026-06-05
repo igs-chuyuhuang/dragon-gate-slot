@@ -479,3 +479,22 @@
 **關鍵 prompt / 指令：** 讓遊戲畫面在任何視窗大小下等比縮放不跑位
 **人工修正：** 每次迭代後用戶測試反饋方向調整（3 次）
 **耗時：** ~1.5 小時（含 3 次迭代）
+
+### [2026-06-05] — Fleet 備份 + RTP 調參 + BG 規則更新 + 固定舞台縮放 + Scatter 特效 + FG/BG 資訊按鈕
+
+**環節：** 程式 / 企劃
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. Fleet 備份：建立 docs/fleet_backup/（14 個檔案，含 fleet config、agent 角色定義、shared decisions）
+2. 整合市場調查報告（2025-2026_slot_market_trends.md、jackpot_system_comparison.md）
+3. RTP 調參：FG 獎金降低 [+5/+10/+15/+30/+50/—]、BG 賠率 ×10/×5/×2.5/×1 + 15→12局、Scatter 門檻 10→12
+4. BG 規則更新：移除 90 秒倒數改固定 12 局、每局 10 秒、UI 改局數 X/12
+5. BG 籌碼按鈕座標微調（x/y 多次迭代）
+6. 固定舞台縮放方案：多次嘗試（transform scale / zoom / min-size），最終用 min-size 390×844 + scale 縮小方案
+7. FG/BG 選擇畫面加 ℹ️ 資訊按鈕（點擊顯示模式介紹）
+8. Scatter 特效重寫：移除複雜光柱/震動/心跳，改為單格 cell 金色光效 → 龍圖飛向進度環 → 環閃亮
+**Before：** 無 fleet 備份；RTP 122.6%；BG 用 90 秒倒數；無舞台縮放；Scatter 特效過度複雜
+**After：** Fleet 備份完整；RTP 96.15%；BG 12局制；舞台可縮放；Scatter 特效簡潔（flash+fly+glow）；FG/BG 有說明按鈕
+**關鍵 prompt / 指令：** 備份 fleet；套用 RTP 調參；BG 改固定局數；加舞台縮放；Scatter 特效簡化同穿門風格
+**人工修正：** 舞台縮放方案經 6 次嘗試+revert 才定案（最終 min-size + scale）；Scatter flash 經 3 次修正
+**耗時：** ~4 小時（含多次縮放迭代）
