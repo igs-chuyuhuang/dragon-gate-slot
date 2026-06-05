@@ -22,7 +22,7 @@ function flashAndFly(el) {
   if (!el) return;
   // Yellow flash on cell
   const flash = document.createElement('div');
-  flash.style.cssText = 'position:absolute;inset:0;background:rgba(255,215,0,0.7);z-index:10;pointer-events:none;border-radius:4px;';
+  flash.style.cssText = 'position:absolute;inset:0;background:rgba(255,215,0,0.7);z-index:10;pointer-events:none;border-radius:50%;';
   el.style.position = 'relative';
   el.appendChild(flash);
   setTimeout(() => flash.remove(), 300);
