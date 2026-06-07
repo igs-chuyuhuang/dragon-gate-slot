@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>射龍門 Slot</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <div class="game-root">
+    <img class="bg-layer" src="assets/img/BG.png" alt="">
+    <img class="bg-bonus" id="bg-bonus" src="assets/img/BG-bonus.png" style="display:none" alt="">
+
+    <!-- Jackpot Pool -->
+    <div class="jp-pool-container">
+      <img class="jp-pool" src="assets/img/JP-pool.png" alt="Jackpot Pool">
+      <div class="jp-values">
+        <span class="jp-val" id="jp-grand-val">3,000</span>
+        <span class="jp-val" id="jp-major-val">500</span>
+        <span class="jp-val" id="jp-mini-val">100</span>
+      </div>
+    </div>
+
+    <!-- 3 Reel containers (absolute positioned on BG grid) -->
+    <div class="reel" id="reel-0"><div class="reel-strip"></div></div>
+    <div class="reel" id="reel-1"><div class="reel-strip"></div></div>
+    <div class="reel" id="reel-2"><div class="reel-strip"></div></div>
+
+    <!-- Badges -->
+    <div class="badge badge-0" id="badge-0"></div>
+    <div class="badge badge-1" id="badge-1"></div>
+    <div class="badge badge-2" id="badge-2"></div>
+
+    <!-- FG Bonus Reel -->
+    <div class="fg-reel" id="fg-reel" style="display:none">
+      <div class="fg-reel-strip" id="fg-reel-strip"></div>
+    </div>
+
+    <img class="mascot-dragon" src="assets/img/MS-01_mascot_dragon.png" alt="mascot">
+
+    <!-- Bottom Control Panel -->
+    <div class="ctrl-panel">
+      <div class="ctrl-info-cell" id="cell-balance">
+        <span class="ctrl-label">BALANCE</span>
+        <span class="ctrl-val" id="balance">1,000</span>
+      </div>
+      <button class="ctrl-auto-upper" id="auto-btn">AUTO</button>
+      <button class="spin-btn" id="spin-btn">SPIN</button>
+      <div class="ctrl-bet-group">
+        <span class="ctrl-label">BET</span>
+        <span class="ctrl-val" id="bet">10</span>
+      </div>
+      <button class="ctrl-adj" id="bet-dec">−</button>
+      <button class="ctrl-adj" id="bet-inc">+</button>
+      <div class="ctrl-info-cell" id="cell-win">
+        <span class="ctrl-label">WIN</span>
+        <span class="ctrl-val" id="win">0</span>
+      </div>
+      <div class="ctrl-action-row">
+        <button class="ctrl-func" id="vol-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
+        </button>
+        <button class="ctrl-func" id="turbo-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </button>
+        <button class="ctrl-func" id="rules-btn">i</button>
+      </div>
+    </div>
+
+    <!-- BG Control Panel (hidden by default) -->
+    <div class="ctrl-panel" id="bg-ctrl-panel" style="display:none">
+      <div class="ctrl-info-cell" style="position:absolute;left:7.7%;top:87.9%;">
+        <span class="ctrl-label">BALANCE</span>
+        <span class="ctrl-val" id="bg-balance">0</span>
+      </div>
+      <div class="ctrl-info-cell" style="position:absolute;left:26.7%;top:87.9%;">
+        <span class="ctrl-label">ROUND</span>
+        <span class="ctrl-val" id="bg-round-timer">15</span>
+      </div>
+      <button class="spin-btn" id="bg-deal-btn" disabled>DEAL</button>
+      <div class="ctrl-bet-group">
+        <span class="ctrl-label">局數</span>
+        <span class="ctrl-val" id="bg-round-counter">0/12</span>
+      </div>
+      <div class="ctrl-info-cell" style="position:absolute;left:80.8%;top:87.9%;">
+        <span class="ctrl-label">WIN</span>
+        <span class="ctrl-val" id="bg-win">0</span>
+      </div>
+      <div class="ctrl-action-row">
+        <button class="ctrl-func" id="bg-vol-btn" style="left:9.7%;width:11.8%;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
+        </button>
+        <button class="ctrl-func" id="bg-turbo-btn" style="left:24%;width:11.8%;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </button>
+        <button class="ctrl-func" id="bg-rules-btn" style="left:79.5%;width:8.7%;">i</button>
+      </div>
+    </div>
+
+    <!-- FG info -->
+    <div class="fg-info" id="fg-info" style="display:none"></div>
+    <div class="results-bar" id="results"></div>
+
+    <!-- FG Result Overlay -->
+    <div class="fg-result-overlay" id="fg-result-overlay" style="display:none">
+      <div class="fg-result-panel">
+        <div class="fg-result-title">FREE GAME</div>
+        <div class="fg-result-big" id="fg-result-big" style="display:none">BIG WIN!</div>
+        <div class="fg-result-label">總贏分</div>
+        <div class="fg-result-amount" id="fg-result-amount">0</div>
+      </div>
+    </div>
+
+    <!-- Bonus Game (inline on game-root, not overlay) -->
+    <div class="bg-inline" id="bg-inline" style="display:none">
+      <div class="bg-cards">
+        <div class="bg-card face" id="bg-card-l">?</div>
+        <div class="bg-card back" id="bg-card-m">🐉</div>
+        <div class="bg-card face" id="bg-card-r">?</div>
+      </div>
+      <div class="bg-gate-info" id="bg-gate-info"></div>
+      <div class="bg-result-text" id="bg-result-text"></div>
+    </div>
+    <!-- BG chip buttons (replaces bet area) -->
+    <div class="bg-chip-bar" id="bg-chip-bar" style="display:none">
+      <div class="bg-chip-btns" id="bg-chip-btns"></div>
+    </div>
+
+    <!-- FG/BG Choice Overlay -->
+    <div class="fg-result-overlay" id="fgbg-choice" style="display:none">
+      <div class="fg-result-panel" style="position:relative;">
+        <button class="rules-close" id="fgbg-close" style="position:absolute;top:-30px;right:-10px;">✕</button>
+        <div class="fg-result-title">選擇獎勵模式</div>
+        <div style="display:flex;flex-direction:column;gap:1rem;margin-top:1.5rem;width:100%;padding:0 1rem;pointer-events:auto;position:relative;z-index:9999;">
+          <button class="bg-deal-btn" id="choose-fg" style="background:linear-gradient(135deg,#1a8c5c,#2ecc71);padding:1rem;pointer-events:auto;">FREE GAME <span id="info-fg" style="cursor:pointer;margin-left:6px;display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;background:#FFD700;color:#5A2600;font-size:0.75em;font-weight:bold;">i</span></button>
+          <button class="bg-deal-btn" id="choose-bg" style="padding:1rem;pointer-events:auto;">BONUS GAME <span id="info-bg" style="cursor:pointer;margin-left:6px;display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;background:#FFD700;color:#5A2600;font-size:0.75em;font-weight:bold;">i</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FG/BG Info Overlay -->
+    <div class="rules-overlay" id="choice-info-overlay" style="display:none;z-index:2100">
+      <div class="rules-panel" style="width:80%;max-height:60vh;">
+        <button class="rules-close" id="choice-info-close">✕</button>
+        <div class="rules-content" id="choice-info-content"></div>
+      </div>
+    </div>
+
+    <!-- Scatter Progress Ring -->
+    <div class="scatter-ring" id="scatter-ring">
+      <div class="ring-bg"></div>
+      <svg class="ring-svg" viewBox="0 0 100 100">
+        <defs>
+          <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+            <feFlood flood-color="#00ffc8" flood-opacity="0.7" result="color"/>
+            <feComposite in="color" in2="blur" operator="in" result="glow"/>
+            <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g id="ring-segments"></g>
+        <g id="ring-glow" filter="url(#glow-filter)"></g>
+      </svg>
+      <div class="ring-orb" id="ring-orb"></div>
+      <img class="ring-icon" src="assets/img/SC-01_scatter_dragon.png" alt="scatter">
+      <span class="ring-label" id="ring-label">0/10</span>
+    </div>
+
+    <!-- JP hidden -->
+    <span id="jp-basic" style="display:none">500</span>
+    <span id="jp-major" style="display:none">2000</span>
+    <span id="jp-grand" style="display:none">10000</span>
+  </div>
+
+  <!-- Rules Panel -->
+  <div class="rules-overlay" id="rules-overlay" style="display:none">
+    <div class="rules-panel">
+      <button class="rules-close" id="rules-close">✕</button>
+      <div class="rules-tabs">
+        <button class="rules-tab active" data-page="0">玩法</button>
+        <button class="rules-tab" data-page="1">計分</button>
+        <button class="rules-tab" data-page="2">Free Game</button>
+      </div>
+      <div class="rules-content" id="rules-content"></div>
+    </div>
+  </div>
+
+  <!-- Auto Panel -->
+  <div class="auto-overlay" id="auto-overlay" style="display:none">
+    <div class="auto-panel">
+      <div class="auto-stepper">
+        <button class="ctrl-adj" id="auto-dec">−</button>
+        <span id="auto-count-display">50 局</span>
+        <button class="ctrl-adj" id="auto-inc">+</button>
+      </div>
+      <div class="auto-actions">
+        <button class="auto-start" id="auto-start">開始</button>
+        <button class="auto-cancel" id="auto-cancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { spin, countScatters } from './js/slotEngine.js';
+    import { GameManager } from './js/gameManager.js';
+    import { BonusGame } from './js/bonusGame.js';
+    import { playSfx } from './js/effects/sfxBus.js';
+    import { playWinLines } from './js/effects/winLine.js';
+    import { playWallHit } from './js/effects/wallHit.js';
+    import { revealScatters } from './js/effects/scatterReveal.js';
+
+    let muted = false;
+    let turbo = false;
+    function sfx(name) { if (!muted) playSfx(name); }
+
+    // === BGM ===
+    const bgm = new Audio('assets/audio/bgm.mp3');
+    bgm.loop = true;
+    bgm.volume = 0.3;
+    function startBGM() { bgm.play().catch(() => {}); }
+    document.addEventListener('click', startBGM, { once: true });
+    document.addEventListener('keydown', startBGM, { once: true });
+
+    const gm = new GameManager();
+    const $ = id => document.getElementById(id);
+    let spinning = false;
+
+    // Build scatter ring segments (10 arcs with gaps)
+    (function initRing() {
+      const g = $('ring-segments');
+      const R = 47, SEG = 10, GAP = 4;
+      const arcLen = (360 - GAP * SEG) / SEG;
+      for (let i = 0; i < SEG; i++) {
+        const startAngle = i * (arcLen + GAP);
+        const endAngle = startAngle + arcLen;
+        const s = startAngle * Math.PI / 180, e = endAngle * Math.PI / 180;
+        const x1 = 50 + R * Math.cos(s), y1 = 50 + R * Math.sin(s);
+        const x2 = 50 + R * Math.cos(e), y2 = 50 + R * Math.sin(e);
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M ${x1} ${y1} A ${R} ${R} 0 0 1 ${x2} ${y2}`);
+        path.setAttribute('class', 'ring-segment');
+        path.dataset.idx = i;
+        g.appendChild(path);
+      }
+    })();
+
+    function updateRing(count) {
+      const segs = document.querySelectorAll('.ring-segment');
+      const glowG = $('ring-glow');
+      glowG.innerHTML = '';
+      segs.forEach((s, i) => {
+        const active = i < count;
+        s.classList.toggle('active', active);
+        s.removeAttribute('filter');
+        if (active) {
+          const clone = s.cloneNode(true);
+          clone.setAttribute('stroke', '#ffd700');
+          clone.setAttribute('stroke-width', '9');
+          glowG.appendChild(clone);
+        }
+      });
+      $('ring-label').textContent = `${count}/10`;
+      // Position orb at end of progress
+      const orb = $('ring-orb');
+      if (count === 0) { orb.style.display = 'none'; return; }
+      orb.style.display = 'block';
+      const SEG = 10, GAP = 4, arcLen = (360 - GAP * SEG) / SEG;
+      const angle = (count * (arcLen + GAP) - GAP / 2) - 90;
+      const rad = angle * Math.PI / 180;
+      const R = 47;
+      orb.style.left = `${50 + R * Math.cos(rad) - 6}%`;
+      orb.style.top = `${50 + R * Math.sin(rad) - 6}%`;
+    }
+    let autoSpins = 0, autoStopped = false, autoCount = 50;
+
+    const CARD_IMG = {
+      1:'CD-01_ace.png',2:'CD-05_num2.png',3:'CD-06_num3.png',
+      4:'CD-07_num4.png',5:'CD-08_num5.png',6:'CD-09_num6.png',
+      7:'CD-10_num7.png',8:'CD-11_num8.png',9:'CD-12_num9.png',
+      10:'CD-13_num10.png',11:'CD-04_jack.png',12:'CD-03_queen.png',13:'CD-02_king.png'
+    };
+    const SC_IMG = 'SC-01_scatter_dragon.png';
+    const ALL_IMGS = Object.values(CARD_IMG);
+    const REEL_SYMBOLS = 30;
+
+    function cellImg(cell) { return cell.isScatter ? SC_IMG : CARD_IMG[cell.value]; }
+    function randomImg() { return ALL_IMGS[Math.floor(Math.random() * 13)]; }
+    function fmt(n) { return Math.round(n).toLocaleString(); }
+
+    // Get cell height from reel
+    function getCellH() {
+      const reel = document.querySelector('.reel');
+      return reel.getBoundingClientRect().height / 3;
+    }
+
+    function buildStrip(col, finalCells) { buildStripN(col, finalCells, REEL_SYMBOLS); }
+
+    function animateSpin(board, fgBonusSymbols) {
+      return new Promise(resolve => {
+        spinning = true;
+        if (turbo) {
+          const cellH = getCellH();
+          for (let col = 0; col < 3; col++) {
+            const strip = document.querySelector(`#reel-${col} .reel-strip`);
+            strip.innerHTML = '';
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateY(0px)';
+            for (let r = 0; r < 3; r++) {
+              const div = document.createElement('div');
+              div.className = 'cell';
+              div.style.height = cellH + 'px';
+              div.id = `cell-${r}-${col}`;
+              div.innerHTML = `<img src="assets/img/${cellImg(board[r][col])}">`;
+              if (fgBonusSymbols && col === 1 && fgBonusSymbols[r] !== '—') {
+                div.innerHTML += `<span class="cell-bonus">💰${fgBonusSymbols[r].slice(1)}</span>`;
+              }
+              strip.appendChild(div);
+            }
+          }
+          spinning = false;
+          resolve();
+          return;
+        }
+        const cellH = getCellH();
+        const overshoot = Math.round(cellH * 0.05);
+        const MID_SYMBOLS = 50;
+
+        for (let col = 0; col < 3; col++) {
+          const numSym = col === 1 ? MID_SYMBOLS : REEL_SYMBOLS;
+          const finalCells = [board[0][col], board[1][col], board[2][col]];
+          buildStripN(col, finalCells, numSym, col === 1 ? fgBonusSymbols : null);
+        }
+
+        const sideScrollDist = REEL_SYMBOLS * cellH;
+        const sideFastDur = 700;
+        const highSpeed = sideScrollDist / sideFastDur;
+
+        const configs = [
+          { scrollDist: REEL_SYMBOLS * cellH, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+          { scrollDist: MID_SYMBOLS * cellH, decelDist: 18 * cellH, decelMs: 2400, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+          { scrollDist: REEL_SYMBOLS * cellH, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        ];
+
+        const totalAxes = 3;
+        let done = 0;
+
+        for (let col = 0; col < 3; col++) {
+          const strip = document.querySelector(`#reel-${col} .reel-strip`);
+          const cfg = configs[col];
+          const targetY = cfg.scrollDist;
+          const fastDist = targetY - cfg.decelDist;
+          const fastDur = Math.round(fastDist / highSpeed);
+
+          strip.style.transition = `transform ${fastDur}ms linear`;
+          strip.style.transform = `translateY(-${fastDist}px)`;
+
+          setTimeout(() => {
+            const overshootY = targetY + overshoot;
+            strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
+            strip.style.transform = `translateY(-${overshootY}px)`;
+
+            setTimeout(() => {
+              strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
+              strip.style.transform = `translateY(-${targetY}px)`;
+
+              setTimeout(() => {
+                const root = document.querySelector('.game-root');
+                root.style.transform = 'translateY(1px)';
+                setTimeout(() => { root.style.transform = ''; }, 50);
+                done++;
+                if (done === totalAxes) { spinning = false; resolve(); }
+              }, 100);
+            }, cfg.decelMs);
+          }, fastDur);
+        }
+      });
+    }
+
+    function buildFgReelStripAnim(bonusSymbols, numSym, cellH) {
+      fgStripEl.innerHTML = '';
+      fgStripEl.style.transition = 'none';
+      fgStripEl.style.transform = 'translateY(0px)';
+      for (let i = 0; i < numSym; i++) {
+        const div = document.createElement('div');
+        div.className = 'fg-reel-cell';
+        div.style.height = cellH + 'px';
+        div.textContent = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
+        fgStripEl.appendChild(div);
+      }
+      for (let r = 0; r < 3; r++) {
+        const div = document.createElement('div');
+        div.className = 'fg-reel-cell';
+        div.style.height = cellH + 'px';
+        div.textContent = bonusSymbols[r];
+        fgStripEl.appendChild(div);
+      }
+    }
+
+    function buildFgReelStrip(bonusSymbols) {
+      const cellH = Math.round(fgReelEl.clientHeight / 3);
+      fgStripEl.innerHTML = '';
+      fgStripEl.style.transition = 'none';
+      fgStripEl.style.transform = 'translateY(0px)';
+      for (let r = 0; r < 3; r++) {
+        const div = document.createElement('div');
+        div.className = 'fg-reel-cell';
+        div.style.height = cellH + 'px';
+        div.textContent = bonusSymbols[r];
+        fgStripEl.appendChild(div);
+      }
+    }
+
+    function buildStripN(col, finalCells, numSym, bonusSymbols) {
+      const strip = document.querySelector(`#reel-${col} .reel-strip`);
+      const cellH = getCellH();
+      strip.innerHTML = '';
+      strip.style.transition = 'none';
+      strip.style.transform = 'translateY(0px)';
+      for (let i = 0; i < numSym; i++) {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.style.height = cellH + 'px';
+        div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+        if (bonusSymbols) {
+          const rSym = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
+          if (rSym !== '—') div.innerHTML += `<span class="cell-bonus">💰${rSym.slice(1)}</span>`;
+        }
+        strip.appendChild(div);
+      }
+      for (let r = 0; r < 3; r++) {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.style.height = cellH + 'px';
+        div.id = `cell-${r}-${col}`;
+        div.innerHTML = `<img src="assets/img/${cellImg(finalCells[r])}">`;
+        if (bonusSymbols && bonusSymbols[r] !== '—') {
+          div.innerHTML += `<span class="cell-bonus">💰${bonusSymbols[r].slice(1)}</span>`;
+        }
+        strip.appendChild(div);
+      }
+    }
+
+    const FG_SYMS = ['+5','+10','+15','+30','+50','—'];
+    const fgReelEl = $('fg-reel'), fgStripEl = $('fg-reel-strip');
+
+    function showFgReel() {}
+    function hideFgReel() {}
+
+    function flyFgCoins(judgments, bonusSymbols) {
+      const flyers = [];
+      for (const j of judgments) {
+        if (j.type !== 'through' || bonusSymbols[j.row] === '—') continue;
+        const cell = document.getElementById(`cell-${j.row}-1`);
+        const badge = $(`badge-${j.row}`);
+        const src = cell && cell.querySelector('.cell-bonus');
+        if (!src || !badge) continue;
+        const srcRect = src.getBoundingClientRect();
+        const dstRect = badge.getBoundingClientRect();
+        const flyer = document.createElement('span');
+        flyer.textContent = `💰${bonusSymbols[j.row].slice(1)}`;
+        flyer.style.cssText = `position:fixed;left:${srcRect.left}px;top:${srcRect.top}px;z-index:9999;font-size:13px;color:#ffd700;font-weight:bold;background:rgba(0,0,0,0.7);border-radius:8px;padding:2px 6px;transition:all 600ms cubic-bezier(0.25,1,0.5,1);pointer-events:none;`;
+        document.body.appendChild(flyer);
+        flyers.push({ clone: flyer, dstRect, badge, sym: bonusSymbols[j.row] });
+        requestAnimationFrame(() => {
+          flyer.style.left = `${dstRect.left + dstRect.width/2 - 20}px`;
+          flyer.style.top = `${dstRect.top + dstRect.height/2 - 10}px`;
+          flyer.style.transform = 'scale(1.3)';
+          flyer.style.opacity = '0.8';
+        });
+      }
+      if (flyers.length === 0) return Promise.resolve();
+      return new Promise(resolve => {
+        setTimeout(() => {
+          for (const f of flyers) {
+            f.clone.remove();
+            f.badge.textContent = `💰${f.sym.slice(1)}`;
+            f.badge.className = `badge badge-${f.badge.id.slice(-1)} win`;
+          }
+          resolve();
+        }, 650);
+      });
+    }
+
+    function showFGResult(total) {
+      const overlay = $('fg-result-overlay');
+      const amountEl = $('fg-result-amount');
+      const bigEl = $('fg-result-big');
+      overlay.style.display = 'flex';
+      bigEl.style.display = total > gm.bet * 20 ? 'block' : 'none';
+      amountEl.textContent = '0';
+      const duration = 2000;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / duration, 1);
+        amountEl.textContent = fmt(Math.round(total * p));
+        if (p < 1) requestAnimationFrame(tick);
+        else sfx('coin_count');
+      }
+      requestAnimationFrame(tick);
+      const close = () => { overlay.style.display = 'none'; };
+      overlay.onclick = close;
+      setTimeout(close, 3500);
+    }
+
+    // === Bonus Game Controller ===
+    const CARD_NAMES = ['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    let bgInstance = null, bgRoundTimer = null;
+
+    function showFgBgChoice() {
+      $('fgbg-choice').style.display = 'flex';
+    }
+
+    $('choose-fg').addEventListener('click', () => {
+      $('fgbg-choice').style.display = 'none';
+      gm.fg.start();
+      setTimeout(doSpin, 300);
+    });
+
+    $('choose-bg').addEventListener('click', () => {
+      $('fgbg-choice').style.display = 'none';
+      startBonusGame();
+    });
+
+    const FG_INFO = '<h3 style="color:#ffd700">FREE GAME</h3><ul><li>獲得 8 次免費轉動</li><li>中輪帶有💰金額符號</li><li>穿門時金額飛向餘額</li><li>符號池：+5, +10, +15, +30, +50, —</li></ul>';
+    const BG_INFO = '<h3 style="color:#ffd700">BONUS GAME</h3><ul><li>獲得 12 局射龍門對決</li><li>每局 10 秒下注時間</li><li>看兩張底牌，猜中間牌能否穿門</li><li>賠率：極窄門×10 / 窄門×5 / 中門×2.5 / 寬門×1</li><li>碰壁 -2× / 同值撞柱 -3×</li></ul>';
+    $('info-fg').addEventListener('click', (e) => { e.stopPropagation(); $('choice-info-content').innerHTML = FG_INFO; $('choice-info-overlay').style.display = 'flex'; });
+    $('info-bg').addEventListener('click', (e) => { e.stopPropagation(); $('choice-info-content').innerHTML = BG_INFO; $('choice-info-overlay').style.display = 'flex'; });
+    $('choice-info-close').addEventListener('click', () => { $('choice-info-overlay').style.display = 'none'; });
+
+    function startBonusGame() {
+      const pool = gm.jp.pools.basic + gm.jp.pools.major + gm.jp.pools.grand;
+      bgInstance = new BonusGame(gm.bet, pool);
+      // Hide main game elements
+      $('bg-bonus').style.display = 'block';
+      for (let i = 0; i < 3; i++) { document.getElementById(`reel-${i}`).style.display = 'none'; $(`badge-${i}`).style.display = 'none'; }
+      $('results').style.display = 'none';
+      $('scatter-ring').style.display = 'none';
+      const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = 'none';
+      const jpContainer = document.querySelector('.jp-pool-container'); if (jpContainer) jpContainer.style.display = 'none';
+      // Show BG inline UI
+      $('bg-inline').style.display = 'block';
+      $('bg-chip-bar').style.display = 'flex';
+      // Swap control panels
+      document.querySelector('.ctrl-panel').style.display = 'none';
+      $('bg-ctrl-panel').style.display = '';
+      $('bg-deal-btn').disabled = true;
+      bgUpdateUI();
+      bgNewRound();
+    }
+
+    function bgNewRound() {
+      if (!bgInstance || !bgInstance.active) { if (bgInstance) bgEnd(); return; }
+      $('bg-result-text').textContent = '';
+      $('bg-result-text').className = 'bg-result-text';
+      const { left, right } = bgInstance.deal();
+      $('bg-card-l').innerHTML = `<img src="assets/img/${CARD_IMG[left]}">`;
+      $('bg-card-l').className = 'bg-card face';
+      $('bg-card-r').innerHTML = `<img src="assets/img/${CARD_IMG[right]}">`;
+      $('bg-card-r').className = 'bg-card face';
+      $('bg-card-m').innerHTML = `<img src="assets/img/back.png">`;
+      $('bg-card-m').className = 'bg-card back';
+      const info = bgInstance.getGateInfo();
+      $('bg-gate-info').textContent = `${info.label} ×${info.mult}`;
+      bgBuildChips();
+      $('spin-btn').disabled = true;
+      bgInstance.roundBet = 0;
+      // Round timer
+      let roundLeft = bgInstance.roundTime;
+      
+      $('bg-round-timer').textContent = roundLeft;
+      if (bgRoundTimer) clearInterval(bgRoundTimer);
+      bgRoundTimer = setInterval(() => {
+        roundLeft--;
+        
+        $('bg-round-timer').textContent = roundLeft;
+        if (roundLeft <= 0) {
+          clearInterval(bgRoundTimer);
+          if (!bgInstance || !bgInstance.active) return;
+          // Auto min bet
+          const minBet = Math.round(bgInstance.chips * 0.1);
+          if (minBet > 0) { bgInstance.roundBet = minBet; bgDeal(); }
+          else bgEnd();
+        }
+      }, 1000);
+    }
+
+    function bgBuildChips() {
+      const container = $('bg-chip-btns');
+      container.innerHTML = '';
+      const chips = [
+        { pct: 10, x: 76, y: 616 },
+        { pct: 20, x: 127, y: 616 },
+        { pct: 100, x: 178, y: 616 },
+        { pct: 30, x: 229, y: 616 },
+        { pct: 50, x: 281, y: 616 },
+      ];
+      chips.forEach(c => {
+        const amt = Math.round(bgInstance.chips * c.pct / 100);
+        const btn = document.createElement('button');
+        btn.className = 'bg-chip-btn';
+        btn.textContent = `${c.pct}%\n${fmt(amt)}`;
+        btn.style.whiteSpace = 'pre-line';
+        btn.style.left = (c.x / 390 * 100) + '%';
+        btn.style.top = (c.y / 844 * 100) + '%';
+        btn.disabled = amt <= 0;
+        btn.addEventListener('click', () => {
+          container.querySelectorAll('.bg-chip-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          bgInstance.roundBet = amt;
+          $('bg-deal-btn').disabled = false;
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function bgDeal() {
+      if (!bgInstance || !bgInstance.active) return;
+      if (bgRoundTimer) clearInterval(bgRoundTimer);
+      $('bg-deal-btn').disabled = true;
+      $('bg-chip-btns').querySelectorAll('.bg-chip-btn').forEach(b => { b.disabled = true; });
+      // Flip animation
+      const midCard = $('bg-card-m');
+      midCard.classList.add('flip');
+      setTimeout(() => {
+        if (!bgInstance) return; // guard against race with bgEnd
+        const result = bgInstance.reveal();
+        midCard.innerHTML = `<img src="assets/img/${CARD_IMG[result.mid]}">`;
+        midCard.className = 'bg-card face';
+        bgInstance.applyResult(result);
+        // Show result
+        const resEl = $('bg-result-text');
+        if (result.mult > 0) {
+          resEl.textContent = `穿門！×${result.mult} +${fmt(bgInstance.roundBet * result.mult)}`;
+          resEl.className = 'bg-result-text win';
+          sfx('gate_through');
+        } else if (result.type === 'wall') {
+          resEl.textContent = `碰壁！-${fmt(Math.abs(bgInstance.roundBet * result.mult))}`;
+          resEl.className = 'bg-result-text lose';
+          sfx('wall_hit');
+        } else if (result.type === 'same-hit') {
+          resEl.textContent = `同值撞柱！-${fmt(Math.abs(bgInstance.roundBet * result.mult))}`;
+          resEl.className = 'bg-result-text lose';
+          sfx('wall_hit');
+        } else {
+          resEl.textContent = `未穿 -${fmt(Math.abs(bgInstance.roundBet * result.mult))}`;
+          resEl.className = 'bg-result-text lose';
+        }
+        bgUpdateUI();
+        // Next round after delay
+        setTimeout(() => {
+          if (!bgInstance) return;
+          if (bgInstance.active && bgInstance.chips > 0) bgNewRound();
+          else {
+            if (bgInstance.chips <= 0) {
+              $('bg-result-text').textContent = '💸 籌碼用盡！';
+              $('bg-result-text').className = 'bg-result-text lose';
+              setTimeout(() => bgEnd(), 1500);
+            } else bgEnd();
+          }
+        }, 2000);
+      }, 750); // halfway through flip
+    }
+
+    function bgUpdateUI() {
+      $('bg-balance').textContent = fmt(bgInstance.chips);
+      $('bg-win').textContent = fmt(bgInstance.winnings);
+      $('bg-round-counter').textContent = `${bgInstance.rounds}/${bgInstance.maxRounds}`;
+    }
+
+    function bgEnd() {
+      if (!bgInstance) return;
+      if (bgRoundTimer) clearInterval(bgRoundTimer);
+      bgInstance.active = false;
+      const winnings = bgInstance.winnings;
+      // Hide BG inline UI
+      $('bg-inline').style.display = 'none';
+      $('bg-chip-bar').style.display = 'none';
+      // Swap panels back
+      $('bg-ctrl-panel').style.display = 'none';
+      document.querySelector('.ctrl-panel').style.display = '';
+      // Restore main game elements
+      $('bg-bonus').style.display = 'none';
+      for (let i = 0; i < 3; i++) { document.getElementById(`reel-${i}`).style.display = ''; $(`badge-${i}`).style.display = ''; }
+      $('results').style.display = '';
+      $('scatter-ring').style.display = '';
+      const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = '';
+      const jpContainer = document.querySelector('.jp-pool-container'); if (jpContainer) jpContainer.style.display = '';
+      bgInstance = null;
+      updateUI();
+      showBGResult(winnings);
+    }
+
+    function showBGResult(total) {
+      const overlay = $('fg-result-overlay');
+      const amountEl = $('fg-result-amount');
+      const bigEl = $('fg-result-big');
+      const titleEl = overlay.querySelector('.fg-result-title');
+      titleEl.textContent = 'BONUS GAME';
+      overlay.style.display = 'flex';
+      bigEl.style.display = total > gm.bet * 20 ? 'block' : 'none';
+      amountEl.textContent = '0';
+      const duration = 2000;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / duration, 1);
+        amountEl.textContent = fmt(Math.round(total * p));
+        if (p < 1) requestAnimationFrame(tick);
+        else sfx('coin_count');
+      }
+      requestAnimationFrame(tick);
+      const close = () => {
+        overlay.style.display = 'none';
+        titleEl.textContent = 'FREE GAME';
+        gm.balance += total;
+        updateUI();
+      };
+      overlay.onclick = close;
+      setTimeout(close, 3500);
+    }
+
+
+
+    function updateUI() {
+      $('balance').textContent = fmt(gm.balance);
+      $('bet').textContent = fmt(gm.bet);
+      $('spin-btn').disabled = spinning || !gm.canSpin();
+      $('bet-dec').disabled = spinning || gm.betIndex <= 0;
+      $('bet-inc').disabled = spinning || gm.betIndex >= 4;
+      $('auto-btn').textContent = autoSpins > 0 ? `${autoSpins}` : 'AUTO';
+      const fgEl = $('fg-info');
+      if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉`; }
+      else { fgEl.style.display = 'none'; }
+      // Update JP pool display
+      $('jp-grand-val').textContent = fmt(Math.round(gm.jp.pools.grand));
+      $('jp-major-val').textContent = fmt(Math.round(gm.jp.pools.major));
+      $('jp-mini-val').textContent = fmt(Math.round(gm.jp.pools.basic));
+    }
+
+    async function doSpin() {
+      if (spinning || !gm.canSpin()) return;
+      for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
+      const isFG = gm.fg.active;
+      sfx('spin_charge');
+      updateUI();
+      const result = gm.executeSpin();
+      if (!result) return;
+      if (result.mode === 'fg') {
+        await animateSpin(result.board, result.bonusSymbols);
+        sfx('spin_release');
+        // Win lines for rows that scored
+        const winRows = result.judgments
+          .filter(j => j.type === 'through' && result.bonusSymbols[j.row] !== '—')
+          .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
+        if (winRows.length > 0) await playWinLines(winRows);
+        // Fly coin from mid-column to badge
+        await flyFgCoins(result.judgments, result.bonusSymbols);
+        $('win').textContent = fmt(result.totalScore);
+        updateUI();
+        if (result.fgDone) { showFGResult(result.totalScore); }
+        else { setTimeout(() => doSpin(), 400); }
+        return result;
+      }
+      await animateSpin(result.board);
+      sfx('spin_release');
+      showResult(result);
+      // Play result sfx + win line effect
+      if (result.mode === 'normal') {
+        // Scatter first (top-to-bottom, left-to-right), with fly to collector
+        if (result.scatterCount > 0) await revealScatters(result.board, result.scatterCount);
+        // Wall hits — await each so the effect is visible
+        for (const j of result.judgments) {
+          if (j.type === 'wall' || j.type === 'same-hit') await playWallHit(j.row);
+        }
+        for (const j of result.judgments) {
+          if (j.type === 'through') sfx('gate_through');
+        }
+        if (result.totalPayout > 0) sfx('coin_count');
+        if (result.fgTriggered) sfx('gate_open');
+        const winRows = result.judgments
+          .filter(j => j.type === 'through')
+          .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
+        if (winRows.length > 0) await playWinLines(winRows);
+      }
+      updateUI();
+      if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
+        if (result.fgTriggered) { showFgBgChoice(); }
+        else { setTimeout(() => doSpin(), 400); }
+      }
+      return result;
+    }
+
+    function showResult(result) {
+      for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
+      if (result.mode === 'fg') { return; }
+      result.judgments.forEach(j => {
+        const badge = $(`badge-${j.row}`);
+        const rowScatters = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].filter(c => c.isScatter).length;
+        if (rowScatters > 0) { badge.textContent = `🐉 +${rowScatters}`; badge.classList.add('sc'); }
+        else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
+        else if (j.type === 'wall') { badge.textContent = '🔥 -1'; badge.classList.add('wall'); }
+        else if (j.type === 'same-hit') { badge.textContent = '🔥 -2'; badge.classList.add('wall'); }
+        else { badge.textContent = '—'; }
+      });
+      const winEl = $('win');
+      if (result.totalPayout > 0) { winEl.textContent = fmt(result.totalPayout); winEl.style.color = '#ffd700'; }
+      else { winEl.textContent = '0'; winEl.style.color = '#ffd700'; }
+      $('results').textContent = result.fgTriggered ? '🎰 Free Game!' : '';
+      updateRing(gm.scatterLamps);
+    }
+
+    // Auto
+    function toggleAuto() {
+      if (autoSpins > 0) { autoStopped = true; autoSpins = 0; updateUI(); return; }
+      $('auto-overlay').style.display = 'flex';
+    }
+    async function startAuto() {
+      $('auto-overlay').style.display = 'none';
+      autoSpins = autoCount; autoStopped = false;
+      while (autoSpins > 0 && !autoStopped && gm.canSpin()) {
+        await doSpin(); autoSpins--; updateUI();
+        if (autoSpins > 0 && !autoStopped) await new Promise(r => setTimeout(r, 300));
+      }
+      autoSpins = 0; updateUI();
+    }
+
+    // Init: show random symbols
+    function initReels() {
+      const cellH = getCellH();
+      for (let col = 0; col < 3; col++) {
+        const strip = document.querySelector(`#reel-${col} .reel-strip`);
+        strip.innerHTML = '';
+        for (let r = 0; r < 3; r++) {
+          const div = document.createElement('div');
+          div.className = 'cell';
+          div.style.height = cellH + 'px';
+          div.id = `cell-${r}-${col}`;
+          div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+          strip.appendChild(div);
+        }
+      }
+    }
+
+    initReels();
+    updateUI();
+    $('results').textContent = '';
+    updateRing(gm.scatterLamps);
+    $('spin-btn').addEventListener('click', doSpin);
+    $('bg-deal-btn').addEventListener('click', () => { if (bgInstance) bgDeal(); });
+    $('bet-dec').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex-1); updateUI(); } });
+    $('bet-inc').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex+1); updateUI(); } });
+    $('auto-btn').addEventListener('click', toggleAuto);
+    $('auto-start').addEventListener('click', startAuto);
+    $('auto-cancel').addEventListener('click', () => { $('auto-overlay').style.display = 'none'; });
+    $('auto-dec').addEventListener('click', () => { autoCount = Math.max(10, autoCount-10); $('auto-count-display').textContent = autoCount+' 局'; });
+    $('auto-inc').addEventListener('click', () => { autoCount = Math.min(100, autoCount+10); $('auto-count-display').textContent = autoCount+' 局'; });
+    // Rules overlay
+    const RULES_PAGES = [
+      `<h3>🎰 遊戲玩法</h3><p>射龍門 Slot，3×3 盤面。</p><p>左右欄決定「門寬」，中欄判定穿門。</p><ul><li>穿門成功 → 依門寬賠率派彩</li><li>碰壁 → 不扣錢，扣 1 個 Scatter 燈</li><li>同值撞柱 → 不扣錢，扣 2 個 Scatter 燈</li></ul>`,
+      `<h3>💰 計分規則</h3><p>穿門賠率（依門寬）：</p><ul><li>極窄（差2）：×15</li><li>窄（差3~4）：×6</li><li>中（差5~8）：×3</li><li>寬（差9~11）：×1</li></ul><p>每次 Spin 扣 bet（bet 平均分配給三列）</p><p>🐉 Scatter 龍符號：累積燈號 +1</p>`,
+      `<h3>🐲 Free Game</h3><ul><li>Scatter 累積燈號達 10 個觸發</li><li>碰壁扣 1 燈、同值扣 2 燈（會延遲觸發）</li><li>Free Game 中不出 Scatter、不碰壁</li><li>穿門成功直接獲得彩金</li><li>觸發後燈號歸零重新收集</li></ul>`
+    ];
+    function showRulesPage(page) {
+      $('rules-content').innerHTML = RULES_PAGES[page];
+      document.querySelectorAll('.rules-tab').forEach(t => t.classList.toggle('active', +t.dataset.page === page));
+    }
+    $('rules-btn').addEventListener('click', () => { $('rules-overlay').style.display = 'flex'; showRulesPage(0); });
+    $('rules-close').addEventListener('click', () => { $('rules-overlay').style.display = 'none'; });
+    $('rules-overlay').addEventListener('click', e => { if (e.target === $('rules-overlay')) $('rules-overlay').style.display = 'none'; });
+    document.querySelectorAll('.rules-tab').forEach(t => t.addEventListener('click', () => showRulesPage(+t.dataset.page)));
+    $('vol-btn').addEventListener('click', () => {
+      muted = !muted;
+      $('vol-btn').classList.toggle('muted', muted);
+      $('vol-btn').innerHTML = muted
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>';
+      bgm.volume = muted ? 0 : 0.3;
+    });
+    $('turbo-btn').addEventListener('click', () => {
+      turbo = !turbo;
+      $('turbo-btn').classList.toggle('active', turbo);
+      $('turbo-btn').style.background = turbo ? 'rgba(255,215,0,0.25)' : '';
+    });
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
+      if (e.key === 'f' && !gm.fg.active && !spinning) { showFgBgChoice(); }
+    });
+    $('fgbg-close').addEventListener('click', () => { $('fgbg-choice').style.display = 'none'; });
+    window.focus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>射龍門 Slot</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+#game-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+}
+
+#game-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+}
+
+#game {
+  display: block;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+</style>
+</head>
+
+<body>
+  <div id="game-viewport">
+    <div id="game-wrap">
+      <iframe id="game" src="game.html?embed=1" allow="autoplay"></iframe>
+    </div>
+  </div>
+
+<script>
+(function () {
+  // iframe 尺寸 = 正常版 .game-root 的 layout 尺寸
+  // game-root CSS: height=100dvh, width=100vw, max-width=calc(100dvh*9/16)
+  // 所以在初始載入時，game-root 的尺寸 = (vh * 9/16) × vh（假設桌機寬度夠）
+  // 我們用初始 viewport 高度作為基準，鎖定後不再變
+  var vh = window.innerHeight;
+  var vw = window.innerWidth;
+  var BASE_H = vh;
+  var BASE_W = Math.min(vw, Math.floor(vh * 9 / 16));
+
+  var wrap = document.getElementById('game-wrap');
+
+  wrap.style.width = BASE_W + 'px';
+  wrap.style.height = BASE_H + 'px';
+
+  function resize() {
+    var vv = window.visualViewport;
+    var cvw = vv ? vv.width : window.innerWidth;
+    var cvh = vv ? vv.height : window.innerHeight;
+
+    var scale = Math.min(cvw / BASE_W, cvh / BASE_H);
+
+    wrap.style.transform =
+      'translate(-50%, -50%) scale(' + scale + ')';
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', resize);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', resize);
+  }
+
+  resize();
+})();
+</script>
+</body>
+</html>
