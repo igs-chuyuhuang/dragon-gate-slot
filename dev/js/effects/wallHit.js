@@ -1,4 +1,4 @@
-// wallHit.js — 碰壁：680ms total (100ms anticipation + 80ms hitStop + 300ms impact + 200ms settle)
+// wallHit.js — 碰壁強化版：~900ms total, double shake + chromatic + persistent crack
 import { anime } from '../gameFeel.js';
 import { burst } from './particlePool.js';
 import { hitStop, shakeBoard, flashScreen, shockwaveDOM } from './cameraFeel.js';
@@ -6,54 +6,65 @@ import { playLayered } from './sfxBus.js';
 
 export async function playWallHit(row) {
   const cells = [0, 1, 2].map(c => document.getElementById(`cell-${row}-${c}`));
-  if (!cells[1]) return; // guard
+  if (!cells[1]) return;
   const [left, mid, right] = cells;
   const midRect = mid.getBoundingClientRect();
   const cx = midRect.left + midRect.width / 2;
   const cy = midRect.top + midRect.height / 2;
 
-  // === ANTICIPATION (60ms) — immediate red flash ===
-  anime({ targets: mid, backgroundColor: '#5c1a1a', boxShadow: '0 0 14px 6px rgba(233,69,96,0.5)', duration: 60, easing: 'easeOutQuad' });
-  flashScreen('#e94560', 0.15, 150);
-
+  // === ANTICIPATION (80ms) — red warning ===
+  anime({ targets: mid, backgroundColor: '#5c1a1a', boxShadow: '0 0 18px 8px rgba(233,69,96,0.6)', duration: 80, easing: 'easeOutQuad' });
+  flashScreen('#e94560', 0.18, 150);
   await hitStop(80);
 
-  // === HIT STOP (80ms) ===
-  await hitStop(80);
+  // === HIT STOP (100ms) — freeze frame ===
+  await hitStop(100);
 
-  // === IMPACT (450ms) ===
-  playLayered([{ name: 'wall_hit' }, { name: 'crack', delay: 80, volume: 0.8 }]);
+  // === IMPACT (500ms) ===
+  playLayered([{ name: 'wall_hit' }, { name: 'crack', delay: 60, volume: 0.9 }]);
 
-  // Red flash — stronger + longer
-  flashScreen('#e94560', 0.4, 400);
+  // Double flash: initial burst + aftershock
+  flashScreen('#e94560', 0.5, 200);
+  setTimeout(() => flashScreen('#ff2244', 0.3, 300), 150);
 
-  // Board shake 14px, 300ms — much more visible
-  shakeBoard(14, 300);
+  // Primary shake 16px/350ms + secondary aftershock
+  shakeBoard(16, 350);
+  setTimeout(() => shakeBoard(8, 200), 300);
 
-  // Crack overlay — persists 1.2s so player sees it
+  // Red shockwave from impact point
+  shockwaveDOM(cx, cy, '#e94560', 6, 400);
+
+  // Chromatic aberration flash (red/cyan split)
+  const chroma = document.createElement('div');
+  chroma.style.cssText = `position:fixed;inset:0;z-index:899;pointer-events:none;mix-blend-mode:screen;
+    background:linear-gradient(90deg, rgba(255,0,0,0.15) 0%, transparent 40%, transparent 60%, rgba(0,255,255,0.15) 100%)`;
+  document.body.appendChild(chroma);
+  anime({ targets: chroma, opacity: [1, 0], duration: 300, easing: 'easeOutQuad', complete: () => chroma.remove() });
+
+  // Multi-path crack overlay — persists 1.5s
+  const crackSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5 L47 25 L40 38 L50 50 L43 62 L50 78 L46 95' stroke='%23e94560' stroke-width='2.5' fill='none'/%3E%3Cpath d='M50 50 L62 55 L75 50' stroke='%23e94560' stroke-width='2' fill='none'/%3E%3Cpath d='M50 50 L38 58 L28 55' stroke='%23e94560' stroke-width='1.5' fill='none'/%3E%3Cpath d='M47 25 L35 20 L28 25' stroke='%23e94560' stroke-width='1.5' fill='none'/%3E%3C/svg%3E`;
   const crack = document.createElement('div');
-  crack.style.cssText = `position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10 L48 30 L42 45 L50 50 L45 65 L50 80 L47 95' stroke='%23e94560' stroke-width='2' fill='none'/%3E%3Cpath d='M50 50 L60 55 L70 52' stroke='%23e94560' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;z-index:5;pointer-events:none;opacity:0.9`;
+  crack.style.cssText = `position:absolute;inset:-10%;width:120%;height:120%;background:url("${crackSvg}") center/contain no-repeat;z-index:5;pointer-events:none;opacity:0`;
   mid.style.position = 'relative';
   mid.appendChild(crack);
-  anime({ targets: crack, opacity: [0.9, 0], duration: 1200, delay: 200, easing: 'easeInQuad', complete: () => crack.remove() });
+  anime({ targets: crack, opacity: [0, 1], duration: 80, easing: 'easeOutQuad' });
+  anime({ targets: crack, opacity: [1, 0], duration: 1500, delay: 400, easing: 'easeInCubic', complete: () => crack.remove() });
 
-  // Red vignette
+  // Heavy red vignette
   const vig = document.createElement('div');
-  vig.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(233,69,96,0.4) 100%);z-index:898;pointer-events:none';
+  vig.style.cssText = 'position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 30%,rgba(233,69,96,0.5) 100%);z-index:898;pointer-events:none';
   document.body.appendChild(vig);
-  anime({ targets: vig, opacity: [0.7, 0], duration: 500, easing: 'easeOutQuad', complete: () => vig.remove() });
+  anime({ targets: vig, opacity: [0.8, 0], duration: 600, easing: 'easeOutQuad', complete: () => vig.remove() });
 
-  // Squash mid cell
-  anime({ targets: mid, scaleX: [1, 1.3, 0.88, 1.05, 1], scaleY: [1, 0.8, 1.12, 0.97, 1], borderColor: ['#e94560', '#0f3460'], backgroundColor: ['#5c1a1a', '#16213e'], boxShadow: ['0 0 10px 4px rgba(233,69,96,0.4)', '0 0 0px transparent'], duration: 450, easing: 'easeOutElastic(1, 0.6)' });
+  // Squash mid cell — more exaggerated
+  anime({ targets: mid, scaleX: [1, 1.35, 0.85, 1.06, 1], scaleY: [1, 0.75, 1.15, 0.96, 1], borderColor: ['#e94560', '#0f3460'], backgroundColor: ['#5c1a1a', '#16213e'], boxShadow: ['0 0 12px 5px rgba(233,69,96,0.5)', '0 0 0px transparent'], duration: 500, easing: 'easeOutElastic(1, 0.55)' });
 
-  // Push left/right 14px
-  anime({ targets: left, translateX: [-14, 3, 0], duration: 400, easing: 'easeOutBack' });
-  anime({ targets: right, translateX: [14, -3, 0], duration: 400, easing: 'easeOutBack' });
+  // Push left/right 18px
+  anime({ targets: left, translateX: [-18, 4, 0], duration: 450, easing: 'easeOutBack' });
+  anime({ targets: right, translateX: [18, -4, 0], duration: 450, easing: 'easeOutBack' });
 
-  // Debris: triangle + redSpark (mixed shapes)
-  burst(cx, cy, { texture: 'triangle', count: 15, spread: 80, duration: 400, gravity: 25, sizeMin: 0.6, sizeMax: 1.2, tint: [0x8b0000, 0x555555, 0xe94560] });
-  burst(cx, cy, { texture: 'redSpark', count: 18, spread: 100, duration: 380, sizeMin: 0.5, sizeMax: 1.2 });
-  burst(cx, cy, { texture: 'debris', count: 10, spread: 70, duration: 450, gravity: 20, tint: [0x444444, 0x666666] });
-
-  // === SETTLE (200ms) — auto via animation durations ===
+  // Heavy debris burst
+  burst(cx, cy, { texture: 'triangle', count: 20, spread: 100, duration: 450, gravity: 30, sizeMin: 0.7, sizeMax: 1.4, tint: [0x8b0000, 0x555555, 0xe94560] });
+  burst(cx, cy, { texture: 'redSpark', count: 24, spread: 120, duration: 420, sizeMin: 0.5, sizeMax: 1.3 });
+  burst(cx, cy, { texture: 'debris', count: 14, spread: 90, duration: 500, gravity: 25, tint: [0x333333, 0x666666, 0x8b0000] });
 }
