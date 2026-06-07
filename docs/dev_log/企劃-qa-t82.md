@@ -498,3 +498,14 @@
 **關鍵 prompt / 指令：** 備份 fleet；套用 RTP 調參；BG 改固定局數；加舞台縮放；Scatter 特效簡化同穿門風格
 **人工修正：** 舞台縮放方案經 6 次嘗試+revert 才定案（最終 min-size + scale）；Scatter flash 經 3 次修正
 **耗時：** ~4 小時（含多次縮放迭代）
+
+### [2026-06-07] — Cherry-pick 碰壁特效到 main
+
+**環節：** 程式
+**AI 工具：** Kiro Agent
+**做了什麼：** 將 game-feel branch 的碰壁特效強化（double shake + chromatic aberration + shockwave + 多路裂痕）cherry-pick 到 main branch，解決 wallHit.js 合併衝突（取用強化版）
+**Before：** 碰壁特效強化只在 game-feel branch，main 上是舊版
+**After：** main 已有最新碰壁特效（commit f683a87 + 27cc897）
+**關鍵 prompt / 指令：** 把 game-feel branch 的修改 merge 或 cherry-pick 到 main
+**人工修正：** 無
+**耗時：** ~5 分鐘
