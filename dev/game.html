@@ -146,6 +146,17 @@
       </div>
     </div>
 
+    <!-- Tutorial Overlay -->
+    <div class="rules-overlay" id="tutorial-overlay" style="display:none;z-index:2200">
+      <div class="rules-panel" style="width:80%;max-height:65vh;">
+        <div class="rules-content" id="tutorial-content"></div>
+        <label style="color:#aaa;font-size:12px;margin-top:10px;display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input type="checkbox" id="tutorial-dismiss"> 不再顯示
+        </label>
+        <button class="bg-deal-btn" id="tutorial-start" style="margin-top:12px;width:100%;padding:0.8rem;">開始遊戲</button>
+      </div>
+    </div>
+
     <!-- Scatter Progress Ring -->
     <div class="scatter-ring" id="scatter-ring">
       <div class="ring-bg"></div>
@@ -683,19 +694,33 @@
       $('fgbg-choice').style.display = 'flex';
     }
 
+    const FG_INFO = '<h3 style="color:#ffd700">FREE GAME</h3><ul><li>獲得 8 次免費轉動</li><li>中輪帶有💰金額符號</li><li>穿門時金額飛向餘額</li><li>符號池：+5, +10, +15, +30, +50, —</li></ul>';
+    const BG_INFO = '<h3 style="color:#ffd700">BONUS GAME</h3><ul><li>獲得 12 局射龍門對決</li><li>每局 10 秒下注時間</li><li>看兩張底牌，猜中間牌能否穿門</li><li>賠率：極窄門×10 / 窄門×5 / 中門×2.5 / 寬門×1</li><li>碰壁 -2× / 同值撞柱 -3×</li></ul>';
+
+    let _tutorialCallback = null;
+    function showTutorial(content, storageKey, callback) {
+      if (localStorage.getItem(storageKey)) { callback(); return; }
+      $('tutorial-content').innerHTML = content;
+      $('tutorial-dismiss').checked = false;
+      $('tutorial-overlay').style.display = 'flex';
+      _tutorialCallback = () => {
+        if ($('tutorial-dismiss').checked) localStorage.setItem(storageKey, '1');
+        $('tutorial-overlay').style.display = 'none';
+        callback();
+      };
+    }
+    $('tutorial-start').addEventListener('click', () => { if (_tutorialCallback) _tutorialCallback(); });
+
     $('choose-fg').addEventListener('click', () => {
       $('fgbg-choice').style.display = 'none';
-      gm.fg.start();
-      setTimeout(doSpin, 300);
+      showTutorial(FG_INFO, 'fgTutorialDismissed', () => { gm.fg.start(); setTimeout(doSpin, 300); });
     });
 
     $('choose-bg').addEventListener('click', () => {
       $('fgbg-choice').style.display = 'none';
-      startBonusGame();
+      showTutorial(BG_INFO, 'bgTutorialDismissed', () => { startBonusGame(); });
     });
 
-    const FG_INFO = '<h3 style="color:#ffd700">FREE GAME</h3><ul><li>獲得 8 次免費轉動</li><li>中輪帶有💰金額符號</li><li>穿門時金額飛向餘額</li><li>符號池：+5, +10, +15, +30, +50, —</li></ul>';
-    const BG_INFO = '<h3 style="color:#ffd700">BONUS GAME</h3><ul><li>獲得 12 局射龍門對決</li><li>每局 10 秒下注時間</li><li>看兩張底牌，猜中間牌能否穿門</li><li>賠率：極窄門×10 / 窄門×5 / 中門×2.5 / 寬門×1</li><li>碰壁 -2× / 同值撞柱 -3×</li></ul>';
     $('info-fg').addEventListener('click', (e) => { e.stopPropagation(); $('choice-info-content').innerHTML = FG_INFO; $('choice-info-overlay').style.display = 'flex'; });
     $('info-bg').addEventListener('click', (e) => { e.stopPropagation(); $('choice-info-content').innerHTML = BG_INFO; $('choice-info-overlay').style.display = 'flex'; });
     $('choice-info-close').addEventListener('click', () => { $('choice-info-overlay').style.display = 'none'; });
