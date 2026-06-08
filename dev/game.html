@@ -295,7 +295,7 @@
 
     function buildStrip(col, finalCells) { buildStripN(col, finalCells, REEL_SYMBOLS); }
 
-    function animateSpin(board, fgBonusSymbols) {
+    function animateSpin(board, fgBonusSymbols, onSidesStop) {
       return new Promise(resolve => {
         spinning = true;
         if (turbo) {
@@ -318,6 +318,7 @@
             }
           }
           spinning = false;
+          if (onSidesStop) onSidesStop();
           resolve();
           return;
         }
@@ -341,8 +342,8 @@
           { scrollDist: REEL_SYMBOLS * cellH, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
         ];
 
-        const totalAxes = 3;
-        let done = 0;
+        let sidesCount = 0;
+        let midDone = false;
 
         for (let col = 0; col < 3; col++) {
           const strip = document.querySelector(`#reel-${col} .reel-strip`);
@@ -364,11 +365,13 @@
               strip.style.transform = `translateY(-${targetY}px)`;
 
               setTimeout(() => {
-                const root = document.querySelector('.game-root');
-                root.style.transform = 'translateY(1px)';
-                setTimeout(() => { root.style.transform = ''; }, 50);
-                done++;
-                if (done === totalAxes) { spinning = false; resolve(); }
+                if (col !== 1) {
+                  sidesCount++;
+                  if (sidesCount === 2 && onSidesStop) onSidesStop();
+                } else {
+                  midDone = true;
+                }
+                if (sidesCount === 2 && midDone) { spinning = false; resolve(); }
               }, 100);
             }, cfg.decelMs);
           }, fastDur);
@@ -829,18 +832,16 @@
         else { setTimeout(() => doSpin(), 400); }
         return result;
       }
-      await animateSpin(result.board);
-      sfx('spin_release');
-      showResult(result);
-      // JP Slot: check if any row has narrow gate, render JP symbols on mid column
+      // Normal mode: determine JP symbols, pass onSidesStop callback
       let jpSlotWin = null;
-      if (result.mode === 'normal') {
-        let jpSyms = null;
-        if (window._debugJpNext) {
-          jpSyms = [window._debugJpNext, window._debugJpNext, window._debugJpNext];
-          window._debugJpNext = null;
-        } else {
-          // Find row with narrow gate (gap 1~3 only)
+      let jpSyms = null;
+      if (window._debugJpNext) {
+        jpSyms = [window._debugJpNext, window._debugJpNext, window._debugJpNext];
+        window._debugJpNext = null;
+      }
+      await animateSpin(result.board, null, () => {
+        // Sides stopped — flash middle reel if narrow gate detected
+        if (!jpSyms) {
           const jpRow = result.judgments.find(j => j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss' && j.gap >= 1 && j.gap <= 3);
           if (jpRow) {
             console.log('[JP] Triggered:', result.judgments.map(j => `row${j.row} type=${j.type} gap=${j.gap}`).join(', '));
@@ -849,15 +850,19 @@
           }
         }
         if (jpSyms) {
-          // Flash middle reel
           const midReel = document.getElementById('reel-1');
           midReel.style.boxShadow = '0 0 16px 4px rgba(255,215,0,0.7)';
-          // Animate each middle cell independently (top→mid→bottom)
-          await animateJpCells(jpSyms, jpSyms.some(s => s !== 'normal') ? getJpPool(1) : getJpPool(2));
-          setTimeout(() => { midReel.style.boxShadow = ''; }, 800);
-          jpSlotWin = checkJpSlotWin(jpSyms);
         }
+      });
+      sfx('spin_release');
+      // After all reels stop: if JP symbols, do independent cell animation
+      if (jpSyms) {
+        await animateJpCells(jpSyms, jpSyms.some(s => s !== 'normal') ? getJpPool(1) : getJpPool(2));
+        const midReel = document.getElementById('reel-1');
+        setTimeout(() => { midReel.style.boxShadow = ''; }, 800);
+        jpSlotWin = checkJpSlotWin(jpSyms);
       }
+      showResult(result);
       // Play result sfx + win line effect
       if (result.mode === 'normal') {
         // Scatter first (top-to-bottom, left-to-right), with fly to collector
