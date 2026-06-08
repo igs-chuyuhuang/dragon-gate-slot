@@ -335,86 +335,110 @@
           return;
         }
         const overshoot = Math.round(cellH * 0.05);
+        const MID_SYMBOLS = 50;
+        const sideScrollDist = REEL_SYMBOLS * cellH;
+        const sideFastDur = 700;
+        const highSpeed = sideScrollDist / sideFastDur;
 
-        // Build side reels (col 0, 2) normally
+        // Build side reels
         for (let col of [0, 2]) {
           buildStripN(col, [board[0][col], board[1][col], board[2][col]], REEL_SYMBOLS);
         }
 
-        // Middle column: 3 independent cycling mini-strips
-        const midReel = document.querySelector('#reel-1 .reel-strip');
-        midReel.innerHTML = '';
-        midReel.style.transition = 'none';
-        midReel.style.transform = 'none';
-        midReel.style.display = 'flex';
-        midReel.style.flexDirection = 'column';
-        const midCellAnims = [];
-        for (let r = 0; r < 3; r++) {
-          const wrapper = document.createElement('div');
-          wrapper.style.cssText = `height:${cellH}px;overflow:hidden;position:relative;`;
-          const miniStrip = document.createElement('div');
-          miniStrip.style.cssText = 'position:absolute;top:0;left:0;right:0;will-change:transform;';
-          const numSym = 6;
-          for (let i = 0; i < numSym * 2; i++) {
-            const s = document.createElement('div');
-            s.style.cssText = `height:${cellH}px;display:flex;align-items:center;justify-content:center;`;
-            s.innerHTML = `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
-            miniStrip.appendChild(s);
-          }
-          wrapper.appendChild(miniStrip);
-          midReel.appendChild(wrapper);
-          // Fast looping (40/50/60ms equivalent speed — much faster than sides)
-          const pixPerFrame = 12 + r * 1.5; // fast, slightly varied
-          const loopDist = numSym * cellH;
-          let pos = 0;
-          const anim = { id: null, running: true };
-          function loop() {
-            if (!anim.running) return;
-            pos -= pixPerFrame;
-            if (pos <= -loopDist) pos += loopDist;
-            miniStrip.style.transform = `translateY(${pos}px)`;
-            anim.id = requestAnimationFrame(loop);
-          }
-          anim.id = requestAnimationFrame(loop);
-          midCellAnims.push({ wrapper, miniStrip, anim, row: r, numSym, loopDist });
-        }
-
-        // Store mid cell anims globally so JP logic can stop them
-        window._midCellAnims = midCellAnims;
-        window._midBoard = board;
-        window._midCellH = cellH;
-        window._midFgBonus = fgBonusSymbols;
-
-        // Animate side reels
-        const sideScrollDist = REEL_SYMBOLS * cellH;
-        const sideFastDur = 700;
-        const highSpeed = sideScrollDist / sideFastDur;
-        const sideCfg = { scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' };
-        let sidesCount = 0;
-
-        for (let col of [0, 2]) {
-          const strip = document.querySelector(`#reel-${col} .reel-strip`);
-          const targetY = sideCfg.scrollDist;
-          const fastDist = targetY - sideCfg.decelDist;
-          const fastDur = Math.round(fastDist / highSpeed);
-          strip.style.transition = `transform ${fastDur}ms linear`;
-          strip.style.transform = `translateY(-${fastDist}px)`;
-          setTimeout(() => {
-            strip.style.transition = `transform ${sideCfg.decelMs}ms ${sideCfg.ease}`;
-            strip.style.transform = `translateY(-${targetY + overshoot}px)`;
+        if (fgBonusSymbols) {
+          // FG mode: all 3 columns use normal strip animation
+          buildStripN(1, [board[0][1], board[1][1], board[2][1]], MID_SYMBOLS, fgBonusSymbols);
+          const configs = [
+            { col: 0, scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+            { col: 1, scrollDist: MID_SYMBOLS * cellH, decelDist: 18 * cellH, decelMs: 2400, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+            { col: 2, scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+          ];
+          let done = 0;
+          for (const cfg of configs) {
+            const strip = document.querySelector(`#reel-${cfg.col} .reel-strip`);
+            const targetY = cfg.scrollDist;
+            const fastDist = targetY - cfg.decelDist;
+            const fastDur = Math.round(fastDist / highSpeed);
+            strip.style.transition = `transform ${fastDur}ms linear`;
+            strip.style.transform = `translateY(-${fastDist}px)`;
             setTimeout(() => {
-              strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
-              strip.style.transform = `translateY(-${targetY}px)`;
+              strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
+              strip.style.transform = `translateY(-${targetY + overshoot}px)`;
               setTimeout(() => {
-                sidesCount++;
-                if (sidesCount === 2) {
-                  if (onSidesStop) onSidesStop();
-                  // After sides stop, wait then stop mid cells
-                  setTimeout(() => stopMidCells(resolve), 1200);
-                }
-              }, 100);
-            }, sideCfg.decelMs);
-          }, fastDur);
+                strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
+                strip.style.transform = `translateY(-${targetY}px)`;
+                setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 100);
+              }, cfg.decelMs);
+            }, fastDur);
+          }
+        } else {
+          // Normal mode: middle column uses independent high-speed cell cycling
+          const midReel = document.querySelector('#reel-1 .reel-strip');
+          midReel.innerHTML = '';
+          midReel.style.transition = 'none';
+          midReel.style.transform = 'none';
+          midReel.style.display = 'flex';
+          midReel.style.flexDirection = 'column';
+          const midCellAnims = [];
+          for (let r = 0; r < 3; r++) {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = `height:${cellH}px;overflow:hidden;position:relative;`;
+            const miniStrip = document.createElement('div');
+            miniStrip.style.cssText = 'position:absolute;top:0;left:0;right:0;will-change:transform;';
+            const numSym = 6;
+            for (let i = 0; i < numSym * 2; i++) {
+              const s = document.createElement('div');
+              s.style.cssText = `height:${cellH}px;display:flex;align-items:center;justify-content:center;`;
+              s.innerHTML = `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
+              miniStrip.appendChild(s);
+            }
+            wrapper.appendChild(miniStrip);
+            midReel.appendChild(wrapper);
+            const pixPerFrame = 12 + r * 1.5;
+            const loopDist = numSym * cellH;
+            let pos = 0;
+            const anim = { id: null, running: true };
+            function loop() {
+              if (!anim.running) return;
+              pos -= pixPerFrame;
+              if (pos <= -loopDist) pos += loopDist;
+              miniStrip.style.transform = `translateY(${pos}px)`;
+              anim.id = requestAnimationFrame(loop);
+            }
+            anim.id = requestAnimationFrame(loop);
+            midCellAnims.push({ wrapper, miniStrip, anim, row: r, numSym, loopDist });
+          }
+          window._midCellAnims = midCellAnims;
+          window._midBoard = board;
+          window._midCellH = cellH;
+          window._midFgBonus = null;
+
+          // Animate side reels
+          const sideCfg = { scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' };
+          let sidesCount = 0;
+          for (let col of [0, 2]) {
+            const strip = document.querySelector(`#reel-${col} .reel-strip`);
+            const targetY = sideCfg.scrollDist;
+            const fastDist = targetY - sideCfg.decelDist;
+            const fastDur = Math.round(fastDist / highSpeed);
+            strip.style.transition = `transform ${fastDur}ms linear`;
+            strip.style.transform = `translateY(-${fastDist}px)`;
+            setTimeout(() => {
+              strip.style.transition = `transform ${sideCfg.decelMs}ms ${sideCfg.ease}`;
+              strip.style.transform = `translateY(-${targetY + overshoot}px)`;
+              setTimeout(() => {
+                strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
+                strip.style.transform = `translateY(-${targetY}px)`;
+                setTimeout(() => {
+                  sidesCount++;
+                  if (sidesCount === 2) {
+                    if (onSidesStop) onSidesStop();
+                    setTimeout(() => stopMidCells(resolve), 1200);
+                  }
+                }, 100);
+              }, sideCfg.decelMs);
+            }, fastDur);
+          }
         }
 
         function stopMidCells(done) {
