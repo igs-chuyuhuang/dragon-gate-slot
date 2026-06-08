@@ -967,13 +967,16 @@
         }
         window._jpPerRow = jpPerRow;
         if (jpPerRow.some(x => x !== null)) {
+          // Determine flash color: red if all 3 rows are extreme narrow (gap=1)
+          const allExtreme = result.judgments.every(j => j.gap === 1 && j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss');
+          const flashAnim = allExtreme ? 'jpFlashRed 0.15s infinite alternate' : 'jpFlash 0.15s infinite alternate';
           // Start jpFlash immediately on narrow-gate cells + inject JP symbols NOW
           const anims = window._midCellAnims;
           if (anims) {
             const ch = window._midCellH;
             anims.forEach(a => {
               if (jpPerRow[a.row] !== null) {
-                a.wrapper.style.animation = 'jpFlash 0.15s infinite alternate';
+                a.wrapper.style.animation = flashAnim;
                 // Immediately rebuild strip with JP mixed in (every other slot)
                 const jpOnly = jpPerRow[a.row] === 'GRAND' ? ['GRAND','MAJOR','MINI'] : ['MAJOR','MINI'];
                 a.miniStrip.innerHTML = '';
