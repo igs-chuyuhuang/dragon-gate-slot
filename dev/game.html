@@ -415,7 +415,6 @@
           anims.forEach((a, i) => {
             const isJp = jpR[a.row] && jpR[a.row] !== 'normal';
             if (isJp) {
-              // Inject JP images into spinning strip (flash already running from onSidesStop)
               const imgs = a.miniStrip.querySelectorAll('div');
               const pool = getJpPool(jpR[a.row] === 'GRAND' ? 1 : 2);
               imgs.forEach((s, idx) => {
@@ -430,26 +429,55 @@
             setTimeout(() => {
               a.anim.running = false;
               cancelAnimationFrame(a.anim.id);
-              a.wrapper.style.boxShadow = '';
               a.wrapper.style.animation = '';
+              // Deceleration: build a short strip and transition to final position
               const finalCell = bd[a.row][1];
-              let html;
+              let finalHtml;
               if (isJp) {
                 const jpImg = getJpImg(jpR[a.row]);
-                html = jpImg ? `<img src="${jpImg}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${cellImg(finalCell)}" style="width:85%;height:85%;object-fit:contain;">`;
+                finalHtml = jpImg ? `<img src="${jpImg}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${cellImg(finalCell)}" style="width:85%;height:85%;object-fit:contain;">`;
               } else {
-                html = `<img src="assets/img/${cellImg(finalCell)}" style="width:85%;height:85%;object-fit:contain;">`;
-                if (fgB && fgB[a.row] !== '—') html += `<span class="cell-bonus">💰${fgB[a.row].slice(1)}</span>`;
+                finalHtml = `<img src="assets/img/${cellImg(finalCell)}" style="width:85%;height:85%;object-fit:contain;">`;
+                if (fgB && fgB[a.row] !== '—') finalHtml += `<span class="cell-bonus">💰${fgB[a.row].slice(1)}</span>`;
               }
+              // Build decel strip: 4 random + final
+              const decelStrip = document.createElement('div');
+              decelStrip.style.cssText = 'position:absolute;top:0;left:0;right:0;will-change:transform;';
+              for (let k = 0; k < 4; k++) {
+                const s = document.createElement('div');
+                s.style.cssText = `height:${ch}px;display:flex;align-items:center;justify-content:center;`;
+                if (isJp && k % 2 === 0) {
+                  const img = getJpImg(pickJpSymbol(getJpPool(1)));
+                  s.innerHTML = img ? `<img src="${img}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
+                } else {
+                  s.innerHTML = `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
+                }
+                decelStrip.appendChild(s);
+              }
+              const finalDiv = document.createElement('div');
+              finalDiv.style.cssText = `height:${ch}px;display:flex;align-items:center;justify-content:center;`;
+              finalDiv.innerHTML = finalHtml;
+              decelStrip.appendChild(finalDiv);
               a.wrapper.innerHTML = '';
-              const div = document.createElement('div');
-              div.className = 'cell';
-              div.style.height = ch + 'px';
-              div.id = `cell-${a.row}-1`;
-              div.innerHTML = html;
-              a.wrapper.appendChild(div);
-              stopped++;
-              if (stopped === 3) { spinning = false; done(); }
+              a.wrapper.appendChild(decelStrip);
+              // Animate decel: easeOutCubic over 700ms
+              const decelDist = 4 * ch;
+              decelStrip.style.transition = 'transform 700ms cubic-bezier(0.16, 1, 0.3, 1)';
+              requestAnimationFrame(() => {
+                decelStrip.style.transform = `translateY(-${decelDist}px)`;
+              });
+              setTimeout(() => {
+                a.wrapper.style.boxShadow = '';
+                a.wrapper.innerHTML = '';
+                const div = document.createElement('div');
+                div.className = 'cell';
+                div.style.height = ch + 'px';
+                div.id = `cell-${a.row}-1`;
+                div.innerHTML = finalHtml;
+                a.wrapper.appendChild(div);
+                stopped++;
+                if (stopped === 3) { spinning = false; done(); }
+              }, 720);
             }, delay);
           });
         }
