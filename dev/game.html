@@ -1060,10 +1060,10 @@
         const rowScatters = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].filter(c => c.isScatter).length;
         if (j.type === 'jp-win') { badge.textContent = '🎰 JP!'; badge.classList.add('win'); }
         else if (j.type === 'jp-none') { badge.textContent = ''; }
-        else if (rowScatters > 0) { badge.textContent = `🐉 +${rowScatters}`; badge.classList.add('sc'); }
+        else if (rowScatters > 0) { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:100%;height:auto;object-fit:contain;"> +${rowScatters}`; badge.classList.add('sc'); }
         else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
-        else if (j.type === 'wall') { badge.textContent = '🔥 -1'; badge.classList.add('wall'); }
-        else if (j.type === 'same-hit') { badge.textContent = '🔥 -2'; badge.classList.add('wall'); }
+        else if (j.type === 'wall') { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:100%;height:auto;object-fit:contain;"> -1`; badge.classList.add('wall'); }
+        else if (j.type === 'same-hit') { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:100%;height:auto;object-fit:contain;"> -2`; badge.classList.add('wall'); }
         else { badge.textContent = '—'; }
       });
       const winEl = $('win');
