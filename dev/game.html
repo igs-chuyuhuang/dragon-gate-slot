@@ -441,6 +441,50 @@
     }
 
     const FG_SYMS = ['+5','+10','+15','+30','+50','—'];
+
+    // JP Badge system — middle column random JP icons
+    const JP_TYPES = ['mini','mini','mini','mini','mini','mini','mini','major','major','major','major','major','grand'];
+    // ~14 entries: mini 7/13≈54%, major 5/13≈38%, grand 1/13≈8%  (adjusted to hit target probs)
+    function generateJpBadges() {
+      // Each of 9 cells has ~18% chance of JP badge; only check all 9 cells
+      const badges = [];
+      for (let r = 0; r < 3; r++) {
+        const row = [];
+        for (let c = 0; c < 3; c++) {
+          if (Math.random() < 0.18) {
+            row.push(JP_TYPES[Math.floor(Math.random() * JP_TYPES.length)]);
+          } else {
+            row.push(null);
+          }
+        }
+        badges.push(row);
+      }
+      return badges;
+    }
+    function checkJpWin(badges) {
+      // Count each type across all 9 cells
+      const counts = { mini: 0, major: 0, grand: 0 };
+      for (let r = 0; r < 3; r++)
+        for (let c = 0; c < 3; c++)
+          if (badges[r][c]) counts[badges[r][c]]++;
+      if (counts.grand >= 3) return 'grand';
+      if (counts.major >= 3) return 'major';
+      if (counts.mini >= 3) return 'mini';
+      return null;
+    }
+    function renderJpBadges(badges) {
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          if (!badges[r][c]) continue;
+          const cell = document.getElementById(`cell-${r}-${c}`);
+          if (!cell) continue;
+          const jp = badges[r][c];
+          const lbl = jp === 'mini' ? 'Mi' : jp === 'major' ? 'Mj' : 'Gr';
+          cell.innerHTML += `<span class="cell-jp jp-${jp}">${lbl}</span>`;
+        }
+      }
+    }
+
     const fgReelEl = $('fg-reel'), fgStripEl = $('fg-reel-strip');
 
     function showFgReel() {}
@@ -761,6 +805,13 @@
       await animateSpin(result.board);
       sfx('spin_release');
       showResult(result);
+      // JP badges (normal mode only)
+      let jpWinType = null;
+      if (result.mode === 'normal') {
+        const jpBadges = generateJpBadges();
+        renderJpBadges(jpBadges);
+        jpWinType = checkJpWin(jpBadges);
+      }
       // Play result sfx + win line effect
       if (result.mode === 'normal') {
         // Scatter first (top-to-bottom, left-to-right), with fly to collector
@@ -778,6 +829,15 @@
           .filter(j => j.type === 'through')
           .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
         if (winRows.length > 0) await playWinLines(winRows);
+        // JP win check
+        if (jpWinType) {
+          const jpAmount = jpWinType === 'grand' ? jpGrand : jpWinType === 'major' ? jpMajor : jpMini;
+          gm.balance += jpAmount;
+          if (jpWinType === 'grand') jpGrand = 30000;
+          else if (jpWinType === 'major') jpMajor = 6000;
+          else jpMini = 1500;
+          showFGResult(jpAmount); // reuse result overlay
+        }
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
