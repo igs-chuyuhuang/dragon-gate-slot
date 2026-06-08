@@ -922,6 +922,17 @@
         const midReel = document.getElementById('reel-1');
         setTimeout(() => { midReel.style.boxShadow = ''; }, 800);
         jpSlotWin = checkJpSlotWin(jpPerRow);
+        // Rows that stopped on JP symbol: no payout for that row
+        for (let r = 0; r < 3; r++) {
+          if (jpPerRow[r] && jpPerRow[r] !== 'normal') {
+            result.judgments[r] = { row: r, type: jpSlotWin ? 'jp-win' : 'jp-none', lampChange: 0, gap: result.judgments[r].gap };
+          }
+        }
+        // Recalc totalPayout excluding JP rows
+        let recalc = 0;
+        for (const j of result.judgments) { if (j.type === 'through') recalc += (gm.bet / 3) * j.mult; }
+        gm.balance += recalc - result.totalPayout;
+        result.totalPayout = recalc;
       }
       showResult(result);
       // Play result sfx + win line effect
@@ -965,7 +976,9 @@
       result.judgments.forEach(j => {
         const badge = $(`badge-${j.row}`);
         const rowScatters = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].filter(c => c.isScatter).length;
-        if (rowScatters > 0) { badge.textContent = `🐉 +${rowScatters}`; badge.classList.add('sc'); }
+        if (j.type === 'jp-win') { badge.textContent = '🎰 JP!'; badge.classList.add('win'); }
+        else if (j.type === 'jp-none') { badge.textContent = ''; }
+        else if (rowScatters > 0) { badge.textContent = `🐉 +${rowScatters}`; badge.classList.add('sc'); }
         else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
         else if (j.type === 'wall') { badge.textContent = '🔥 -1'; badge.classList.add('wall'); }
         else if (j.type === 'same-hit') { badge.textContent = '🔥 -2'; badge.classList.add('wall'); }
