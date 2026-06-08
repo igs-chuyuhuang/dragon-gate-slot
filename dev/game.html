@@ -415,10 +415,7 @@
           anims.forEach((a, i) => {
             const isJp = jpR[a.row] && jpR[a.row] !== 'normal';
             if (isJp) {
-              // Add JP symbols to the spinning strip + flash border
-              a.wrapper.style.boxShadow = '0 0 12px 3px rgba(255,215,0,0.8)';
-              a.wrapper.style.animation = 'jpFlash 0.15s infinite alternate';
-              // Inject JP images into strip
+              // Inject JP images into spinning strip (flash already running from onSidesStop)
               const imgs = a.miniStrip.querySelectorAll('div');
               const pool = getJpPool(jpR[a.row] === 'GRAND' ? 1 : 2);
               imgs.forEach((s, idx) => {
@@ -937,8 +934,15 @@
         }
         window._jpPerRow = jpPerRow;
         if (jpPerRow.some(x => x !== null)) {
-          const midReel = document.getElementById('reel-1');
-          midReel.style.boxShadow = '0 0 16px 4px rgba(255,215,0,0.7)';
+          // Start jpFlash immediately on narrow-gate cells
+          const anims = window._midCellAnims;
+          if (anims) {
+            anims.forEach(a => {
+              if (jpPerRow[a.row] !== null) {
+                a.wrapper.style.animation = 'jpFlash 0.15s infinite alternate';
+              }
+            });
+          }
         }
       });
       sfx('spin_release');
