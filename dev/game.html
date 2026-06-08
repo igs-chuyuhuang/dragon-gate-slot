@@ -941,6 +941,18 @@
     document.addEventListener('keydown', e => {
       if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
       if (e.key === 'f' && !gm.fg.active && !spinning) { showFgBgChoice(); }
+      if (e.key === 'j' || e.key === 'J') {
+        const badges = [['mini','major','grand'],['mini','major','grand'],['mini','major','grand']];
+        renderJpBadges(badges);
+        const win = checkJpWin(badges);
+        if (win) {
+          const amt = win === 'grand' ? jpGrand : win === 'major' ? jpMajor : jpMini;
+          gm.balance += amt;
+          if (win === 'grand') jpGrand = 30000; else if (win === 'major') jpMajor = 6000; else jpMini = 1500;
+          showFGResult(amt);
+          updateUI();
+        }
+      }
     });
     $('fgbg-close').addEventListener('click', () => { $('fgbg-choice').style.display = 'none'; });
 
