@@ -1059,7 +1059,7 @@
         const badge = $(`badge-${j.row}`);
         const rowScatters = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].filter(c => c.isScatter).length;
         if (j.type === 'jp-win') { badge.textContent = '🎰 JP!'; badge.classList.add('win'); }
-        else if (j.type === 'jp-none') { badge.textContent = ''; }
+        else if (j.type === 'jp-none') { badge.textContent = '—'; }
         else if (rowScatters > 0) { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> +${rowScatters}`; badge.classList.add('sc'); }
         else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
         else if (j.type === 'wall') { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> -1`; badge.classList.add('wall'); }
