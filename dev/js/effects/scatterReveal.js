@@ -33,22 +33,22 @@ function flashAndFly(el) {
     const dstRect = ring.getBoundingClientRect();
     const flyer = document.createElement('img');
     flyer.src = 'assets/img/SC-01_scatter_dragon.png';
-    flyer.style.cssText = `position:fixed;left:${srcRect.left}px;top:${srcRect.top}px;width:${srcRect.width}px;height:${srcRect.height}px;z-index:9999;object-fit:contain;transition:all 500ms cubic-bezier(0.25,1,0.5,1);pointer-events:none;`;
+    flyer.style.cssText = `position:fixed;left:${srcRect.left}px;top:${srcRect.top}px;width:${srcRect.width}px;height:${srcRect.height}px;z-index:9999;object-fit:contain;pointer-events:none;transition:none;`;
     document.body.appendChild(flyer);
-    requestAnimationFrame(() => {
-      flyer.style.left = (dstRect.left + dstRect.width / 2 - srcRect.width / 4) + 'px';
-      flyer.style.top = (dstRect.top + dstRect.height / 2 - srcRect.height / 4) + 'px';
-      flyer.style.width = (srcRect.width / 2) + 'px';
-      flyer.style.height = (srcRect.height / 2) + 'px';
-      flyer.style.opacity = '0.8';
-    });
-    setTimeout(() => {
+    // Animate along a curved path using keyframes
+    const dx = (dstRect.left + dstRect.width / 2 - srcRect.width / 4) - srcRect.left;
+    const dy = (dstRect.top + dstRect.height / 2 - srcRect.height / 4) - srcRect.top;
+    const anim = flyer.animate([
+      { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx * 0.3}px, ${dy * 0.5 - 30}px) scale(0.8)`, opacity: 1, offset: 0.4 },
+      { transform: `translate(${dx}px, ${dy}px) scale(0.5)`, opacity: 0.8 }
+    ], { duration: 800, easing: 'ease-in-out', fill: 'forwards' });
+    anim.onfinish = () => {
       flyer.remove();
-      // Ring glow — circular
       ring.style.boxShadow = '0 0 20px 8px rgba(255,215,0,0.9)';
       ring.style.borderRadius = '50%';
       setTimeout(() => { ring.style.boxShadow = ''; }, 400);
-    }, 550);
+    };
   }, 300);
 }
 
