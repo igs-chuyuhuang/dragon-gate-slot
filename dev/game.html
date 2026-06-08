@@ -429,7 +429,6 @@
             setTimeout(() => {
               a.anim.running = false;
               cancelAnimationFrame(a.anim.id);
-              a.wrapper.style.animation = '';
               // Deceleration: build a short strip and transition to final position
               const finalCell = bd[a.row][1];
               let finalHtml;
@@ -979,6 +978,13 @@
       // After all reels stop: JP already rendered by stopMidCells
       if (jpPerRow.some(x => x !== null)) {
         jpSlotWin = checkJpSlotWin(jpPerRow);
+        // Clear flash on cells: keep if JP win, clear if not
+        const anims = window._midCellAnims;
+        if (anims) {
+          anims.forEach(a => {
+            if (!jpSlotWin) { a.wrapper.style.animation = ''; a.wrapper.style.boxShadow = ''; }
+          });
+        }
         for (let r = 0; r < 3; r++) {
           if (jpPerRow[r] && jpPerRow[r] !== 'normal') {
             result.judgments[r] = { row: r, type: jpSlotWin ? 'jp-win' : 'jp-none', lampChange: 0, gap: result.judgments[r].gap };
@@ -1015,6 +1021,9 @@
           else if (jpSlotWin === 'MAJOR') jpMajor = 6000;
           else jpMini = 1500;
           showFGResult(jpAmount);
+          // Clear JP flash after showing result
+          const anims2 = window._midCellAnims;
+          if (anims2) anims2.forEach(a => { a.wrapper.style.animation = ''; a.wrapper.style.boxShadow = ''; });
         }
       }
       updateUI();
