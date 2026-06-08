@@ -847,6 +847,11 @@
         midCard.innerHTML = `<img src="assets/img/${CARD_IMG[result.mid]}">`;
         midCard.className = 'bg-card face';
         bgInstance.applyResult(result);
+        // Immediately add winnings to balance
+        if (result.mult > 0) {
+          gm.balance += bgInstance.roundBet * result.mult;
+          updateUI();
+        }
         // Show result
         const resEl = $('bg-result-text');
         if (result.mult > 0) {
@@ -907,10 +912,10 @@
       const jpContainer = document.querySelector('.jp-pool-container'); if (jpContainer) jpContainer.style.display = '';
       bgInstance = null;
       updateUI();
-      showBGResult(winnings);
+      showBGResult(winnings, false);
     }
 
-    function showBGResult(total) {
+    function showBGResult(total, addToBalance = true) {
       const overlay = $('fg-result-overlay');
       const amountEl = $('fg-result-amount');
       const bigEl = $('fg-result-big');
@@ -931,7 +936,7 @@
       const close = () => {
         overlay.style.display = 'none';
         titleEl.textContent = 'FREE GAME';
-        gm.balance += total;
+        if (addToBalance) gm.balance += total;
         updateUI();
       };
       overlay.onclick = close;
