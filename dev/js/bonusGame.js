@@ -61,6 +61,7 @@ export class BonusGame {
       const win = this.roundBet * result.mult;
       const actual = Math.min(win, this.pool);
       this.winnings += actual;
+      this.chips += actual;
       this.pool -= actual;
     } else {
       this.chips += this.roundBet * result.mult;
