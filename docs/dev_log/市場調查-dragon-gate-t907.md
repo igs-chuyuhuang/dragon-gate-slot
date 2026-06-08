@@ -74,3 +74,18 @@
 ### Commits
 
 - `2cf8850`（昨日 dev log commit，今日無新 commit）
+
+## 2026-06-08
+
+### 完成任務
+
+1. **射龍門 BGM 候選清單**
+   - 搜尋 Pixabay / OpenGameArt / itch.io 免費商用中國風音樂
+   - 篩選 10 首候選，確認授權（Content ID 風險、CC0/Pixabay License）
+   - 依「符合畫面、Loop 適合度、授權安全性、音樂品質」加權評分
+   - Top 3：Dragon Dance (CC0, itch.io)、Chinese New Year_50Sec (Pixabay)、CN New Year Background Music (Pixabay)
+   - 產出報告：`docs/market_research/bgm_candidates.md`
+
+### Commits
+
+- `71086cf` — 新增射龍門 BGM 候選清單（10首免費商用中國風音樂）
