@@ -415,20 +415,6 @@
           let stopped = 0;
           anims.forEach((a, i) => {
             const isJp = jpR[a.row] && jpR[a.row] !== 'normal';
-            if (isJp) {
-              // Rebuild entire mini-strip with ALL JP symbols (no normal)
-              const jpOnly = jpR[a.row] === 'GRAND' ? ['GRAND','MAJOR','MINI'] : ['MAJOR','MINI'];
-              const ch = window._midCellH;
-              a.miniStrip.innerHTML = '';
-              for (let k = 0; k < 12; k++) {
-                const s = document.createElement('div');
-                s.style.cssText = `height:${ch}px;display:flex;align-items:center;justify-content:center;`;
-                const sym = jpOnly[Math.floor(Math.random() * jpOnly.length)];
-                const img = getJpImg(sym);
-                s.innerHTML = `<img src="${img}" style="width:85%;height:85%;object-fit:contain;">`;
-                a.miniStrip.appendChild(s);
-              }
-            }
             const delay = isJp ? 1500 + i * 250 : i * 200;
             setTimeout(() => {
               a.anim.running = false;
@@ -981,12 +967,31 @@
         }
         window._jpPerRow = jpPerRow;
         if (jpPerRow.some(x => x !== null)) {
-          // Start jpFlash immediately on narrow-gate cells
+          // Start jpFlash immediately on narrow-gate cells + inject JP symbols NOW
           const anims = window._midCellAnims;
           if (anims) {
+            const ch = window._midCellH;
             anims.forEach(a => {
               if (jpPerRow[a.row] !== null) {
                 a.wrapper.style.animation = 'jpFlash 0.15s infinite alternate';
+                // Immediately rebuild strip with JP mixed in (every other slot)
+                const jpOnly = jpPerRow[a.row] === 'GRAND' ? ['GRAND','MAJOR','MINI'] : ['MAJOR','MINI'];
+                a.miniStrip.innerHTML = '';
+                a.miniStrip.style.transform = 'translateY(0)';
+                a.anim.pos = 0;
+                for (let k = 0; k < 12; k++) {
+                  const s = document.createElement('div');
+                  s.style.cssText = `height:${ch}px;display:flex;align-items:center;justify-content:center;`;
+                  if (k % 3 === 0) {
+                    // JP symbol every 3rd slot
+                    const sym = jpOnly[Math.floor(Math.random() * jpOnly.length)];
+                    s.innerHTML = `<img src="${getJpImg(sym)}" style="width:85%;height:85%;object-fit:contain;">`;
+                  } else {
+                    // Normal symbol
+                    s.innerHTML = `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
+                  }
+                  a.miniStrip.appendChild(s);
+                }
               }
             });
           }
