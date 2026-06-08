@@ -884,18 +884,29 @@
     });
     $('fgbg-close').addEventListener('click', () => { $('fgbg-choice').style.display = 'none'; });
 
-    // JP Pool auto-climb (visual effect)
+    // JP Pool auto-climb with smooth countUp
     let jpGrand = 30000, jpMajor = 6000, jpMini = 1500;
+    function animateJp(el, start, end, duration) {
+      const range = end - start;
+      const t0 = performance.now();
+      function step(now) {
+        const p = Math.min((now - t0) / duration, 1);
+        el.textContent = Math.round(start + range * p).toLocaleString();
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
     $('jp-grand-val').textContent = jpGrand.toLocaleString();
     $('jp-major-val').textContent = jpMajor.toLocaleString();
     $('jp-mini-val').textContent = jpMini.toLocaleString();
     setInterval(() => {
+      const prevG = jpGrand, prevM = jpMajor, prevMi = jpMini;
       jpGrand += 1; jpMajor += 2; jpMini += 3;
       if (jpMini >= jpMajor) jpMini = 1500;
       if (jpMajor >= jpGrand) jpMajor = 6000;
-      $('jp-grand-val').textContent = jpGrand.toLocaleString();
-      $('jp-major-val').textContent = jpMajor.toLocaleString();
-      $('jp-mini-val').textContent = jpMini.toLocaleString();
+      animateJp($('jp-grand-val'), prevG, jpGrand, 1400);
+      animateJp($('jp-major-val'), prevM, jpMajor, 1400);
+      animateJp($('jp-mini-val'), prevMi, jpMini, 1400);
     }, 1500);
 
     window.focus();
