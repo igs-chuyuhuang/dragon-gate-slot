@@ -731,9 +731,7 @@
       if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉`; }
       else { fgEl.style.display = 'none'; }
       // Update JP pool display
-      $('jp-grand-val').textContent = fmt(Math.round(gm.jp.pools.grand));
-      $('jp-major-val').textContent = fmt(Math.round(gm.jp.pools.major));
-      $('jp-mini-val').textContent = fmt(Math.round(gm.jp.pools.basic));
+      // JP pool display handled by auto-climb setInterval
     }
 
     async function doSpin() {
@@ -885,6 +883,21 @@
       if (e.key === 'f' && !gm.fg.active && !spinning) { showFgBgChoice(); }
     });
     $('fgbg-close').addEventListener('click', () => { $('fgbg-choice').style.display = 'none'; });
+
+    // JP Pool auto-climb (visual effect)
+    let jpGrand = 30000, jpMajor = 6000, jpMini = 1500;
+    $('jp-grand-val').textContent = jpGrand.toLocaleString();
+    $('jp-major-val').textContent = jpMajor.toLocaleString();
+    $('jp-mini-val').textContent = jpMini.toLocaleString();
+    setInterval(() => {
+      jpGrand += 1; jpMajor += 2; jpMini += 3;
+      if (jpMini >= jpMajor) jpMini = 1500;
+      if (jpMajor >= jpGrand) jpMajor = 6000;
+      $('jp-grand-val').textContent = jpGrand.toLocaleString();
+      $('jp-major-val').textContent = jpMajor.toLocaleString();
+      $('jp-mini-val').textContent = jpMini.toLocaleString();
+    }, 1500);
+
     window.focus();
   </script>
 </body>
