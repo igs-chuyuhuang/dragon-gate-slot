@@ -496,3 +496,5 @@ body {
   font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   pointer-events: auto;
 }
+
+@keyframes jpFlash { from { box-shadow: 0 0 8px 2px rgba(255,215,0,0.4); } to { box-shadow: 0 0 16px 6px rgba(255,215,0,0.9); } }
