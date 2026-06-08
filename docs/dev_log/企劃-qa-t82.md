@@ -509,3 +509,23 @@
 **關鍵 prompt / 指令：** 把 game-feel branch 的修改 merge 或 cherry-pick 到 main
 **人工修正：** 無
 **耗時：** ~5 分鐘
+
+### [2026-06-08] — JP 系統完整實作 + 中輪獨立轉動 + JP 爬升動畫
+
+**環節：** 程式
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. JP Pool 自動爬升：三層獨立 timer（Mini 2~4s/Major 5~10s/Grand 10~20s）+ easeOutCubic countUp 動畫
+2. JP Badge 系統（v1→移除）→ JP Slot 系統（極窄/窄門時中輪顯示 GRAND/MAJOR/MINI 圖片）
+3. 中輪改 3 格獨立 requestAnimationFrame 循環轉動（pixPerFrame 12~15 超高速）
+4. 左右停後 onSidesStop callback 判斷門寬，窄門 cell 立刻金色閃爍 + 混入 JP 圖片繼續轉
+5. 中輪停輪改 14 格 decel strip + 1900ms easeOut 漸慢動畫
+6. JP per-row 獨立判斷（只有窄門的那一列才出 JP）
+7. JP 列不計穿門分數（jp-none/jp-win type）
+8. JP 閃爍持續到結算（沒中獎立刻消、中獎保持到 overlay 後清）
+9. Debug J/M/N 鍵預設下一轉強制 JP 中獎
+**Before：** 無 JP 視覺系統、中輪用整條 strip 一起滾
+**After：** 完整 JP Slot 流程（爬升+觸發+獨立轉動+閃爍+減速+判定+結算）
+**關鍵 prompt / 指令：** JP 爬升效果；JP badge→JP Slot 大改；中輪獨立轉動；閃爍/速度/減速多次迭代
+**人工修正：** JP 邏輯經 5+ 次修正（badge→slot→per-row→type覆蓋→revert→最終版）
+**耗時：** ~4 小時
