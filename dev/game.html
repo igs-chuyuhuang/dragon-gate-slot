@@ -884,30 +884,38 @@
     });
     $('fgbg-close').addEventListener('click', () => { $('fgbg-choice').style.display = 'none'; });
 
-    // JP Pool auto-climb with smooth countUp
+    // JP Pool auto-climb with easeOut + random timing
     let jpGrand = 30000, jpMajor = 6000, jpMini = 1500;
     function animateJp(el, start, end, duration) {
       const range = end - start;
       const t0 = performance.now();
       function step(now) {
-        const p = Math.min((now - t0) / duration, 1);
-        el.textContent = Math.round(start + range * p).toLocaleString();
-        if (p < 1) requestAnimationFrame(step);
+        const t = Math.min((now - t0) / duration, 1);
+        const ease = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(start + range * ease).toLocaleString();
+        if (t < 1) requestAnimationFrame(step);
       }
       requestAnimationFrame(step);
     }
-    $('jp-grand-val').textContent = jpGrand.toLocaleString();
-    $('jp-major-val').textContent = jpMajor.toLocaleString();
-    $('jp-mini-val').textContent = jpMini.toLocaleString();
-    setInterval(() => {
-      const prevG = jpGrand, prevM = jpMajor, prevMi = jpMini;
-      jpGrand += 1; jpMajor += 2; jpMini += 3;
-      if (jpMini >= jpMajor) jpMini = 1500;
-      if (jpMajor >= jpGrand) jpMajor = 6000;
-      animateJp($('jp-grand-val'), prevG, jpGrand, 1400);
-      animateJp($('jp-major-val'), prevM, jpMajor, 1400);
-      animateJp($('jp-mini-val'), prevMi, jpMini, 1400);
-    }, 1500);
+    const grandEl = $('jp-grand-val'), majorEl = $('jp-major-val'), miniEl = $('jp-mini-val');
+    grandEl.textContent = jpGrand.toLocaleString();
+    majorEl.textContent = jpMajor.toLocaleString();
+    miniEl.textContent = jpMini.toLocaleString();
+    function scheduleJpTick() {
+      setTimeout(() => {
+        const prevG = jpGrand, prevM = jpMajor, prevMi = jpMini;
+        jpGrand += Math.ceil(Math.random() * 2);
+        jpMajor += Math.ceil(Math.random() * 3);
+        jpMini += Math.ceil(Math.random() * 5);
+        if (jpMini >= jpMajor) jpMini = 1500;
+        if (jpMajor >= jpGrand) jpMajor = 6000;
+        animateJp(grandEl, prevG, jpGrand, 800);
+        animateJp(majorEl, prevM, jpMajor, 800);
+        animateJp(miniEl, prevMi, jpMini, 800);
+        scheduleJpTick();
+      }, 2000 + Math.random() * 3000);
+    }
+    scheduleJpTick();
 
     window.focus();
   </script>
