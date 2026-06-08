@@ -298,8 +298,8 @@
     function animateSpin(board, fgBonusSymbols, onSidesStop) {
       return new Promise(resolve => {
         spinning = true;
+        const cellH = getCellH();
         if (turbo) {
-          const cellH = getCellH();
           for (let col = 0; col < 3; col++) {
             const strip = document.querySelector(`#reel-${col} .reel-strip`);
             strip.innerHTML = '';
@@ -322,59 +322,114 @@
           resolve();
           return;
         }
-        const cellH = getCellH();
         const overshoot = Math.round(cellH * 0.05);
-        const MID_SYMBOLS = 50;
 
-        for (let col = 0; col < 3; col++) {
-          const numSym = col === 1 ? MID_SYMBOLS : REEL_SYMBOLS;
-          const finalCells = [board[0][col], board[1][col], board[2][col]];
-          buildStripN(col, finalCells, numSym, col === 1 ? fgBonusSymbols : null);
+        // Build side reels (col 0, 2) normally
+        for (let col of [0, 2]) {
+          buildStripN(col, [board[0][col], board[1][col], board[2][col]], REEL_SYMBOLS);
         }
 
+        // Middle column: 3 independent cycling mini-strips
+        const midReel = document.querySelector('#reel-1 .reel-strip');
+        midReel.innerHTML = '';
+        midReel.style.transition = 'none';
+        midReel.style.transform = 'none';
+        midReel.style.display = 'flex';
+        midReel.style.flexDirection = 'column';
+        const midCellAnims = [];
+        for (let r = 0; r < 3; r++) {
+          const wrapper = document.createElement('div');
+          wrapper.style.cssText = `height:${cellH}px;overflow:hidden;position:relative;`;
+          const miniStrip = document.createElement('div');
+          miniStrip.style.cssText = 'position:absolute;top:0;left:0;right:0;will-change:transform;';
+          const numSym = 6;
+          for (let i = 0; i < numSym * 2; i++) { // double for seamless loop
+            const s = document.createElement('div');
+            s.style.cssText = `height:${cellH}px;display:flex;align-items:center;justify-content:center;`;
+            s.innerHTML = `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
+            miniStrip.appendChild(s);
+          }
+          wrapper.appendChild(miniStrip);
+          midReel.appendChild(wrapper);
+          // Start looping animation (varying speed per row)
+          const speed = 80 + r * 15; // ms per cell, slightly different
+          const loopDist = numSym * cellH;
+          let pos = 0;
+          const anim = { id: null, running: true };
+          function loop() {
+            if (!anim.running) return;
+            pos -= speed * 0.06;
+            if (pos <= -loopDist) pos += loopDist;
+            miniStrip.style.transform = `translateY(${pos}px)`;
+            anim.id = requestAnimationFrame(loop);
+          }
+          anim.id = requestAnimationFrame(loop);
+          midCellAnims.push({ wrapper, miniStrip, anim, row: r });
+        }
+
+        // Store mid cell anims globally so JP logic can stop them
+        window._midCellAnims = midCellAnims;
+        window._midBoard = board;
+        window._midCellH = cellH;
+        window._midFgBonus = fgBonusSymbols;
+
+        // Animate side reels
         const sideScrollDist = REEL_SYMBOLS * cellH;
         const sideFastDur = 700;
         const highSpeed = sideScrollDist / sideFastDur;
-
-        const configs = [
-          { scrollDist: REEL_SYMBOLS * cellH, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
-          { scrollDist: MID_SYMBOLS * cellH, decelDist: 18 * cellH, decelMs: 2400, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
-          { scrollDist: REEL_SYMBOLS * cellH, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
-        ];
-
+        const sideCfg = { scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' };
         let sidesCount = 0;
-        let midDone = false;
 
-        for (let col = 0; col < 3; col++) {
+        for (let col of [0, 2]) {
           const strip = document.querySelector(`#reel-${col} .reel-strip`);
-          const cfg = configs[col];
-          const targetY = cfg.scrollDist;
-          const fastDist = targetY - cfg.decelDist;
+          const targetY = sideCfg.scrollDist;
+          const fastDist = targetY - sideCfg.decelDist;
           const fastDur = Math.round(fastDist / highSpeed);
-
           strip.style.transition = `transform ${fastDur}ms linear`;
           strip.style.transform = `translateY(-${fastDist}px)`;
-
           setTimeout(() => {
-            const overshootY = targetY + overshoot;
-            strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
-            strip.style.transform = `translateY(-${overshootY}px)`;
-
+            strip.style.transition = `transform ${sideCfg.decelMs}ms ${sideCfg.ease}`;
+            strip.style.transform = `translateY(-${targetY + overshoot}px)`;
             setTimeout(() => {
               strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
               strip.style.transform = `translateY(-${targetY}px)`;
-
               setTimeout(() => {
-                if (col !== 1) {
-                  sidesCount++;
-                  if (sidesCount === 2 && onSidesStop) onSidesStop();
-                } else {
-                  midDone = true;
+                sidesCount++;
+                if (sidesCount === 2) {
+                  if (onSidesStop) onSidesStop();
+                  // After sides stop, wait then stop mid cells
+                  setTimeout(() => stopMidCells(resolve), 1200);
                 }
-                if (sidesCount === 2 && midDone) { spinning = false; resolve(); }
               }, 100);
-            }, cfg.decelMs);
+            }, sideCfg.decelMs);
           }, fastDur);
+        }
+
+        function stopMidCells(done) {
+          const anims = window._midCellAnims;
+          const bd = window._midBoard;
+          const ch = window._midCellH;
+          const fgB = window._midFgBonus;
+          let stopped = 0;
+          anims.forEach((a, i) => {
+            setTimeout(() => {
+              a.anim.running = false;
+              cancelAnimationFrame(a.anim.id);
+              // Snap to final symbol
+              const finalCell = bd[a.row][1];
+              let html = `<img src="assets/img/${cellImg(finalCell)}" style="width:85%;height:85%;object-fit:contain;">`;
+              if (fgB && fgB[a.row] !== '—') html += `<span class="cell-bonus">💰${fgB[a.row].slice(1)}</span>`;
+              a.wrapper.innerHTML = '';
+              const div = document.createElement('div');
+              div.className = 'cell';
+              div.style.height = ch + 'px';
+              div.id = `cell-${a.row}-1`;
+              div.innerHTML = html;
+              a.wrapper.appendChild(div);
+              stopped++;
+              if (stopped === 3) { spinning = false; done(); }
+            }, i * 200);
+          });
         }
       });
     }
