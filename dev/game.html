@@ -884,7 +884,7 @@
     });
     $('fgbg-close').addEventListener('click', () => { $('fgbg-choice').style.display = 'none'; });
 
-    // JP Pool auto-climb with easeOut + random timing
+    // JP Pool auto-climb — independent timers per tier
     let jpGrand = 30000, jpMajor = 6000, jpMini = 1500;
     function animateJp(el, start, end, duration) {
       const range = end - start;
@@ -901,21 +901,32 @@
     grandEl.textContent = jpGrand.toLocaleString();
     majorEl.textContent = jpMajor.toLocaleString();
     miniEl.textContent = jpMini.toLocaleString();
-    function scheduleJpTick() {
+    (function tickMini() {
       setTimeout(() => {
-        const prevG = jpGrand, prevM = jpMajor, prevMi = jpMini;
-        jpGrand += Math.ceil(Math.random() * 2);
-        jpMajor += Math.ceil(Math.random() * 3);
+        const prev = jpMini;
         jpMini += Math.ceil(Math.random() * 5);
         if (jpMini >= jpMajor) jpMini = 1500;
+        animateJp(miniEl, prev, jpMini, 800);
+        tickMini();
+      }, 2000 + Math.random() * 2000);
+    })();
+    (function tickMajor() {
+      setTimeout(() => {
+        const prev = jpMajor;
+        jpMajor += 3 + Math.floor(Math.random() * 6);
         if (jpMajor >= jpGrand) jpMajor = 6000;
-        animateJp(grandEl, prevG, jpGrand, 800);
-        animateJp(majorEl, prevM, jpMajor, 800);
-        animateJp(miniEl, prevMi, jpMini, 800);
-        scheduleJpTick();
-      }, 2000 + Math.random() * 3000);
-    }
-    scheduleJpTick();
+        animateJp(majorEl, prev, jpMajor, 800);
+        tickMajor();
+      }, 5000 + Math.random() * 5000);
+    })();
+    (function tickGrand() {
+      setTimeout(() => {
+        const prev = jpGrand;
+        jpGrand += 5 + Math.floor(Math.random() * 11);
+        animateJp(grandEl, prev, jpGrand, 800);
+        tickGrand();
+      }, 10000 + Math.random() * 10000);
+    })();
 
     window.focus();
   </script>
