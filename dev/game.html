@@ -416,16 +416,16 @@
           anims.forEach((a, i) => {
             const isJp = jpR[a.row] && jpR[a.row] !== 'normal';
             if (isJp) {
-              // Rebuild entire mini-strip with mostly JP symbols
-              const pool = getJpPool(jpR[a.row] === 'GRAND' ? 1 : 2);
+              // Rebuild entire mini-strip with ALL JP symbols (no normal)
+              const jpOnly = jpR[a.row] === 'GRAND' ? ['GRAND','MAJOR','MINI'] : ['MAJOR','MINI'];
               const ch = window._midCellH;
               a.miniStrip.innerHTML = '';
               for (let k = 0; k < 12; k++) {
                 const s = document.createElement('div');
                 s.style.cssText = `height:${ch}px;display:flex;align-items:center;justify-content:center;`;
-                const sym = pickJpSymbol(pool);
+                const sym = jpOnly[Math.floor(Math.random() * jpOnly.length)];
                 const img = getJpImg(sym);
-                s.innerHTML = img ? `<img src="${img}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
+                s.innerHTML = `<img src="${img}" style="width:85%;height:85%;object-fit:contain;">`;
                 a.miniStrip.appendChild(s);
               }
             }
