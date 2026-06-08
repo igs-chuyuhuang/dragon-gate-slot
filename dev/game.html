@@ -928,10 +928,11 @@
       if (!result) return;
       // Debug: force narrow gate for JP testing
       if (window._debugForceNarrow && result.mode === 'normal') {
+        const gapSize = window._debugJpNext === 'GRAND' ? 2 : 3; // gap=1 for GRAND, gap=2 for MAJOR/MINI
         for (let r = 0; r < 3; r++) {
-          const base = 3 + Math.floor(Math.random() * 8);
+          const base = 3 + Math.floor(Math.random() * (13 - gapSize));
           result.board[r][0] = { value: base, isScatter: false };
-          result.board[r][2] = { value: base + 2, isScatter: false };
+          result.board[r][2] = { value: base + gapSize, isScatter: false };
           result.board[r][1] = { value: base + 1, isScatter: false };
         }
         result.judgments = judgeBoard(result.board);
