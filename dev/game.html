@@ -443,7 +443,7 @@
               // Build decel strip: 4 random + final
               const decelStrip = document.createElement('div');
               decelStrip.style.cssText = 'position:absolute;top:0;left:0;right:0;will-change:transform;';
-              for (let k = 0; k < 4; k++) {
+              for (let k = 0; k < 14; k++) {
                 const s = document.createElement('div');
                 s.style.cssText = `height:${ch}px;display:flex;align-items:center;justify-content:center;`;
                 if (isJp && k % 2 === 0) {
@@ -461,8 +461,8 @@
               a.wrapper.innerHTML = '';
               a.wrapper.appendChild(decelStrip);
               // Animate decel: easeOutCubic over 700ms
-              const decelDist = 4 * ch;
-              decelStrip.style.transition = 'transform 700ms cubic-bezier(0.16, 1, 0.3, 1)';
+              const decelDist = 14 * ch;
+              decelStrip.style.transition = 'transform 1900ms cubic-bezier(0.05, 0.95, 0.2, 1)';
               requestAnimationFrame(() => {
                 decelStrip.style.transform = `translateY(-${decelDist}px)`;
               });
@@ -477,7 +477,7 @@
                 a.wrapper.appendChild(div);
                 stopped++;
                 if (stopped === 3) { spinning = false; done(); }
-              }, 720);
+              }, 1950);
             }, delay);
           });
         }
