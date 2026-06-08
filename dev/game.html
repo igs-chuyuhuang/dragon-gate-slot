@@ -498,17 +498,22 @@
       }
     }
 
-    // Animate middle column cells individually for JP (top→mid→bottom, each with mini strip)
-    function animateJpCells(finalSyms, pool) {
+    // Animate middle column cells individually for JP (only rows with JP symbol)
+    function animateJpCells(jpPerRow) {
       const cellH = getCellH();
       return new Promise(resolve => {
+        let total = jpPerRow.filter(x => x !== null).length;
+        if (total === 0) { resolve(); return; }
         let done = 0;
+        let delay = 0;
         for (let r = 0; r < 3; r++) {
+          if (jpPerRow[r] === null) continue;
           const cell = document.getElementById(`cell-${r}-1`);
-          if (!cell) { done++; if (done === 3) resolve(); continue; }
-          // Build mini strip inside cell
+          if (!cell) { done++; if (done === total) resolve(); continue; }
+          const pool = getJpPool(jpPerRow[r] === 'GRAND' ? 1 : 2);
           const numSym = 8;
           cell.style.overflow = 'hidden';
+          cell.style.position = 'relative';
           const miniStrip = document.createElement('div');
           miniStrip.style.cssText = 'display:flex;flex-direction:column;position:absolute;top:0;left:0;right:0;will-change:transform;';
           for (let i = 0; i < numSym; i++) {
@@ -519,17 +524,14 @@
             s.innerHTML = img ? `<img src="${img}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
             miniStrip.appendChild(s);
           }
-          // Final cell
           const finalDiv = document.createElement('div');
           finalDiv.style.cssText = `height:${cellH}px;display:flex;align-items:center;justify-content:center;`;
-          const fImg = getJpImg(finalSyms[r]);
+          const fImg = getJpImg(jpPerRow[r]);
           finalDiv.innerHTML = fImg ? `<img src="${fImg}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
           miniStrip.appendChild(finalDiv);
-
           cell.innerHTML = '';
           cell.appendChild(miniStrip);
           const totalDist = numSym * cellH;
-          const delay = r * 250; // stagger: 0, 250, 500ms
           setTimeout(() => {
             miniStrip.style.transition = 'transform 400ms linear';
             miniStrip.style.transform = `translateY(-${totalDist * 0.4}px)`;
@@ -537,13 +539,13 @@
               miniStrip.style.transition = 'transform 600ms cubic-bezier(0.16, 1, 0.3, 1)';
               miniStrip.style.transform = `translateY(-${totalDist}px)`;
               setTimeout(() => {
-                // Snap to final
                 cell.innerHTML = fImg ? `<img src="${fImg}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
                 done++;
-                if (done === 3) resolve();
+                if (done === total) resolve();
               }, 600);
             }, 400);
           }, delay);
+          delay += 250;
         }
       });
     }
@@ -560,7 +562,8 @@
     }
     function pickJpSymbol(pool) { return pool[Math.floor(Math.random() * pool.length)]; }
     function checkJpSlotWin(symbols) {
-      if (symbols[0] !== 'normal' && symbols[0] === symbols[1] && symbols[1] === symbols[2]) return symbols[0];
+      // All 3 must be the same non-null JP symbol
+      if (symbols[0] && symbols[0] !== 'normal' && symbols[0] === symbols[1] && symbols[1] === symbols[2]) return symbols[0];
       return null;
     }
     function getJpImg(sym) {
@@ -887,35 +890,38 @@
         else { setTimeout(() => doSpin(), 400); }
         return result;
       }
-      // Normal mode: determine JP symbols, pass onSidesStop callback
+      // Normal mode: determine JP symbols per-row, pass onSidesStop callback
       let jpSlotWin = null;
-      let jpSyms = null;
+      let jpPerRow = [null, null, null]; // per-row JP symbol (null = normal)
       if (window._debugJpNext) {
-        jpSyms = [window._debugJpNext, window._debugJpNext, window._debugJpNext];
+        jpPerRow = [window._debugJpNext, window._debugJpNext, window._debugJpNext];
         window._debugJpNext = null;
       }
       await animateSpin(result.board, null, () => {
-        // Sides stopped — flash middle reel if narrow gate detected
-        if (!jpSyms) {
-          const jpRow = result.judgments.find(j => j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss' && j.gap >= 1 && j.gap <= 3);
-          if (jpRow) {
-            console.log('[JP] Triggered:', result.judgments.map(j => `row${j.row} type=${j.type} gap=${j.gap}`).join(', '));
-            const pool = getJpPool(jpRow.gap);
-            jpSyms = [pickJpSymbol(pool), pickJpSymbol(pool), pickJpSymbol(pool)];
+        // Sides stopped — per-row JP determination
+        if (jpPerRow.every(x => x === null)) {
+          result.judgments.forEach(j => {
+            if (j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss' && j.gap >= 1 && j.gap <= 3) {
+              const pool = getJpPool(j.gap);
+              jpPerRow[j.row] = pickJpSymbol(pool);
+            }
+          });
+          if (jpPerRow.some(x => x !== null)) {
+            console.log('[JP] Per-row:', jpPerRow, result.judgments.map(j => `row${j.row} gap=${j.gap}`));
           }
         }
-        if (jpSyms) {
+        if (jpPerRow.some(x => x !== null)) {
           const midReel = document.getElementById('reel-1');
           midReel.style.boxShadow = '0 0 16px 4px rgba(255,215,0,0.7)';
         }
       });
       sfx('spin_release');
-      // After all reels stop: if JP symbols, do independent cell animation
-      if (jpSyms) {
-        await animateJpCells(jpSyms, jpSyms.some(s => s !== 'normal') ? getJpPool(1) : getJpPool(2));
+      // After all reels stop: animate JP cells (only rows with JP)
+      if (jpPerRow.some(x => x !== null)) {
+        await animateJpCells(jpPerRow);
         const midReel = document.getElementById('reel-1');
         setTimeout(() => { midReel.style.boxShadow = ''; }, 800);
-        jpSlotWin = checkJpSlotWin(jpSyms);
+        jpSlotWin = checkJpSlotWin(jpPerRow);
       }
       showResult(result);
       // Play result sfx + win line effect
