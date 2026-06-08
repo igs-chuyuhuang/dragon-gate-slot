@@ -840,9 +840,10 @@
           jpSyms = [window._debugJpNext, window._debugJpNext, window._debugJpNext];
           window._debugJpNext = null;
         } else {
-          // Find narrowest gate row
-          const jpRow = result.judgments.find(j => j.gap >= 1 && j.gap <= 3 && j.type !== 'scatter');
+          // Find row with narrow gate (gap 1~3 only)
+          const jpRow = result.judgments.find(j => j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss' && j.gap >= 1 && j.gap <= 3);
           if (jpRow) {
+            console.log('[JP] Triggered:', result.judgments.map(j => `row${j.row} type=${j.type} gap=${j.gap}`).join(', '));
             const pool = getJpPool(jpRow.gap);
             jpSyms = [pickJpSymbol(pool), pickJpSymbol(pool), pickJpSymbol(pool)];
           }
