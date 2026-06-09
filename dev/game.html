@@ -753,14 +753,14 @@
         }
         // Continuous coin spawner
         function spawnCoins() {
-          for (let i = 0; i < 50; i++) {
+          for (let i = 0; i < 15; i++) {
             const c = document.createElement('div');
             const sz = 12 + Math.random() * 18;
             c.style.cssText = `position:absolute;left:${Math.random()*100}%;top:-30px;width:${sz}px;height:${sz}px;border-radius:50%;background:linear-gradient(135deg,${coinColors});box-shadow:0 0 4px rgba(255,215,0,0.5);opacity:${0.5+Math.random()*0.5};animation:coinRain ${2+Math.random()*1.5}s linear forwards;`;
             ov.appendChild(c);
             setTimeout(() => c.remove(), 4000);
           }
-          for (let i = 0; i < 30; i++) {
+          for (let i = 0; i < 10; i++) {
             const c = document.createElement('div');
             const sz = 14 + Math.random() * 20;
             const angle = Math.random() * Math.PI * 2;
@@ -771,7 +771,7 @@
           }
         }
         spawnCoins();
-        const coinInterval = setInterval(spawnCoins, 300);
+        const coinInterval = setInterval(spawnCoins, 500);
         document.body.appendChild(ov);
         // Collect button handler
         btn.onclick = () => {
