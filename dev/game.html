@@ -698,7 +698,7 @@
         winAudio.volume = 0.5;
         winAudio.play().catch(() => {});
         // After first play, loop from specified start point
-        const loopStart = label.includes('SUPER') ? 1.5 : label.includes('MEGA') ? 1.5 : 1.2;
+        const loopStart = label.includes('SUPER') ? 1.5 : label.includes('MEGA') ? 1.5 : 0.94;
         winAudio.addEventListener('ended', function loopTail() {
           winAudio.currentTime = loopStart;
           winAudio.play().catch(() => {});
