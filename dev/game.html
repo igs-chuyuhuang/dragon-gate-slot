@@ -829,7 +829,7 @@
       bgInstance = new BonusGame(gm.bet, pool);
       // Hide main game elements
       $('bg-bonus').style.display = 'block';
-      for (let i = 0; i < 30; i++) { document.getElementById(`reel-${i}`).style.display = 'none'; $(`badge-${i}`).style.display = 'none'; }
+      for (let i = 0; i < 3; i++) { const el = document.getElementById(`reel-${i}`); if (el) el.style.display = 'none'; $(`badge-${i}`).style.display = 'none'; }
       $('results').style.display = 'none';
       $('scatter-ring').style.display = 'none';
       const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = 'none';
@@ -984,7 +984,7 @@
       document.querySelector('.ctrl-panel').style.display = '';
       // Restore main game elements
       $('bg-bonus').style.display = 'none';
-      for (let i = 0; i < 30; i++) { document.getElementById(`reel-${i}`).style.display = ''; $(`badge-${i}`).style.display = ''; }
+      for (let i = 0; i < 3; i++) { const el = document.getElementById(`reel-${i}`); if (el) el.style.display = ''; $(`badge-${i}`).style.display = ''; }
       $('results').style.display = '';
       $('scatter-ring').style.display = '';
       const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = '';
