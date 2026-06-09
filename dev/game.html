@@ -669,6 +669,7 @@
         flyer.style.cssText = `position:fixed;left:${srcRect.left}px;top:${srcRect.top}px;z-index:9999;font-size:13px;color:#ffd700;font-weight:bold;background:rgba(0,0,0,0.7);border-radius:8px;padding:2px 6px;transition:all 600ms cubic-bezier(0.25,1,0.5,1);pointer-events:none;`;
         document.body.appendChild(flyer);
         flyers.push({ clone: flyer, dstRect, badge, sym: bonusSymbols[j.row] });
+        sfx('coin_fly');
         requestAnimationFrame(() => {
           flyer.style.left = `${dstRect.left + dstRect.width/2 - 20}px`;
           flyer.style.top = `${dstRect.top + dstRect.height/2 - 10}px`;
