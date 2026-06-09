@@ -705,7 +705,7 @@
         else sfx('coin_count');
       }
       requestAnimationFrame(tick);
-      const close = () => { overlay.style.display = 'none'; };
+      const close = () => { overlay.style.display = 'none'; updateRing(0); };
       overlay.onclick = close;
       setTimeout(close, 3500);
     }
@@ -940,6 +940,7 @@
         titleEl.textContent = 'FREE GAME';
         gm.balance += total;
         updateUI();
+        updateRing(0);
       };
       overlay.onclick = close;
       setTimeout(close, 3500);
