@@ -1166,9 +1166,10 @@
         }
       }
       // BIG WIN check
-      if (result.mode === 'normal' && result.totalPayout > 0) {
-        const ratio = result.totalPayout / gm.bet;
-        console.log("[BIGWIN] payout="+result.totalPayout+" bet="+gm.bet+" ratio="+ratio); if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 20 ? 'SUPER WIN!' : ratio >= 10 ? 'MEGA WIN!' : 'BIG WIN!');
+      const bigWinAmount = result.totalPayout + (jpSlotWin ? ({'GRAND':jpGrand,'MAJOR':jpMajor,'MINI':jpMini}[jpSlotWin]||0) : 0);
+      if (result.mode === 'normal' && bigWinAmount > 0) {
+        const ratio = bigWinAmount / gm.bet;
+        if (ratio >= 5) await showBigWin(bigWinAmount, ratio >= 20 ? 'SUPER WIN!' : ratio >= 10 ? 'MEGA WIN!' : 'BIG WIN!');
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
