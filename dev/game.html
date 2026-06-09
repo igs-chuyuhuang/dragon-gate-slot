@@ -1235,6 +1235,7 @@
             }
           });
           if (jpPerRow.some(x => x !== null)) {
+            sfx('narrow_gate');
             console.log('[JP] Per-row:', jpPerRow, result.judgments.map(j => `row${j.row} gap=${j.gap}`));
           }
         }
