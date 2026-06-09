@@ -529,3 +529,38 @@
 **關鍵 prompt / 指令：** JP 爬升效果；JP badge→JP Slot 大改；中輪獨立轉動；閃爍/速度/減速多次迭代
 **人工修正：** JP 邏輯經 5+ 次修正（badge→slot→per-row→type覆蓋→revert→最終版）
 **耗時：** ~4 小時
+
+### [2026-06-09] — 龍門特效加強 + 音效合成（BIG WIN/龍門/countup/coin fly）
+
+**環節：** 程式 / 音效
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 金龍素材生成（PIL，800×600 透明背景 placeholder）
+2. playDragonGateOpening 特效全面加強 5 倍：門 80vw×60vh、shake 60px、100 粒子、衝擊波 scale5、門縫光芒 blur、金閃光 overlay
+3. 合成 5 個新音效：bigwin/megawin/supermegawin（fanfare+金幣）、gate_rise（隆隆+金屬摩擦）、gate_open_sfx（boom+衝擊）
+4. 合成 countup.mp3（0.5s 8 tick 金幣計數聲），BIG WIN 得分時循環播放
+5. 合成 coin_fly.mp3（0.4s whoosh+金屬尾音），FG 錢幣飛移時播放
+6. 所有音效接入 game.html 對應觸發點
+**Before：** 龍門特效小（160×240px）、無 win/gate 音效、無計數音效、無飛行音效
+**After：** 龍門特效佔滿畫面、7 個新音效全部接入播放
+**關鍵 prompt / 指令：** 龍門特效加強 5 倍；為各特效加入音效；countup 計數聲；coin fly 咻聲
+**人工修正：** 無
+**耗時：** ~40 分鐘
+
+### [2026-06-09] — 手機 debug 面板 + F 鍵改散集 + BIG WIN 動畫 + 龍門開啟特效 + BG 得分動畫
+
+**環節：** 程式
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 手機 debug 面板：長按 2 秒彈出 F/J/M/N/S 按鈕
+2. F 鍵改為填進度到 11/12 + 下一轉出 1 顆 Scatter 觸發完整流程
+3. BIG WIN 動畫系統（≥5x/15x/30x bet）：霓虹金字+星星+金幣雨+噴射+得分按鈕倒數歸零
+4. 金幣顏色分級：棕(BIG)/銀(MEGA)/金(SUPER MEGA)
+5. BIG WIN 整合到 FG/BG/JP 所有結算場景
+6. 龍門開啟特效 playDragonGateOpening：dim+門板升起+開門衝擊波+shake+金龍飛出+粒子拖尾（3.2s）
+7. BG 得分/扣分改漸進動畫（countUp 900ms + countup.mp3 loop）
+**Before：** 無 BIG WIN 動畫、觸發 FG/BG 直接跳選擇、BG 結果一次跳到目標值
+**After：** 華麗 BIG WIN 分級慶祝特效、龍門開啟儀式感、BG 數字漸進動畫
+**關鍵 prompt / 指令：** BIG WIN 金幣雨+得分按鈕；龍門開啟完整時間軸；BG countUp 動畫
+**人工修正：** BIG WIN 經 3 次迭代（加金幣→重做華麗版→加得分按鈕倒數）
+**耗時：** ~3 小時
