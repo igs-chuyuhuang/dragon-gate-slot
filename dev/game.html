@@ -831,6 +831,13 @@
         });
         container.appendChild(btn);
       });
+      // Default select first chip (10%)
+      const firstBtn = container.querySelector('.bg-chip-btn');
+      if (firstBtn && !firstBtn.disabled) {
+        firstBtn.classList.add('selected');
+        bgInstance.roundBet = Math.round(bgInstance.chips * 10 / 100);
+        $('bg-deal-btn').disabled = false;
+      }
     }
 
     function bgDeal() {
