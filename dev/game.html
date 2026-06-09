@@ -689,6 +689,33 @@
       });
     }
 
+    function showBigWin(amount, label) {
+      return new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:fgFadeIn 0.2s ease;';
+        const title = document.createElement('div');
+        title.textContent = label;
+        title.style.cssText = 'font-size:3rem;font-weight:900;color:#ffd700;text-shadow:0 0 30px rgba(255,215,0,0.8),0 0 60px rgba(255,140,0,0.5);animation:bigWinPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275);';
+        ov.appendChild(title);
+        const num = document.createElement('div');
+        num.style.cssText = 'font-size:2rem;font-weight:bold;color:#fff;margin-top:8px;text-shadow:0 0 10px rgba(255,215,0,0.5);';
+        num.textContent = '0';
+        ov.appendChild(num);
+        document.body.appendChild(ov);
+        // CountUp
+        const dur = 1500, t0 = performance.now();
+        function tick(now) {
+          const p = Math.min((now - t0) / dur, 1);
+          const ease = 1 - Math.pow(1 - p, 3);
+          num.textContent = '+' + Math.round(amount * ease).toLocaleString();
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        setTimeout(() => { ov.remove(); resolve(); }, 2800);
+        ov.onclick = () => { ov.remove(); resolve(); };
+      });
+    }
+
     function showFGResult(total) {
       const overlay = $('fg-result-overlay');
       const amountEl = $('fg-result-amount');
@@ -1130,8 +1157,12 @@
           if (anims2) anims2.forEach(a => { a.wrapper.style.animation = ''; a.wrapper.style.boxShadow = ''; });
         }
       }
+      // BIG WIN check
+      if (result.mode === 'normal' && result.totalPayout > 0) {
+        const ratio = result.totalPayout / gm.bet;
+        if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 20 ? 'SUPER WIN!' : ratio >= 10 ? 'MEGA WIN!' : 'BIG WIN!');
+      }
       updateUI();
-      if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
         if (result.fgTriggered) { showFgBgChoice(); gm.scatterLamps = 0; }
         else { setTimeout(() => doSpin(), 400); }
       }
