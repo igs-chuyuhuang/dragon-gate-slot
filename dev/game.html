@@ -1165,11 +1165,15 @@
           if (anims2) anims2.forEach(a => { a.wrapper.style.animation = ''; a.wrapper.style.boxShadow = ''; });
         }
       }
-      // BIG WIN check
-      const bigWinAmount = result.totalPayout + (jpSlotWin ? ({'GRAND':jpGrand,'MAJOR':jpMajor,'MINI':jpMini}[jpSlotWin]||0) : 0);
-      if (result.mode === 'normal' && bigWinAmount > 0) {
-        const ratio = bigWinAmount / gm.bet;
-        if (ratio >= 5) await showBigWin(bigWinAmount, ratio >= 20 ? 'SUPER WIN!' : ratio >= 10 ? 'MEGA WIN!' : 'BIG WIN!');
+      // BIG WIN check (skip if JP already showing its own overlay)
+      if (result.mode === 'normal' && !jpSlotWin && result.totalPayout > 0) {
+        const ratio = result.totalPayout / gm.bet;
+        if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 20 ? 'SUPER WIN!' : ratio >= 10 ? 'MEGA WIN!' : 'BIG WIN!');
+      }
+      // Debug B key: force BIG WIN display
+      if (window._debugForceBigWin && result.mode === 'normal') {
+        window._debugForceBigWin = false;
+        await showBigWin(gm.bet * 15, 'BIG WIN!');
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
@@ -1275,6 +1279,7 @@
     document.addEventListener('keydown', e => {
       if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
       if (e.key === 'f' && !gm.fg.active && !spinning) { gm.scatterLamps = 9; updateRing(9); window._debugForceScatter = true; }
+      if (e.key === 'b' || e.key === 'B') { window._debugForceBigWin = true; }
       let debugJpNext = null; // 'GRAND'|'MAJOR'|'MINI'
       if (e.key === 'j' || e.key === 'J') { debugJpNext = 'GRAND'; }
       if (e.key === 'm' || e.key === 'M') { debugJpNext = 'MAJOR'; }
@@ -1336,7 +1341,7 @@
       function showDbg() {
         const d = document.createElement('div');
         d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(0,0,0,0.9);border:2px solid #ffd700;border-radius:12px;padding:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;';
-        const btns = [['F','f'],['J','j'],['M','m'],['N','n'],['S','s']];
+        const btns = [['F','f'],['B','b'],['J','j'],['M','m'],['N','n'],['S','s']];
         btns.forEach(([label, key]) => {
           const b = document.createElement('button');
           b.textContent = label;
