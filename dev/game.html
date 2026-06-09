@@ -759,15 +759,22 @@
       });
     }
 
-    function showFGResult(total) {
+    async function showFGResult(total) {
+      const ratio = total / gm.bet;
+      if (ratio >= 5) {
+        const label = ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!';
+        const colors = ratio >= 30 ? '#ffd700,#ff8c00' : ratio >= 15 ? '#c0c0c0,#808080' : '#cd7f32,#8b4513';
+        await showBigWin(total, label, colors);
+        updateRing(0);
+        return;
+      }
       const overlay = $('fg-result-overlay');
       const amountEl = $('fg-result-amount');
       const bigEl = $('fg-result-big');
       overlay.style.display = 'flex';
-      bigEl.style.display = total > gm.bet * 20 ? 'block' : 'none';
+      bigEl.style.display = 'none';
       amountEl.textContent = '0';
-      const duration = 2000;
-      const start = performance.now();
+      const duration = 2000, start = performance.now();
       function tick(now) {
         const p = Math.min((now - start) / duration, 1);
         amountEl.textContent = fmt(Math.round(total * p));
@@ -964,7 +971,7 @@
       $('bg-round-counter').textContent = `${bgInstance.rounds}/${bgInstance.maxRounds}`;
     }
 
-    function bgEnd() {
+    async function bgEnd() {
       if (!bgInstance) return;
       if (bgRoundTimer) clearInterval(bgRoundTimer);
       bgInstance.active = false;
@@ -984,20 +991,28 @@
       const jpContainer = document.querySelector('.jp-pool-container'); if (jpContainer) jpContainer.style.display = '';
       bgInstance = null;
       updateUI();
-      showBGResult(winnings);
+      await showBGResult(winnings);
     }
 
-    function showBGResult(total) {
+    async function showBGResult(total) {
+      const ratio = total / gm.bet;
+      if (ratio >= 5) {
+        const label = ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!';
+        const colors = ratio >= 30 ? '#ffd700,#ff8c00' : ratio >= 15 ? '#c0c0c0,#808080' : '#cd7f32,#8b4513';
+        gm.balance += total;
+        await showBigWin(total, label, colors);
+        updateUI(); updateRing(0);
+        return;
+      }
       const overlay = $('fg-result-overlay');
       const amountEl = $('fg-result-amount');
       const bigEl = $('fg-result-big');
       const titleEl = overlay.querySelector('.fg-result-title');
       titleEl.textContent = 'BONUS GAME';
       overlay.style.display = 'flex';
-      bigEl.style.display = total > gm.bet * 20 ? 'block' : 'none';
+      bigEl.style.display = 'none';
       amountEl.textContent = '0';
-      const duration = 2000;
-      const start = performance.now();
+      const duration = 2000, start = performance.now();
       function tick(now) {
         const p = Math.min((now - start) / duration, 1);
         amountEl.textContent = fmt(Math.round(total * p));
@@ -1009,8 +1024,7 @@
         overlay.style.display = 'none';
         titleEl.textContent = 'FREE GAME';
         gm.balance += total;
-        updateUI();
-        updateRing(0);
+        updateUI(); updateRing(0);
       };
       overlay.onclick = close;
       setTimeout(close, 3500);
@@ -1089,7 +1103,7 @@
         await flyFgCoins(result.judgments, result.bonusSymbols);
         $('win').textContent = fmt(result.totalScore);
         updateUI();
-        if (result.fgDone) { showFGResult(result.totalScore); }
+        if (result.fgDone) { await showFGResult(result.totalScore); }
         else { setTimeout(() => doSpin(), 400); }
         return result;
       }
@@ -1194,7 +1208,7 @@
           if (jpSlotWin === 'GRAND') jpGrand = 30000;
           else if (jpSlotWin === 'MAJOR') jpMajor = 6000;
           else jpMini = 1500;
-          showFGResult(jpAmount);
+          await showBigWin(jpAmount, 'JACKPOT!', '#ffd700,#ff8c00');
           // Clear JP flash after showing result
           const anims2 = window._midCellAnims;
           if (anims2) anims2.forEach(a => { a.wrapper.style.animation = ''; a.wrapper.style.boxShadow = ''; });
