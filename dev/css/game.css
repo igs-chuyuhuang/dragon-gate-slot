@@ -501,4 +501,4 @@ body {
 @keyframes jpFlashRed { 0% { box-shadow: 0 0 30px 15px rgba(255,50,50,1), inset 0 0 20px rgba(255,50,50,0.8); border: 3px solid #ff3333; } 100% { box-shadow: 0 0 60px 30px rgba(255,50,50,1), inset 0 0 40px rgba(255,50,50,0.9); border: 3px solid #fff; } }
 
 @keyframes bigWinPop { 0% { transform: scale(0); opacity:0; } 60% { transform: scale(1.2); opacity:1; } 100% { transform: scale(1); } }
-@keyframes coinFall { 0% { transform: translateY(0) rotate(0deg); opacity:1; } 80% { opacity:1; } 100% { transform: translateY(100vh) rotate(var(--rot)); opacity:0; } }
+@keyframes coinBurst { 0% { transform: translate(0,0) scale(0.3) rotate(0deg); opacity:1; } 60% { opacity:1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(var(--rot)); opacity:0; } }
