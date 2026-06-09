@@ -800,7 +800,7 @@
         setTimeout(() => { ov.style.background = 'rgba(0,0,0,0.8)'; root.style.transition = 'transform 0.5s'; root.style.transform = 'scale(1.05)'; }, 0);
         // Gate (80% width, 60% height)
         const gate = document.createElement('div');
-        gate.style.cssText = 'position:relative;width:80vw;max-width:500px;height:60vh;max-height:400px;display:flex;perspective:800px;';
+        gate.style.cssText = 'position:relative;width:100vw;height:100vh;display:flex;perspective:800px;';
         const leftDoor = document.createElement('div');
         leftDoor.style.cssText = 'width:50%;height:100%;background:linear-gradient(135deg,#1a1a2e,#2d1b00);border:4px solid #ffd700;border-right:none;transform-origin:left;transition:transform 0.5s ease-out;border-radius:12px 0 0 12px;box-shadow:inset -20px 0 40px rgba(255,215,0,0.4);';
         const rightDoor = document.createElement('div');
@@ -822,7 +822,7 @@
           const wave = document.createElement('div');
           wave.style.cssText = 'position:absolute;width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,215,0,0.9);box-shadow:0 0 30px rgba(255,215,0,0.6);transform:scale(0);transition:transform 0.6s ease-out,opacity 0.6s;';
           ov.appendChild(wave);
-          requestAnimationFrame(() => { wave.style.transform = 'scale(5)'; wave.style.opacity = '0'; });
+          requestAnimationFrame(() => { wave.style.transform = 'scale(8)'; wave.style.opacity = '0'; });
           // Heavy camera shake (60px)
           root.style.transition = 'none';
           let shakes = 0;
@@ -837,7 +837,7 @@
         setTimeout(() => {
           const dragon = document.createElement('img');
           dragon.src = 'assets/img/golden-dragon.png';
-          dragon.style.cssText = 'position:absolute;width:45vw;max-width:350px;height:auto;object-fit:contain;animation:dragonFlyOut 1.2s ease-out forwards;filter:drop-shadow(0 0 20px rgba(255,215,0,0.8));';
+          dragon.style.cssText = 'position:absolute;width:70vw;height:auto;object-fit:contain;animation:dragonFlyOut 1.2s ease-out forwards;filter:drop-shadow(0 0 20px rgba(255,215,0,0.8));';
           ov.appendChild(dragon);
           // 100 gold particles
           for (let i = 0; i < 100; i++) {
