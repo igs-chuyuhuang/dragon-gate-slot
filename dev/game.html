@@ -1134,23 +1134,24 @@
       }
       // Debug: force scatter to fill progress to threshold
       if (window._debugForceScatter && result.mode === 'normal') {
-        const threshold = 10; // SCATTER_LAMP_THRESHOLD
-        const needed = Math.min(3, Math.max(1, threshold - gm.scatterLamps));
-        let placed = 0;
-        for (let r = 0; r < 3 && placed < needed; r++) {
-          for (let c = 0; c < 3 && placed < needed; c++) {
+        const threshold = 10;
+        // Override: force exactly 1 scatter, set lamps to threshold-1 so it triggers
+        gm.scatterLamps = threshold - 1;
+        // Place exactly 1 scatter on the board
+        let placed = false;
+        for (let r = 0; r < 3 && !placed; r++) {
+          for (let c = 0; c < 3 && !placed; c++) {
             if (!result.board[r][c].isScatter) {
               result.board[r][c] = { value: null, isScatter: true };
-              placed++;
+              placed = true;
             }
           }
         }
         result.judgments = judgeBoard(result.board);
-        result.scatterCount = placed;
-        // Update scatter lamps to threshold (show full ring) but don't reset yet
-        gm.scatterLamps += placed;
-        result.fgTriggered = gm.scatterLamps >= threshold;
-        result.scatterLamps = gm.scatterLamps; // Keep at 10 for ring display
+        result.scatterCount = 1;
+        gm.scatterLamps = threshold; // now at 10
+        result.fgTriggered = true;
+        result.scatterLamps = threshold;
         result.totalPayout = 0;
         for (const j of result.judgments) { if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult; }
         window._debugForceScatter = false;
