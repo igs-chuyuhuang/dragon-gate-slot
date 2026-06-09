@@ -1160,7 +1160,7 @@
       // BIG WIN check
       if (result.mode === 'normal' && result.totalPayout > 0) {
         const ratio = result.totalPayout / gm.bet;
-        if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 20 ? 'SUPER WIN!' : ratio >= 10 ? 'MEGA WIN!' : 'BIG WIN!');
+        console.log("[BIGWIN] payout="+result.totalPayout+" bet="+gm.bet+" ratio="+ratio); if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 20 ? 'SUPER WIN!' : ratio >= 10 ? 'MEGA WIN!' : 'BIG WIN!');
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
