@@ -13,7 +13,7 @@ function judgeRow(row, left, mid, right) {
   // Same-value gate
   if (l === r2) {
     if (m === l) return { row, type: 'same-hit', lampChange: -2, gap: 0 };
-    return { row, type: 'same-miss', lampChange: 0, gap: 0 };
+    return { row, type: 'through', mult: 1, gap: 12 }; // 視為寬門穿門
   }
 
   // Normal gate
