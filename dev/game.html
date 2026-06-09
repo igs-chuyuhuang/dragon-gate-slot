@@ -694,11 +694,16 @@
         // Play corresponding win SFX (loop until collect)
         const winSfxName = label.includes('SUPER') ? 'supermegawin' : label.includes('MEGA') ? 'megawin' : 'bigwin';
         const winAudio = new Audio(`assets/sfx/${winSfxName}.mp3`);
-        winAudio.loop = true;
+        winAudio.loop = false;
         winAudio.volume = 0.5;
         winAudio.play().catch(() => {});
-        // Stop win music after 2 seconds
-        setTimeout(() => { winAudio.pause(); }, 2000);
+        // After first play, loop only last 2 seconds
+        winAudio.addEventListener('ended', function loopTail() {
+          const dur = winAudio.duration;
+          const loopStart = Math.max(0, dur - 2);
+          winAudio.currentTime = loopStart;
+          winAudio.play().catch(() => {});
+        });
         const ov = document.createElement('div');
         ov.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.7);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;';
         // Title
