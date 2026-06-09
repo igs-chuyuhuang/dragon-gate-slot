@@ -1163,6 +1163,7 @@
         if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 20 ? 'SUPER WIN!' : ratio >= 10 ? 'MEGA WIN!' : 'BIG WIN!');
       }
       updateUI();
+      if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
         if (result.fgTriggered) { showFgBgChoice(); gm.scatterLamps = 0; }
         else { setTimeout(() => doSpin(), 400); }
       }
