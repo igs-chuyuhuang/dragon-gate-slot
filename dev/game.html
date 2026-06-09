@@ -1012,25 +1012,36 @@
         midCard.innerHTML = `<img src="assets/img/${CARD_IMG[result.mid]}">`;
         midCard.className = 'bg-card face';
         bgInstance.applyResult(result);
-        // Show result
+        // Show result with animation
         const resEl = $('bg-result-text');
+        const winEl = $('bg-win');
+        const balEl = $('bg-balance');
         if (result.mult > 0) {
-          resEl.textContent = `穿門！×${result.mult} +${fmt(bgInstance.roundBet * result.mult)}`;
+          const won = bgInstance.roundBet * result.mult;
+          resEl.textContent = `穿門！×${result.mult}`;
           resEl.className = 'bg-result-text win';
           sfx('gate_through');
+          bgAnimateValue(winEl, '', bgInstance.winnings - won, bgInstance.winnings, 900, true);
+          bgAnimateValue(balEl, '', bgInstance.chips - won, bgInstance.chips, 900, false);
         } else if (result.type === 'wall') {
-          resEl.textContent = `碰壁！-${fmt(Math.abs(bgInstance.roundBet * result.mult))}`;
+          const lost = Math.abs(bgInstance.roundBet * result.mult);
+          resEl.textContent = `碰壁！`;
           resEl.className = 'bg-result-text lose';
           sfx('wall_hit');
+          bgAnimateValue(balEl, '', bgInstance.chips + lost, bgInstance.chips, 600, false);
         } else if (result.type === 'same-hit') {
-          resEl.textContent = `同值撞柱！-${fmt(Math.abs(bgInstance.roundBet * result.mult))}`;
+          const lost = Math.abs(bgInstance.roundBet * result.mult);
+          resEl.textContent = `同值撞柱！`;
           resEl.className = 'bg-result-text lose';
           sfx('wall_hit');
+          bgAnimateValue(balEl, '', bgInstance.chips + lost, bgInstance.chips, 600, false);
         } else {
-          resEl.textContent = `未穿 -${fmt(Math.abs(bgInstance.roundBet * result.mult))}`;
+          const lost = Math.abs(bgInstance.roundBet * result.mult);
+          resEl.textContent = `未穿`;
           resEl.className = 'bg-result-text lose';
+          bgAnimateValue(balEl, '', bgInstance.chips + lost, bgInstance.chips, 600, false);
         }
-        bgUpdateUI();
+        $('bg-round-counter').textContent = `${bgInstance.rounds}/${bgInstance.maxRounds}`;
         // Next round after delay
         setTimeout(() => {
           if (!bgInstance) return;
@@ -1050,6 +1061,21 @@
       $('bg-balance').textContent = fmt(bgInstance.chips);
       $('bg-win').textContent = fmt(bgInstance.winnings);
       $('bg-round-counter').textContent = `${bgInstance.rounds}/${bgInstance.maxRounds}`;
+    }
+
+    const bgCountSfx = new Audio('assets/sfx/countup.mp3');
+    bgCountSfx.loop = true; bgCountSfx.volume = 0.4;
+    function bgAnimateValue(el, prefix, from, to, duration, isWin) {
+      if (isWin) { bgCountSfx.currentTime = 0; bgCountSfx.play().catch(()=>{}); }
+      const t0 = performance.now();
+      function tick(now) {
+        const p = Math.min((now - t0) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = prefix + fmt(Math.round(from + (to - from) * ease));
+        if (p < 1) requestAnimationFrame(tick);
+        else if (isWin) bgCountSfx.pause();
+      }
+      requestAnimationFrame(tick);
     }
 
     async function bgEnd() {
