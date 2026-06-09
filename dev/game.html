@@ -1207,8 +1207,11 @@
       }
       // Debug B key: force BIG WIN display
       if (window._debugForceBigWin && result.mode === 'normal') {
+        const lvl = window._debugForceBigWin;
         window._debugForceBigWin = false;
-        await showBigWin(gm.bet * 15, 'BIG WIN!', '#cd7f32,#8b4513');
+        if (lvl === 'super') await showBigWin(gm.bet * 30, 'SUPER MEGA WIN!', '#ffd700,#ff8c00');
+        else if (lvl === 'mega') await showBigWin(gm.bet * 15, 'MEGA WIN!', '#c0c0c0,#808080');
+        else await showBigWin(gm.bet * 5, 'BIG WIN!', '#cd7f32,#8b4513');
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
@@ -1314,7 +1317,9 @@
     document.addEventListener('keydown', e => {
       if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
       if (e.key === 'f' && !gm.fg.active && !spinning) { gm.scatterLamps = 9; updateRing(9); window._debugForceScatter = true; }
-      if (e.key === 'b' || e.key === 'B') { window._debugForceBigWin = true; }
+      if (e.key === 'b' || e.key === 'B') { window._debugForceBigWin = 'big'; }
+      if (e.key === 'v' || e.key === 'V') { window._debugForceBigWin = 'mega'; }
+      if (e.key === 'x' || e.key === 'X') { window._debugForceBigWin = 'super'; }
       let debugJpNext = null; // 'GRAND'|'MAJOR'|'MINI'
       if (e.key === 'j' || e.key === 'J') { debugJpNext = 'GRAND'; }
       if (e.key === 'm' || e.key === 'M') { debugJpNext = 'MAJOR'; }
@@ -1376,7 +1381,7 @@
       function showDbg() {
         const d = document.createElement('div');
         d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(0,0,0,0.9);border:2px solid #ffd700;border-radius:12px;padding:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;';
-        const btns = [['F','f'],['B','b'],['J','j'],['M','m'],['N','n'],['S','s']];
+        const btns = [['F','f'],['B','b'],['V','v'],['X','x'],['J','j'],['M','m'],['N','n'],['S','s']];
         btns.forEach(([label, key]) => {
           const b = document.createElement('button');
           b.textContent = label;
