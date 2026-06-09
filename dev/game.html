@@ -983,6 +983,25 @@
         for (const j of result.judgments) { if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult; }
         window._debugForceNarrow = false;
       }
+      // Debug: force scatter to fill progress to threshold
+      if (window._debugForceScatter && result.mode === 'normal') {
+        const threshold = 12; // SCATTER_LAMP_THRESHOLD
+        const needed = Math.min(3, Math.max(1, threshold - gm.scatterLamps));
+        let placed = 0;
+        for (let r = 0; r < 3 && placed < needed; r++) {
+          for (let c = 0; c < 3 && placed < needed; c++) {
+            if (!result.board[r][c].isScatter) {
+              result.board[r][c] = { value: null, isScatter: true };
+              placed++;
+            }
+          }
+        }
+        result.judgments = judgeBoard(result.board);
+        result.scatterCount = placed;
+        result.totalPayout = 0;
+        for (const j of result.judgments) { if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult; }
+        window._debugForceScatter = false;
+      }
       if (result.mode === 'fg') {
         await animateSpin(result.board, result.bonusSymbols);
         sfx('spin_release');
@@ -1209,7 +1228,7 @@
     });
     document.addEventListener('keydown', e => {
       if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
-      if (e.key === 'f' && !gm.fg.active && !spinning) { showFgBgChoice(); }
+      if (e.key === 'f' && !gm.fg.active && !spinning) { window._debugForceScatter = true; }
       let debugJpNext = null; // 'GRAND'|'MAJOR'|'MINI'
       if (e.key === 'j' || e.key === 'J') { debugJpNext = 'GRAND'; }
       if (e.key === 'm' || e.key === 'M') { debugJpNext = 'MAJOR'; }
