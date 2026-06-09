@@ -747,7 +747,10 @@
         btn.onclick = () => {
           btn.disabled = true;
           btn.style.opacity = '0.5';
-          // Countdown win → 0, balance increases
+          winAudio.pause();
+          const countSfx = new Audio('assets/sfx/countup.mp3');
+          countSfx.loop = true; countSfx.volume = 0.4;
+          countSfx.play().catch(() => {});
           const dur = 2000, t0 = performance.now();
           const startBal = gm.balance;
           function tick(now) {
@@ -758,7 +761,7 @@
             gm.balance = startBal + Math.round(amount * ease);
             $('balance').textContent = fmt(gm.balance);
             if (p < 1) requestAnimationFrame(tick);
-            else { clearInterval(coinInterval); winAudio.pause(); ov.remove(); resolve(); }
+            else { clearInterval(coinInterval); countSfx.pause(); ov.remove(); resolve(); }
           }
           requestAnimationFrame(tick);
         };
