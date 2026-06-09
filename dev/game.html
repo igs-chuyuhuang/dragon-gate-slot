@@ -984,6 +984,7 @@
         btn.addEventListener('click', () => {
           container.querySelectorAll('.bg-chip-btn').forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
+          sfx('chip_select');
           bgInstance.roundBet = amt;
           $('bg-deal-btn').disabled = false;
         });
@@ -1067,6 +1068,7 @@
     bgCountSfx.loop = true; bgCountSfx.volume = 0.4;
     function bgAnimateValue(el, prefix, from, to, duration, isWin) {
       if (isWin) { bgCountSfx.currentTime = 0; bgCountSfx.play().catch(()=>{}); }
+      else { sfx('lose'); }
       const t0 = performance.now();
       function tick(now) {
         const p = Math.min((now - t0) / duration, 1);
