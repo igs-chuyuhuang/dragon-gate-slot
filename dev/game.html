@@ -228,7 +228,7 @@
     // === BGM ===
     const bgm = new Audio('assets/audio/bgm.mp3');
     bgm.loop = true;
-    bgm.volume = 0.24;
+    bgm.volume = 0.216;
     function startBGM() { bgm.play().catch(() => {}); }
     document.addEventListener('click', startBGM, { once: true });
     document.addEventListener('keydown', startBGM, { once: true });
@@ -691,9 +691,12 @@
 
     function showBigWin(amount, label, coinColors) {
       return new Promise(resolve => {
-        // Play corresponding win SFX
-        const winSfx = label.includes('SUPER') ? 'supermegawin' : label.includes('MEGA') ? 'megawin' : 'bigwin';
-        sfx(winSfx);
+        // Play corresponding win SFX (loop until collect)
+        const winSfxName = label.includes('SUPER') ? 'supermegawin' : label.includes('MEGA') ? 'megawin' : 'bigwin';
+        const winAudio = new Audio(`assets/sfx/${winSfxName}.mp3`);
+        winAudio.loop = true;
+        winAudio.volume = 0.5;
+        winAudio.play().catch(() => {});
         const ov = document.createElement('div');
         ov.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.7);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;';
         // Title
@@ -755,7 +758,7 @@
             gm.balance = startBal + Math.round(amount * ease);
             $('balance').textContent = fmt(gm.balance);
             if (p < 1) requestAnimationFrame(tick);
-            else { clearInterval(coinInterval); ov.remove(); resolve(); }
+            else { clearInterval(coinInterval); winAudio.pause(); ov.remove(); resolve(); }
           }
           requestAnimationFrame(tick);
         };
