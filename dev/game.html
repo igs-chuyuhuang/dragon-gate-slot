@@ -701,6 +701,14 @@
         num.style.cssText = 'font-size:2rem;font-weight:bold;color:#fff;margin-top:8px;text-shadow:0 0 10px rgba(255,215,0,0.5);';
         num.textContent = '0';
         ov.appendChild(num);
+        // Gold coins
+        for (let i = 0; i < 30; i++) {
+          const coin = document.createElement('div');
+          const sz = 16 + Math.random() * 20;
+          const rot = Math.floor(Math.random() * 720) - 360;
+          coin.style.cssText = `position:absolute;left:${Math.random()*100}%;top:-30px;width:${sz}px;height:${sz}px;border-radius:50%;background:linear-gradient(135deg,#ffd700,#ff8c00);box-shadow:0 0 4px rgba(255,215,0,0.6);animation:coinFall ${1.5+Math.random()*1.5}s ease-in forwards;animation-delay:${Math.random()*0.8}s;opacity:0;--rot:${rot}deg;`;
+          ov.appendChild(coin);
+        }
         document.body.appendChild(ov);
         // CountUp
         const dur = 1500, t0 = performance.now();
