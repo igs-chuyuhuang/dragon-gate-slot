@@ -1262,6 +1262,32 @@
       }, 10000 + Math.random() * 10000);
     })();
 
+    // Mobile debug panel (long press 2s)
+    (function(){
+      let lpt;
+      document.addEventListener('touchstart', () => { lpt = setTimeout(showDbg, 2000); });
+      document.addEventListener('touchend', () => clearTimeout(lpt));
+      document.addEventListener('touchmove', () => clearTimeout(lpt));
+      function showDbg() {
+        const d = document.createElement('div');
+        d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(0,0,0,0.9);border:2px solid #ffd700;border-radius:12px;padding:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;';
+        const btns = [['F','f'],['J','j'],['M','m'],['N','n'],['S','s']];
+        btns.forEach(([label, key]) => {
+          const b = document.createElement('button');
+          b.textContent = label;
+          b.style.cssText = 'width:44px;height:44px;border-radius:50%;border:2px solid #ffd700;background:#222;color:#ffd700;font-size:16px;font-weight:bold;cursor:pointer;';
+          b.onclick = () => { document.dispatchEvent(new KeyboardEvent('keydown',{key})); d.remove(); };
+          d.appendChild(b);
+        });
+        const close = document.createElement('button');
+        close.textContent = '✕';
+        close.style.cssText = 'width:44px;height:44px;border-radius:50%;border:1px solid #666;background:#333;color:#fff;font-size:16px;cursor:pointer;';
+        close.onclick = () => d.remove();
+        d.appendChild(close);
+        document.body.appendChild(d);
+      }
+    })();
+
     window.focus();
   </script>
 </body>
