@@ -1203,15 +1203,15 @@
       // BIG WIN check (skip if JP already showing its own overlay)
       if (result.mode === 'normal' && !jpSlotWin && result.totalPayout > 0) {
         const ratio = result.totalPayout / gm.bet;
-        if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!', ratio >= 30 ? '#ffd700,#ff8c00' : ratio >= 15 ? '#c0c0c0,#808080' : '#cd7f32,#8b4513');
+        if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!', ratio >= 30 ? '#ffd700,#ff8c00' : ratio >= 15 ? '#e8e8e8,#b0b0b0' : '#e8a04a,#cd7f32');
       }
       // Debug B key: force BIG WIN display
       if (window._debugForceBigWin && result.mode === 'normal') {
         const lvl = window._debugForceBigWin;
         window._debugForceBigWin = false;
         if (lvl === 'super') await showBigWin(gm.bet * 30, 'SUPER MEGA WIN!', '#ffd700,#ff8c00');
-        else if (lvl === 'mega') await showBigWin(gm.bet * 15, 'MEGA WIN!', '#c0c0c0,#808080');
-        else await showBigWin(gm.bet * 5, 'BIG WIN!', '#cd7f32,#8b4513');
+        else if (lvl === 'mega') await showBigWin(gm.bet * 15, 'MEGA WIN!', '#e8e8e8,#b0b0b0');
+        else await showBigWin(gm.bet * 5, 'BIG WIN!', '#e8a04a,#cd7f32');
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
