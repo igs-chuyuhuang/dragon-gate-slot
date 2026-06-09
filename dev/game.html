@@ -7,6 +7,11 @@
   <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div id="loading-overlay" style="position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+    <div style="color:#ffd700;font-size:1.5rem;font-weight:bold;margin-bottom:16px;">LOADING...</div>
+    <div style="width:200px;height:6px;background:#333;border-radius:3px;overflow:hidden;"><div id="loading-bar" style="width:0%;height:100%;background:linear-gradient(90deg,#ffd700,#ff8c00);transition:width 0.2s;"></div></div>
+  </div>
   <div class="game-root">
     <img class="bg-layer" src="assets/img/BG.png" alt="">
     <img class="bg-bonus" id="bg-bonus" src="assets/img/BG-bonus.png" style="display:none" alt="">
@@ -211,6 +216,24 @@
     </div>
   </div>
 
+  <script>
+  (function(){
+    const PRELOAD_IMGS = ['BG.png','BG-bonus.png','SC-01_scatter_dragon.png','JP-pool.png',
+      'FR-01_slot_frame_mobile.png','MS-01_mascot_dragon.png','golden-dragon.png',
+      'GRAND.png','MAJOR.png','MINI.png','back.png',
+      'CD-01_ace.png','CD-02_king.png','CD-03_queen.png','CD-04_jack.png',
+      'CD-05_num2.png','CD-06_num3.png','CD-07_num4.png','CD-08_num5.png',
+      'CD-09_num6.png','CD-10_num7.png','CD-11_num8.png','CD-12_num9.png','CD-13_num10.png'];
+    const SFX_NAMES = ['gate_through','dragon_growl','dragon_roar','coin_fly','countup','lose','chip_select','card_deal','narrow_gate','bigwin','megawin','supermegawin','gate_rise','gate_open_sfx'];
+    var loaded = 0, total = PRELOAD_IMGS.length;
+    var bar = document.getElementById('loading-bar');
+    function check() { loaded++; bar.style.width = (loaded/total*100)+'%'; if(loaded>=total) document.getElementById('loading-overlay').style.display='none'; }
+    PRELOAD_IMGS.forEach(function(src){ var img=new Image(); img.onload=img.onerror=check; img.src='assets/img/'+src; });
+    // SFX preload cache
+    window.SFX_CACHE = {};
+    SFX_NAMES.forEach(function(n){ window.SFX_CACHE[n] = new Audio('assets/sfx/'+n+'.mp3'); });
+  })();
+  </script>
   <script type="module">
     import { spin, countScatters } from './js/slotEngine.js';
     import { GameManager } from './js/gameManager.js';

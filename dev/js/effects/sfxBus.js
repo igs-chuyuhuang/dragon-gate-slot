@@ -2,7 +2,9 @@
 const cache = {};
 
 function getAudio(name) {
-  if (!cache[name]) cache[name] = new Audio(`assets/sfx/${name}.mp3`);
+  if (!cache[name]) {
+    cache[name] = (window.SFX_CACHE && window.SFX_CACHE[name]) || new Audio(`assets/sfx/${name}.mp3`);
+  }
   return cache[name];
 }
 
