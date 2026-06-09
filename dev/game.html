@@ -697,10 +697,9 @@
         winAudio.loop = false;
         winAudio.volume = 0.5;
         winAudio.play().catch(() => {});
-        // After first play, loop only last 2 seconds
+        // After first play, loop from specified start point
+        const loopStart = label.includes('SUPER') ? 1.5 : label.includes('MEGA') ? 1.5 : 1.2;
         winAudio.addEventListener('ended', function loopTail() {
-          const dur = winAudio.duration;
-          const loopStart = Math.max(0, dur - 2);
           winAudio.currentTime = loopStart;
           winAudio.play().catch(() => {});
         });
