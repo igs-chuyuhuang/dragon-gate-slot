@@ -1209,7 +1209,7 @@
           else if (jpSlotWin === 'MAJOR') jpMajor = 6000;
           else jpMini = 1500;
           const jpSubLabel = jpSlotWin === 'GRAND' ? 'SUPER MEGA WIN!' : jpSlotWin === 'MAJOR' ? 'MEGA WIN!' : 'BIG WIN!';
-          await showBigWin(jpAmount, 'JACKPOT!\n' + jpSubLabel, jpSlotWin === 'GRAND' ? '#ffd700,#ff8c00' : jpSlotWin === 'MAJOR' ? '#e8e8e8,#b0b0b0' : '#e8a04a,#cd7f32');
+          await showBigWin(jpAmount, 'JACKPOT!\n' + jpSubLabel, '#ffd700,#ff8c00');
           // Clear JP flash after showing result
           const anims2 = window._midCellAnims;
           if (anims2) anims2.forEach(a => { a.wrapper.style.animation = ''; a.wrapper.style.boxShadow = ''; });
