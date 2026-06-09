@@ -505,3 +505,7 @@ body {
 @keyframes coinBurst { 0% { transform:translate(0,0) rotate(0deg) scale(1);opacity:1; } 100% { transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(0.5);opacity:0; } }
 @keyframes coinRain { 0% { transform:translateY(0) rotateY(0deg);opacity:1; } 100% { transform:translateY(110vh) rotateY(720deg);opacity:0.3; } }
 @keyframes starTwinkle { 0%,100% { opacity:0;transform:scale(0.5); } 50% { opacity:1;transform:scale(1.2); } }
+
+@keyframes shockwave { 0% { transform:scale(1);opacity:1; } 100% { transform:scale(6);opacity:0; } }
+@keyframes dragonFlyOut { 0% { transform:scale(0) translateY(0);opacity:0; } 30% { transform:scale(1.5) translateY(-20px);opacity:1; } 60% { transform:scale(1) translateY(-60px);opacity:1; } 100% { transform:scale(0.8) translateY(-120vh);opacity:0; } }
+@keyframes dragonParticle { 0% { transform:translate(0,0);opacity:1; } 100% { transform:translate(var(--px,0),var(--py,-80px));opacity:0; } }
