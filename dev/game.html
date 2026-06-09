@@ -998,6 +998,13 @@
         }
         result.judgments = judgeBoard(result.board);
         result.scatterCount = placed;
+        // Manually update scatter lamps (since gm.spin() already ran with old board)
+        gm.scatterLamps += placed;
+        if (gm.scatterLamps >= threshold) {
+          gm.scatterLamps = 0;
+          result.fgTriggered = true;
+        }
+        result.scatterLamps = gm.scatterLamps;
         result.totalPayout = 0;
         for (const j of result.judgments) { if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult; }
         window._debugForceScatter = false;
