@@ -1001,6 +1001,7 @@
 
     function bgDeal() {
       if (!bgInstance || !bgInstance.active) return;
+      sfx('card_deal');
       if (bgRoundTimer) clearInterval(bgRoundTimer);
       $('bg-deal-btn').disabled = true;
       $('bg-chip-btns').querySelectorAll('.bg-chip-btn').forEach(b => { b.disabled = true; });
