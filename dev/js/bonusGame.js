@@ -1,5 +1,6 @@
 function getPassMult(gap) {
-  if (gap <= 1) return 10;
+  if (gap <= 0) return 0; // gap=0: impossible to pass
+  if (gap === 1) return 10;
   if (gap <= 3) return 5;
   if (gap <= 7) return 2.5;
   return 1;
@@ -21,8 +22,14 @@ export class BonusGame {
   }
 
   deal() {
-    this.left = Math.floor(Math.random() * 13) + 1;
-    this.right = Math.floor(Math.random() * 13) + 1;
+    // Ensure gap >= 1 (avoid gap=0 dead gate)
+    let l, r;
+    do {
+      l = Math.floor(Math.random() * 13) + 1;
+      r = Math.floor(Math.random() * 13) + 1;
+    } while (l !== r && Math.abs(l - r) <= 1);
+    this.left = l;
+    this.right = r;
     return { left: this.left, right: this.right };
   }
 
@@ -32,7 +39,8 @@ export class BonusGame {
     const gap = Math.abs(l - r) - 1;
     const mult = getPassMult(gap);
     let label = '寬門';
-    if (gap <= 1) label = '極窄門';
+    if (gap <= 0) label = '死門';
+    else if (gap === 1) label = '極窄門';
     else if (gap <= 3) label = '窄門';
     else if (gap <= 7) label = '中門';
     return { type: 'normal', gap, label, mult };
