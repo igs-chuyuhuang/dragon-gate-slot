@@ -1228,7 +1228,7 @@
     });
     document.addEventListener('keydown', e => {
       if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
-      if (e.key === 'f' && !gm.fg.active && !spinning) { window._debugForceScatter = true; }
+      if (e.key === 'f' && !gm.fg.active && !spinning) { gm.scatterLamps = 11; updateRing(11); window._debugForceScatter = true; }
       let debugJpNext = null; // 'GRAND'|'MAJOR'|'MINI'
       if (e.key === 'j' || e.key === 'J') { debugJpNext = 'GRAND'; }
       if (e.key === 'm' || e.key === 'M') { debugJpNext = 'MAJOR'; }
