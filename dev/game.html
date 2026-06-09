@@ -800,12 +800,12 @@
 
     let _tutorialCallback = null;
     function showTutorial(content, storageKey, callback) {
-      if (localStorage.getItem(storageKey)) { callback(); return; }
+      if (sessionStorage.getItem(storageKey)) { callback(); return; }
       $('tutorial-content').innerHTML = content;
       $('tutorial-dismiss').checked = false;
       $('tutorial-overlay').style.display = 'flex';
       _tutorialCallback = () => {
-        if ($('tutorial-dismiss').checked) localStorage.setItem(storageKey, '1');
+        if ($('tutorial-dismiss').checked) sessionStorage.setItem(storageKey, '1');
         $('tutorial-overlay').style.display = 'none';
         callback();
       };
