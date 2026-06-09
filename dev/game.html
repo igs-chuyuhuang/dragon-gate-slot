@@ -760,7 +760,7 @@
             ov.appendChild(c);
             setTimeout(() => c.remove(), 4000);
           }
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < 30; i++) {
             const c = document.createElement('div');
             const sz = 14 + Math.random() * 20;
             const angle = Math.random() * Math.PI * 2;
@@ -771,7 +771,7 @@
           }
         }
         spawnCoins();
-        const coinInterval = setInterval(spawnCoins, 500);
+        const coinInterval = setInterval(spawnCoins, 300);
         document.body.appendChild(ov);
         // Collect button handler
         btn.onclick = () => {
