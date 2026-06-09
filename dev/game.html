@@ -692,7 +692,7 @@
     function showBigWin(amount, label, coinColors) {
       return new Promise(resolve => {
         // Play corresponding win SFX (loop until collect)
-        const winSfxName = label.includes('SUPER') ? 'supermegawin' : label.includes('MEGA') ? 'megawin' : 'bigwin';
+        const winSfxName = label.includes('SUPER') ? 'supermegawin' : 'megawin';
         const winAudio = new Audio(`assets/sfx/${winSfxName}.mp3`);
         winAudio.loop = false;
         winAudio.volume = 0.5;
