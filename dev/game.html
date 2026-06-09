@@ -794,58 +794,64 @@
     async function playDragonGateOpening() {
       return new Promise(resolve => {
         const root = document.querySelector('.game-root');
-        // Overlay
         const ov = document.createElement('div');
         ov.style.cssText = 'position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,0);transition:background 0.2s;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden;';
         document.body.appendChild(ov);
-        // Dim + zoom
-        setTimeout(() => { ov.style.background = 'rgba(0,0,0,0.7)'; root.style.transition = 'transform 0.5s'; root.style.transform = 'scale(1.05)'; }, 0);
-        // Gate
+        setTimeout(() => { ov.style.background = 'rgba(0,0,0,0.8)'; root.style.transition = 'transform 0.5s'; root.style.transform = 'scale(1.05)'; }, 0);
+        // Gate (80% width, 60% height)
         const gate = document.createElement('div');
-        gate.style.cssText = 'position:relative;width:160px;height:240px;display:flex;perspective:600px;';
+        gate.style.cssText = 'position:relative;width:80vw;max-width:500px;height:60vh;max-height:400px;display:flex;perspective:800px;';
         const leftDoor = document.createElement('div');
-        leftDoor.style.cssText = 'width:50%;height:100%;background:linear-gradient(135deg,#1a1a2e,#2d1b00);border:3px solid #ffd700;border-right:none;transform-origin:left;transition:transform 0.4s ease-out;border-radius:8px 0 0 8px;box-shadow:inset -10px 0 20px rgba(255,215,0,0.3);';
+        leftDoor.style.cssText = 'width:50%;height:100%;background:linear-gradient(135deg,#1a1a2e,#2d1b00);border:4px solid #ffd700;border-right:none;transform-origin:left;transition:transform 0.5s ease-out;border-radius:12px 0 0 12px;box-shadow:inset -20px 0 40px rgba(255,215,0,0.4);';
         const rightDoor = document.createElement('div');
-        rightDoor.style.cssText = 'width:50%;height:100%;background:linear-gradient(225deg,#1a1a2e,#2d1b00);border:3px solid #ffd700;border-left:none;transform-origin:right;transition:transform 0.4s ease-out;border-radius:0 8px 8px 0;box-shadow:inset 10px 0 20px rgba(255,215,0,0.3);';
+        rightDoor.style.cssText = 'width:50%;height:100%;background:linear-gradient(225deg,#1a1a2e,#2d1b00);border:4px solid #ffd700;border-left:none;transform-origin:right;transition:transform 0.5s ease-out;border-radius:0 12px 12px 0;box-shadow:inset 20px 0 40px rgba(255,215,0,0.4);';
+        // Door crack glow (bright wide)
         const glow = document.createElement('div');
-        glow.style.cssText = 'position:absolute;inset:20%;background:radial-gradient(circle,rgba(255,215,0,0.8),transparent);opacity:0;transition:opacity 0.3s;';
+        glow.style.cssText = 'position:absolute;left:40%;right:40%;top:5%;bottom:5%;background:linear-gradient(90deg,transparent,rgba(255,215,0,1),rgba(255,255,200,1),rgba(255,215,0,1),transparent);opacity:0;transition:opacity 0.3s;filter:blur(8px);';
         gate.appendChild(leftDoor); gate.appendChild(rightDoor); gate.appendChild(glow);
-        gate.style.transform = 'scaleY(0)'; gate.style.transition = 'transform 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+        gate.style.transform = 'scaleY(0)'; gate.style.transition = 'transform 0.7s cubic-bezier(0.34,1.56,0.64,1)';
         ov.appendChild(gate);
         // Rise gate
         setTimeout(() => { gate.style.transform = 'scaleY(1)'; glow.style.opacity = '1'; }, 200);
-        // Open doors + shockwave
+        // Open doors + massive shockwave + heavy shake
         setTimeout(() => {
-          leftDoor.style.transform = 'rotateY(-90deg)';
-          rightDoor.style.transform = 'rotateY(90deg)';
+          leftDoor.style.transform = 'rotateY(-100deg)';
+          rightDoor.style.transform = 'rotateY(100deg)';
           sfx('dragon_roar');
-          // Shockwave
+          // Shockwave (scale 0→5)
           const wave = document.createElement('div');
-          wave.style.cssText = 'position:absolute;width:60px;height:60px;border-radius:50%;border:3px solid rgba(255,215,0,0.8);animation:shockwave 0.5s ease-out forwards;';
+          wave.style.cssText = 'position:absolute;width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,215,0,0.9);box-shadow:0 0 30px rgba(255,215,0,0.6);transform:scale(0);transition:transform 0.6s ease-out,opacity 0.6s;';
           ov.appendChild(wave);
-          // Shake
+          requestAnimationFrame(() => { wave.style.transform = 'scale(5)'; wave.style.opacity = '0'; });
+          // Heavy camera shake (60px)
           root.style.transition = 'none';
           let shakes = 0;
-          const shakeId = setInterval(() => { root.style.transform = `scale(1.05) translate(${(Math.random()-0.5)*12}px,${(Math.random()-0.5)*8}px)`; if(++shakes>8){clearInterval(shakeId);root.style.transform='scale(1.05)';} }, 25);
-        }, 800);
-        // Dragon flies out
+          const shakeId = setInterval(() => { root.style.transform = `scale(1.05) translate(${(Math.random()-0.5)*60}px,${(Math.random()-0.5)*40}px)`; if(++shakes>12){clearInterval(shakeId);root.style.transform='scale(1.05)';} }, 30);
+          // Bright flash
+          const flash = document.createElement('div');
+          flash.style.cssText = 'position:fixed;inset:0;background:rgba(255,215,0,0.5);z-index:2501;pointer-events:none;transition:opacity 0.4s;';
+          document.body.appendChild(flash);
+          setTimeout(() => { flash.style.opacity = '0'; setTimeout(() => flash.remove(), 400); }, 50);
+        }, 900);
+        // Dragon flies out (large, using golden-dragon.png)
         setTimeout(() => {
           const dragon = document.createElement('img');
-          dragon.src = 'assets/img/SC-01_scatter_dragon.png';
-          dragon.style.cssText = 'position:absolute;width:120px;height:120px;object-fit:contain;animation:dragonFlyOut 1s ease-out forwards;';
+          dragon.src = 'assets/img/golden-dragon.png';
+          dragon.style.cssText = 'position:absolute;width:45vw;max-width:350px;height:auto;object-fit:contain;animation:dragonFlyOut 1.2s ease-out forwards;filter:drop-shadow(0 0 20px rgba(255,215,0,0.8));';
           ov.appendChild(dragon);
-          // Gold particles trailing
-          for (let i = 0; i < 20; i++) {
+          // 100 gold particles
+          for (let i = 0; i < 100; i++) {
             const p = document.createElement('div');
-            const sz = 4 + Math.random() * 6;
-            p.style.cssText = `position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:#ffd700;opacity:0;animation:dragonParticle 0.8s ${i*50}ms ease-out forwards;`;
+            const sz = 4 + Math.random() * 10;
+            const angle = Math.random() * 360;
+            const dist = 50 + Math.random() * 200;
+            p.style.cssText = `position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:radial-gradient(circle,#fff,#ffd700);opacity:0;left:50%;top:50%;transform:translate(-50%,-50%);animation:dragonParticle 1s ${i*20}ms ease-out forwards;--angle:${angle}deg;--dist:${dist}px;`;
             ov.appendChild(p);
           }
-        }, 1200);
-        // Fly away + fade
-        setTimeout(() => { root.style.transition = 'transform 0.5s'; root.style.transform = ''; ov.style.transition = 'opacity 0.5s'; ov.style.opacity = '0'; }, 2500);
-        // Cleanup
-        setTimeout(() => { ov.remove(); resolve(); }, 3200);
+        }, 1300);
+        // Fade out
+        setTimeout(() => { root.style.transition = 'transform 0.5s'; root.style.transform = ''; ov.style.transition = 'opacity 0.5s'; ov.style.opacity = '0'; }, 2800);
+        setTimeout(() => { ov.remove(); resolve(); }, 3500);
       });
     }
 
