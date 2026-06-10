@@ -410,23 +410,29 @@
           let done = 0;
           for (const cfg of configs) {
             const strip = document.querySelector(`#reel-${cfg.col} .reel-strip`);
-            const fastDist = cfg.scrollDist - cfg.decelDist;
-            const fastDur = Math.round(fastDist / highSpeed);
-            strip.style.transition = `transform ${fastDur}ms linear`;
-            strip.style.transform = `translateY(-${cfg.decelDist}px)`;
-            setTimeout(() => {
-              strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
-              strip.style.transform = `translateY(${overshoot}px)`;
+            if (cfg.col === 1) {
+              // Middle reel: single easeOut curve
+              strip.style.transition = `transform 5000ms cubic-bezier(0.1, 0.7, 0.3, 1)`;
+              strip.style.transform = `translateY(0px)`;
+              setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 5100);
+            } else {
+              const fastDist = cfg.scrollDist - cfg.decelDist;
+              const fastDur = Math.round(fastDist / highSpeed);
+              strip.style.transition = `transform ${fastDur}ms linear`;
+              strip.style.transform = `translateY(-${cfg.decelDist}px)`;
               setTimeout(() => {
-                strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
-                strip.style.transform = `translateY(0px)`;
+                strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
+                strip.style.transform = `translateY(${overshoot}px)`;
                 setTimeout(() => {
-                  if (cfg.col !== 1) { sidesCount++; if (sidesCount === 2 && onSidesStop) onSidesStop(); }
-                  done++;
-                  if (done === 3) { spinning = false; resolve(); }
-                }, 100);
-              }, cfg.decelMs);
-            }, fastDur);
+                  strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
+                  strip.style.transform = `translateY(0px)`;
+                  setTimeout(() => {
+                    sidesCount++; if (sidesCount === 2 && onSidesStop) onSidesStop();
+                    done++; if (done === 3) { spinning = false; resolve(); }
+                  }, 100);
+                }, cfg.decelMs);
+              }, fastDur);
+            }
           }
         }
       });
