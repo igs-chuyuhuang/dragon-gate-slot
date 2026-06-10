@@ -1166,7 +1166,7 @@
             flyer.style.cssText = `position:fixed;left:${srcRect.left}px;top:${srcRect.top}px;width:48px;height:48px;z-index:9999;object-fit:contain;transition:all 600ms cubic-bezier(0.25,1,0.5,1);pointer-events:none;`;
             document.body.appendChild(flyer);
             setTimeout(() => { flyer.style.left = dstRect.left+'px'; flyer.style.top = dstRect.top+'px'; flyer.style.width = '24px'; flyer.style.height = '24px'; flyer.style.opacity = '0.7'; }, r * 150);
-            setTimeout(() => flyer.remove(), 800 + r * 150);
+            setTimeout(() => { flyer.remove(); const b = document.getElementById(`badge-${r}`); if(b) b.innerHTML = `<img src="${getJpImg(jpSlotWin)}" style="width:100%;height:100%;object-fit:contain;">`; }, 800 + r * 150);
           }
           await new Promise(res => setTimeout(res, 1000));
           const jpAmount = jpSlotWin === 'GRAND' ? jpGrand : jpSlotWin === 'MAJOR' ? jpMajor : jpMini;
@@ -1208,7 +1208,7 @@
       result.judgments.forEach(j => {
         const badge = $(`badge-${j.row}`);
         const rowScatters = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].filter(c => c.isScatter).length;
-        if (j.type === 'jp-win') { badge.textContent = '🎰 JP!'; badge.classList.add('win'); }
+        if (j.type === 'jp-win') { badge.textContent = ''; }
         else if (j.type === 'jp-none') { badge.textContent = '—'; }
         else if (rowScatters > 0) { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> +${rowScatters}`; badge.classList.add('sc'); }
         else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
