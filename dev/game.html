@@ -411,7 +411,8 @@
           for (const cfg of configs) {
             const strip = document.querySelector(`#reel-${cfg.col} .reel-strip`);
             if (cfg.col === 1) {
-              // Middle reel: single easeOut curve
+              // Middle reel: force reflow then single easeOut curve
+              strip.offsetHeight; // force reflow
               strip.style.transition = `transform 5000ms cubic-bezier(0.1, 0.7, 0.3, 1)`;
               strip.style.transform = `translateY(0px)`;
               setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 5100);
