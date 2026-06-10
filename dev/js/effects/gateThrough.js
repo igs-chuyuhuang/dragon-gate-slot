@@ -15,7 +15,7 @@ export async function playGateThrough(row, mult) {
   // === ANTICIPATION (80ms) — immediate visual ===
   const unfocus = focusRow(row);
   dimBackground(0.35, 80);
-  anime({ targets: cells, backgroundColor: ['#16213e', '#3a2800'], boxShadow: ['0 0 0px transparent', '0 0 16px 6px rgba(255,215,0,0.5)'], duration: 80, easing: 'easeOutQuad' });
+  anime({ targets: cells, backgroundColor: ['transparent', '#3a2800'], boxShadow: ['0 0 0px transparent', '0 0 16px 6px rgba(255,215,0,0.5)'], duration: 80, easing: 'easeOutQuad' });
   flashScreen('#ffd700', 0.15, 150); // immediate subtle flash so screenshot catches it
 
   await hitStop(80);
@@ -40,7 +40,7 @@ export async function playGateThrough(row, mult) {
   shakeBoard(8, 200);
 
   // Cell glow
-  anime({ targets: cells, backgroundColor: ['#ffd700', '#16213e'], boxShadow: ['0 0 30px 14px #ffd700', '0 0 0px transparent'], duration: 400, easing: 'easeOutExpo' });
+  anime({ targets: cells, backgroundColor: ['#ffd700', 'transparent'], boxShadow: ['0 0 30px 14px #ffd700', '0 0 0px transparent'], duration: 400, easing: 'easeOutExpo' });
 
   // Particles: star sparks + streaks + debris (mixed shapes)
   burst(cx, cy, { texture: 'star', count: 20, spread: 130, duration: 400, sizeMin: 0.5, sizeMax: 1.3 });

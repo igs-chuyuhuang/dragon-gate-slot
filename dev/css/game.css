@@ -70,6 +70,7 @@ body {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; overflow: hidden;
   position: relative;
+  background: transparent;
 }
 .cell img { width: 85%; height: 85%; object-fit: contain; }
 .cell-bonus {

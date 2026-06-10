@@ -57,7 +57,7 @@ export async function playWallHit(row) {
   anime({ targets: vig, opacity: [0.8, 0], duration: 600, easing: 'easeOutQuad', complete: () => vig.remove() });
 
   // Squash mid cell — more exaggerated
-  anime({ targets: mid, scaleX: [1, 1.35, 0.85, 1.06, 1], scaleY: [1, 0.75, 1.15, 0.96, 1], borderColor: ['#e94560', '#0f3460'], backgroundColor: ['#5c1a1a', '#16213e'], boxShadow: ['0 0 12px 5px rgba(233,69,96,0.5)', '0 0 0px transparent'], duration: 500, easing: 'easeOutElastic(1, 0.55)' });
+  anime({ targets: mid, scaleX: [1, 1.35, 0.85, 1.06, 1], scaleY: [1, 0.75, 1.15, 0.96, 1], borderColor: ['#e94560', '#0f3460'], backgroundColor: ['#5c1a1a', 'transparent'], boxShadow: ['0 0 12px 5px rgba(233,69,96,0.5)', '0 0 0px transparent'], duration: 500, easing: 'easeOutElastic(1, 0.55)' });
 
   // Push left/right 18px
   anime({ targets: left, translateX: [-18, 4, 0], duration: 450, easing: 'easeOutBack' });
