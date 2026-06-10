@@ -575,3 +575,35 @@
 **關鍵 prompt / 指令：** 設計 Bet 對應 Scatter 機率公式，確保各 Bet 等級 RTP 達標
 **人工修正：** 無
 **耗時：** ~20 分鐘
+
+### [2026-06-10] — BG passRate 賠率平衡計算
+
+**環節：** 數學
+**AI 工具：** Kiro Agent
+**做了什麼：** 計算 passRate=25% 時的 BG 賠率調整方案。測試多組賠率組合（200 萬轉），找到達標配置：極窄×6/窄×3/中×1.5/寬×0.8，總 RTP 95.7%。
+**Before：** passRate=15% + 原高賠率（×10/×5/×2.5/×1）
+**After：** 提供 passRate=25% 替代方案（×6/×3/×1.5/×0.8），穿門率提高但獎金降低，兩方案均達標
+**關鍵 prompt / 指令：** passRate 提高到 25%，計算需要怎麼調賠率讓 RTP 維持 95.5~96.5
+**人工修正：** 無
+**耗時：** ~10 分鐘
+
+### [2026-06-10] — 轉輪方向反轉 + 中輪整條strip回歸 + JP系統重構 + 中輪閃爍規則
+
+**環節：** 程式
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 轉輪方向反轉：符號從上往下掉（finals在top，randoms在bottom，動畫向translateY(0)移動）
+2. 中輪改回整條strip動畫（移除獨立cell轉動200+行代碼），Normal模式三軸統一strip
+3. 中輪改單一5s easeOut曲線（不分fast/decel兩段），加offsetHeight強制reflow
+4. JP觸發改三列全窄門才觸發；三格全帶JP符號（不再有normal）
+5. JP badge 改inline style 48px + 所有strip cells都注入JP圖片（跳過final cells）
+6. 中輪一律金色閃爍，三列全窄時紅金交替(jpFlashRedGold)
+7. JP中獎飛移動畫：縮小飛到badge→放大→停頓→JACKPOT overlay
+8. 修正cell深藍底色殘留（特效歸transparent）
+9. MID_SYMBOLS 50→200延長中輪轉動
+10. Debug K鍵：強制窄門+JP不中獎
+**Before：** 中輪獨立cell轉動+JP per-row+方向往上
+**After：** 統一strip下落動畫+JP三列全窄觸發+完整飛移動畫+閃爍分級
+**關鍵 prompt / 指令：** 方向反轉；中輪回歸strip；JP全窄觸發；閃爍規則；飛移動畫
+**人工修正：** JP badge大小多次調整(10→72→48)；飛移目標修正(JP池→badge)；閃爍條件修正
+**耗時：** ~5小時
