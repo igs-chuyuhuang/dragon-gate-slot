@@ -1076,6 +1076,7 @@
           jpPerRow = [window._debugJpNext, window._debugJpNext, window._debugJpNext];
         }
         window._debugJpNext = null;
+        console.log("[DEBUG JP] jpPerRow set to:", jpPerRow);
       }
       await animateSpin(result.board, null, () => {
         // Sides stopped — per-row JP determination
