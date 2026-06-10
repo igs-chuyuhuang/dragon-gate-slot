@@ -1013,7 +1013,7 @@
       if (!result) return;
       // Debug: force narrow gate for JP testing
       if (window._debugForceNarrow && result.mode === 'normal') {
-        const gapSize = window._debugJpNext === 'GRAND' ? 2 : 3; // gap=1 for GRAND, gap=2 for MAJOR/MINI
+        const gapSize = window._debugJpNext === 'GRAND' ? 2 : window._debugJpNoWin ? 3 : 3;
         for (let r = 0; r < 3; r++) {
           const base = 2 + Math.floor(Math.random() * (11 - gapSize));
           result.board[r][0] = { value: base, isScatter: false };
@@ -1024,6 +1024,7 @@
         result.totalPayout = 0;
         for (const j of result.judgments) { if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult; }
         window._debugForceNarrow = false;
+        window._debugJpNoWin = false;
       }
       // Debug: force scatter to fill progress to threshold
       if (window._debugForceScatter && result.mode === 'normal') {
@@ -1069,7 +1070,11 @@
       let jpSlotWin = null;
       let jpPerRow = [null, null, null]; // per-row JP symbol (null = normal)
       if (window._debugJpNext) {
-        jpPerRow = [window._debugJpNext, window._debugJpNext, window._debugJpNext];
+        if (window._debugJpNext === 'FORCE_NO_WIN') {
+          jpPerRow = ['GRAND', 'MINI', 'MAJOR'];
+        } else {
+          jpPerRow = [window._debugJpNext, window._debugJpNext, window._debugJpNext];
+        }
         window._debugJpNext = null;
       }
       await animateSpin(result.board, null, () => {
@@ -1273,6 +1278,7 @@
       if (e.key === 'j' || e.key === 'J') { debugJpNext = 'GRAND'; }
       if (e.key === 'm' || e.key === 'M') { debugJpNext = 'MAJOR'; }
       if (e.key === 'n' || e.key === 'N') { debugJpNext = 'MINI'; }
+      if (e.key === 'k' || e.key === 'K') { window._debugJpNoWin = true; window._debugForceNarrow = true; window._debugJpNext = 'FORCE_NO_WIN'; }
       if (debugJpNext) { window._debugJpNext = debugJpNext; window._debugForceNarrow = true; }
     });
     $('fgbg-close').addEventListener('click', () => { $('fgbg-choice').style.display = 'none'; });
@@ -1330,7 +1336,7 @@
       function showDbg() {
         const d = document.createElement('div');
         d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(0,0,0,0.9);border:2px solid #ffd700;border-radius:12px;padding:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;';
-        const btns = [['F','f'],['B','b'],['V','v'],['X','x'],['J','j'],['M','m'],['N','n'],['S','s']];
+        const btns = [['F','f'],['B','b'],['V','v'],['X','x'],['J','j'],['M','m'],['N','n'],['K','k'],['S','s']];
         btns.forEach(([label, key]) => {
           const b = document.createElement('button');
           b.textContent = label;
