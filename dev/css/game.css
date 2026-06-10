@@ -511,3 +511,5 @@ body {
 @keyframes dragonParticle { 0% { transform:translate(0,0);opacity:1; } 100% { transform:translate(var(--px,0),var(--py,-80px));opacity:0; } }
 
 .cell-jp-badge { position:absolute; bottom:2px; right:2px; width:10px; height:10px; border-radius:2px; object-fit:contain; z-index:5; }
+
+@keyframes jpFlashRedGold { 0% { box-shadow: 0 0 30px 15px rgba(255,215,0,1), inset 0 0 20px rgba(255,215,0,0.8); border: 3px solid #ffd700; } 50% { box-shadow: 0 0 30px 15px rgba(255,50,50,1), inset 0 0 20px rgba(255,50,50,0.8); border: 3px solid #ff3333; } 100% { box-shadow: 0 0 30px 15px rgba(255,215,0,1), inset 0 0 20px rgba(255,215,0,0.8); border: 3px solid #ffd700; } }
