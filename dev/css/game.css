@@ -69,9 +69,9 @@ body {
   width: 100%;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; overflow: hidden;
+  position: relative;
 }
 .cell img { width: 85%; height: 85%; object-fit: contain; }
-.cell { position: relative; }
 .cell-bonus {
   position: absolute; bottom: 2px; right: 2px;
   background: rgba(0,0,0,0.75); border-radius: 10px;
@@ -510,4 +510,4 @@ body {
 @keyframes dragonFlyOut { 0% { transform:scale(0) translateY(0);opacity:0; } 30% { transform:scale(1.5) translateY(-20px);opacity:1; } 60% { transform:scale(1) translateY(-60px);opacity:1; } 100% { transform:scale(0.8) translateY(-120vh);opacity:0; } }
 @keyframes dragonParticle { 0% { transform:translate(0,0);opacity:1; } 100% { transform:translate(var(--px,0),var(--py,-80px));opacity:0; } }
 
-.cell-jp-badge { position:absolute; bottom:2px; right:2px; width:10px; height:10px; border-radius:2px; object-fit:contain; }
+.cell-jp-badge { position:absolute; bottom:2px; right:2px; width:10px; height:10px; border-radius:2px; object-fit:contain; z-index:5; }
