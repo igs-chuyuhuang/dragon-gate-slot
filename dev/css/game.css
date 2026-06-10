@@ -509,3 +509,5 @@ body {
 @keyframes shockwave { 0% { transform:scale(1);opacity:1; } 100% { transform:scale(6);opacity:0; } }
 @keyframes dragonFlyOut { 0% { transform:scale(0) translateY(0);opacity:0; } 30% { transform:scale(1.5) translateY(-20px);opacity:1; } 60% { transform:scale(1) translateY(-60px);opacity:1; } 100% { transform:scale(0.8) translateY(-120vh);opacity:0; } }
 @keyframes dragonParticle { 0% { transform:translate(0,0);opacity:1; } 100% { transform:translate(var(--px,0),var(--py,-80px));opacity:0; } }
+
+.cell-jp-badge { position:absolute; bottom:2px; right:2px; width:20px; height:20px; border-radius:4px; object-fit:contain; }

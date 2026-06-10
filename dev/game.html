@@ -399,175 +399,39 @@
             }, fastDur);
           }
         } else {
-          // Normal mode: middle column uses independent high-speed cell cycling
-          const midReel = document.querySelector('#reel-1 .reel-strip');
-          midReel.innerHTML = '';
-          midReel.style.transition = 'none';
-          midReel.style.transform = 'none';
-          midReel.style.display = 'flex';
-          midReel.style.flexDirection = 'column';
-          const midCellAnims = [];
-          for (let r = 0; r < 3; r++) {
-            const wrapper = document.createElement('div');
-            wrapper.style.cssText = `height:${cellH}px;overflow:hidden;position:relative;`;
-            const miniStrip = document.createElement('div');
-            miniStrip.style.cssText = 'position:absolute;top:0;left:0;right:0;will-change:transform;';
-            const numSym = 6;
-            for (let i = 0; i < numSym * 2; i++) {
-              const s = document.createElement('div');
-              s.style.cssText = `height:${cellH}px;display:flex;align-items:center;justify-content:center;`;
-              s.innerHTML = `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
-              miniStrip.appendChild(s);
-            }
-            wrapper.appendChild(miniStrip);
-            midReel.appendChild(wrapper);
-            const pixPerFrame = 12 + r * 1.5;
-            const loopDist = numSym * cellH;
-            let pos = 0;
-            const anim = { id: null, running: true };
-            function loop() {
-              if (!anim.running) return;
-              pos -= pixPerFrame;
-              if (pos <= -loopDist) pos += loopDist;
-              miniStrip.style.transform = `translateY(${pos}px)`;
-              anim.id = requestAnimationFrame(loop);
-            }
-            anim.id = requestAnimationFrame(loop);
-            midCellAnims.push({ wrapper, miniStrip, anim, row: r, numSym, loopDist });
-          }
-          window._midCellAnims = midCellAnims;
-          window._midBoard = board;
-          window._midCellH = cellH;
-          window._midFgBonus = null;
-
-          // Animate side reels
-          const sideCfg = { scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' };
+          // Normal mode: all 3 columns use strip animation (mid spins longer)
+          buildStripN(1, [board[0][1], board[1][1], board[2][1]], MID_SYMBOLS);
+          const configs = [
+            { col: 0, scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+            { col: 1, scrollDist: MID_SYMBOLS * cellH, decelDist: 18 * cellH, decelMs: 2400, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+            { col: 2, scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+          ];
           let sidesCount = 0;
-          for (let col of [0, 2]) {
-            const strip = document.querySelector(`#reel-${col} .reel-strip`);
-            const fastDist = sideCfg.scrollDist - sideCfg.decelDist;
+          let done = 0;
+          for (const cfg of configs) {
+            const strip = document.querySelector(`#reel-${cfg.col} .reel-strip`);
+            const fastDist = cfg.scrollDist - cfg.decelDist;
             const fastDur = Math.round(fastDist / highSpeed);
             strip.style.transition = `transform ${fastDur}ms linear`;
-            strip.style.transform = `translateY(-${sideCfg.decelDist}px)`;
+            strip.style.transform = `translateY(-${cfg.decelDist}px)`;
             setTimeout(() => {
-              strip.style.transition = `transform ${sideCfg.decelMs}ms ${sideCfg.ease}`;
+              strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
               strip.style.transform = `translateY(${overshoot}px)`;
               setTimeout(() => {
                 strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
                 strip.style.transform = `translateY(0px)`;
                 setTimeout(() => {
-                  sidesCount++;
-                  if (sidesCount === 2) {
-                    if (onSidesStop) onSidesStop();
-                    setTimeout(() => stopMidCells(resolve), 1200);
-                  }
+                  if (cfg.col !== 1) { sidesCount++; if (sidesCount === 2 && onSidesStop) onSidesStop(); }
+                  done++;
+                  if (done === 3) { spinning = false; resolve(); }
                 }, 100);
-              }, sideCfg.decelMs);
+              }, cfg.decelMs);
             }, fastDur);
           }
-        }
-
-        function stopMidCells(done) {
-          const anims = window._midCellAnims;
-          const bd = window._midBoard;
-          const ch = window._midCellH;
-          const fgB = window._midFgBonus;
-          const jpR = window._jpPerRow || [null, null, null];
-          let stopped = 0;
-          anims.forEach((a, i) => {
-            const isJp = jpR[a.row] && jpR[a.row] !== 'normal';
-            const delay = isJp ? 1500 + i * 250 : i * 200;
-            setTimeout(() => {
-              a.anim.running = false;
-              cancelAnimationFrame(a.anim.id);
-              // Deceleration: build a short strip and transition to final position
-              const finalCell = bd[a.row][1];
-              let finalHtml;
-              if (isJp) {
-                const jpImg = getJpImg(jpR[a.row]);
-                finalHtml = jpImg ? `<img src="${jpImg}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${cellImg(finalCell)}" style="width:85%;height:85%;object-fit:contain;">`;
-              } else {
-                finalHtml = `<img src="assets/img/${cellImg(finalCell)}" style="width:85%;height:85%;object-fit:contain;">`;
-                if (fgB && fgB[a.row] !== '—') finalHtml += `<span class="cell-bonus">💰${fgB[a.row].slice(1)}</span>`;
-              }
-              // Build decel strip: 4 random + final
-              const decelStrip = document.createElement('div');
-              decelStrip.style.cssText = 'position:absolute;top:0;left:0;right:0;will-change:transform;';
-              for (let k = 0; k < 14; k++) {
-                const s = document.createElement('div');
-                s.style.cssText = `height:${ch}px;display:flex;align-items:center;justify-content:center;`;
-                if (isJp && k % 2 === 0) {
-                  const img = getJpImg(pickJpSymbol(getJpPool(1)));
-                  s.innerHTML = img ? `<img src="${img}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
-                } else {
-                  s.innerHTML = `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
-                }
-                decelStrip.appendChild(s);
-              }
-              const finalDiv = document.createElement('div');
-              finalDiv.style.cssText = `height:${ch}px;display:flex;align-items:center;justify-content:center;`;
-              finalDiv.innerHTML = finalHtml;
-              decelStrip.appendChild(finalDiv);
-              a.wrapper.innerHTML = '';
-              a.wrapper.appendChild(decelStrip);
-              // Animate decel: extreme slow-down over 2500ms
-              const decelDist = 14 * ch;
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  decelStrip.style.transition = 'transform 2500ms cubic-bezier(0.0, 0.7, 0.1, 1.0)';
-                  decelStrip.style.transform = `translateY(-${decelDist}px)`;
-                });
-              });
-              setTimeout(() => {
-                a.wrapper.style.boxShadow = '';
-                a.wrapper.innerHTML = '';
-                const div = document.createElement('div');
-                div.className = 'cell';
-                div.style.height = ch + 'px';
-                div.id = `cell-${a.row}-1`;
-                div.innerHTML = finalHtml;
-                a.wrapper.appendChild(div);
-                stopped++;
-                if (stopped === 3) { spinning = false; done(); }
-              }, 2600);
-            }, delay);
-          });
         }
       });
     }
 
-    function buildFgReelStripAnim(bonusSymbols, numSym, cellH) {
-      fgStripEl.innerHTML = '';
-      fgStripEl.style.transition = 'none';
-      fgStripEl.style.transform = 'translateY(0px)';
-      for (let i = 0; i < numSym; i++) {
-        const div = document.createElement('div');
-        div.className = 'fg-reel-cell';
-        div.style.height = cellH + 'px';
-        div.textContent = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
-        fgStripEl.appendChild(div);
-      }
-      for (let r = 0; r < 3; r++) {
-        const div = document.createElement('div');
-        div.className = 'fg-reel-cell';
-        div.style.height = cellH + 'px';
-        div.textContent = bonusSymbols[r];
-        fgStripEl.appendChild(div);
-      }
-    }
-
-    function buildFgReelStrip(bonusSymbols) {
-      const cellH = Math.round(fgReelEl.clientHeight / 3);
-      fgStripEl.innerHTML = '';
-      fgStripEl.style.transition = 'none';
-      fgStripEl.style.transform = 'translateY(0px)';
-      for (let r = 0; r < 3; r++) {
-        const div = document.createElement('div');
-        div.className = 'fg-reel-cell';
-        div.style.height = cellH + 'px';
-        div.textContent = bonusSymbols[r];
-        fgStripEl.appendChild(div);
-      }
     }
 
     function buildStripN(col, finalCells, numSym, bonusSymbols) {
@@ -603,57 +467,6 @@
     }
 
     // Animate middle column cells individually for JP (only rows with JP symbol)
-    function animateJpCells(jpPerRow) {
-      const cellH = getCellH();
-      return new Promise(resolve => {
-        let total = jpPerRow.filter(x => x !== null).length;
-        if (total === 0) { resolve(); return; }
-        let done = 0;
-        let delay = 0;
-        for (let r = 0; r < 3; r++) {
-          if (jpPerRow[r] === null) continue;
-          const cell = document.getElementById(`cell-${r}-1`);
-          if (!cell) { done++; if (done === total) resolve(); continue; }
-          const pool = getJpPool(jpPerRow[r] === 'GRAND' ? 1 : 2);
-          const numSym = 8;
-          cell.style.overflow = 'hidden';
-          cell.style.position = 'relative';
-          const miniStrip = document.createElement('div');
-          miniStrip.style.cssText = 'display:flex;flex-direction:column;position:absolute;top:0;left:0;right:0;will-change:transform;';
-          for (let i = 0; i < numSym; i++) {
-            const s = document.createElement('div');
-            s.style.cssText = `height:${cellH}px;display:flex;align-items:center;justify-content:center;`;
-            const sym = pickJpSymbol(pool);
-            const img = getJpImg(sym);
-            s.innerHTML = img ? `<img src="${img}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
-            miniStrip.appendChild(s);
-          }
-          const finalDiv = document.createElement('div');
-          finalDiv.style.cssText = `height:${cellH}px;display:flex;align-items:center;justify-content:center;`;
-          const fImg = getJpImg(jpPerRow[r]);
-          finalDiv.innerHTML = fImg ? `<img src="${fImg}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
-          miniStrip.appendChild(finalDiv);
-          cell.innerHTML = '';
-          cell.appendChild(miniStrip);
-          const totalDist = numSym * cellH;
-          setTimeout(() => {
-            miniStrip.style.transition = 'transform 400ms linear';
-            miniStrip.style.transform = `translateY(-${totalDist * 0.4}px)`;
-            setTimeout(() => {
-              miniStrip.style.transition = 'transform 600ms cubic-bezier(0.16, 1, 0.3, 1)';
-              miniStrip.style.transform = `translateY(-${totalDist}px)`;
-              setTimeout(() => {
-                cell.innerHTML = fImg ? `<img src="${fImg}" style="width:85%;height:85%;object-fit:contain;">` : `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
-                done++;
-                if (done === total) resolve();
-              }, 600);
-            }, 400);
-          }, delay);
-          delay += 250;
-        }
-      });
-    }
-
     const FG_SYMS = ['+5','+10','+15','+25','+40','—'];
 
     // JP Slot system — extreme narrow gate triggers JP symbols in middle reel
@@ -1266,52 +1079,36 @@
             console.log('[JP] Per-row:', jpPerRow, result.judgments.map(j => `row${j.row} gap=${j.gap}`));
           }
         }
-        window._jpPerRow = jpPerRow;
         if (jpPerRow.some(x => x !== null)) {
           sfx('narrow_gate');
-          // Determine flash color: red if all 3 rows are extreme narrow (gap=1)
-          const allExtreme = result.judgments.every(j => j.gap === 1 && j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss');
-          const flashAnim = allExtreme ? 'jpFlashRed 0.15s infinite alternate' : 'jpFlash 0.15s infinite alternate';
-          // Start jpFlash immediately on narrow-gate cells + inject JP symbols NOW
-          const anims = window._midCellAnims;
-          if (anims) {
-            const ch = window._midCellH;
-            anims.forEach(a => {
-              if (jpPerRow[a.row] !== null) {
-                a.wrapper.style.animation = flashAnim;
-                // Immediately rebuild strip with JP mixed in (every other slot)
-                const jpOnly = jpPerRow[a.row] === 'GRAND' ? ['GRAND','MAJOR','MINI'] : ['MAJOR','MINI'];
-                a.miniStrip.innerHTML = '';
-                a.miniStrip.style.transform = 'translateY(0)';
-                a.anim.pos = 0;
-                for (let k = 0; k < 12; k++) {
-                  const s = document.createElement('div');
-                  s.style.cssText = `height:${ch}px;display:flex;align-items:center;justify-content:center;`;
-                  if (k % 3 === 0) {
-                    // JP symbol every 3rd slot
-                    const sym = jpOnly[Math.floor(Math.random() * jpOnly.length)];
-                    s.innerHTML = `<img src="${getJpImg(sym)}" style="width:85%;height:85%;object-fit:contain;">`;
-                  } else {
-                    // Normal symbol
-                    s.innerHTML = `<img src="assets/img/${randomImg()}" style="width:85%;height:85%;object-fit:contain;">`;
-                  }
-                  a.miniStrip.appendChild(s);
-                }
-              }
-            });
+          // Flash middle reel + inject JP badges into final cells
+          const midReel = document.getElementById('reel-1');
+          midReel.style.animation = 'jpFlash 0.15s infinite alternate';
+          // Add JP badges to mid column final cells (they're at the top of strip)
+          for (let r = 0; r < 3; r++) {
+            if (jpPerRow[r] && jpPerRow[r] !== 'normal') {
+              const cell = document.getElementById(`cell-${r}-1`);
+              if (cell) cell.innerHTML += `<img src="${getJpImg(jpPerRow[r])}" class="cell-jp-badge">`;
+            }
           }
         }
       });
       sfx('spin_release');
-      // After all reels stop: JP already rendered by stopMidCells
+      // After all reels stop: check JP
       if (jpPerRow.some(x => x !== null)) {
+        const midReel = document.getElementById('reel-1');
         jpSlotWin = checkJpSlotWin(jpPerRow);
-        // Clear flash on cells: keep if JP win, clear if not
-        const anims = window._midCellAnims;
-        if (anims) {
-          anims.forEach(a => {
-            if (!jpSlotWin) { a.wrapper.style.animation = ''; a.wrapper.style.boxShadow = ''; }
-          });
+        if (!jpSlotWin) { midReel.style.animation = ''; }
+        for (let r = 0; r < 3; r++) {
+          if (jpPerRow[r] && jpPerRow[r] !== 'normal') {
+            result.judgments[r] = { row: r, type: jpSlotWin ? 'jp-win' : 'jp-none', lampChange: 0, gap: result.judgments[r].gap };
+          }
+        }
+        let recalc = 0;
+        for (const j of result.judgments) { if (j.type === 'through') recalc += (gm.bet / 3) * j.mult; }
+        gm.balance += recalc - result.totalPayout;
+        result.totalPayout = recalc;
+      }
         }
         for (let r = 0; r < 3; r++) {
           if (jpPerRow[r] && jpPerRow[r] !== 'normal') {
@@ -1351,8 +1148,8 @@
           const jpSubLabel = jpSlotWin === 'GRAND' ? 'SUPER MEGA WIN!' : jpSlotWin === 'MAJOR' ? 'MEGA WIN!' : 'BIG WIN!';
           await showBigWin(jpAmount, 'JACKPOT!\n' + jpSubLabel, '#ffd700,#ff8c00');
           // Clear JP flash after showing result
-          const anims2 = window._midCellAnims;
-          if (anims2) anims2.forEach(a => { a.wrapper.style.animation = ''; a.wrapper.style.boxShadow = ''; });
+          const mr = document.getElementById('reel-1');
+          if (mr) mr.style.animation = '';
         }
       }
       // BIG WIN check (skip if JP already showing its own overlay)
