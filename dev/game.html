@@ -379,17 +379,21 @@
           let done = 0;
           for (const cfg of configs) {
             const strip = document.querySelector(`#reel-${cfg.col} .reel-strip`);
-            const targetY = cfg.scrollDist;
-            const fastDist = targetY - cfg.decelDist;
+            const targetY = 0; // end at 0 (finals at top visible)
+            const scrollDist = cfg.scrollDist;
+            const fastDist = scrollDist - cfg.decelDist;
             const fastDur = Math.round(fastDist / highSpeed);
+            // Start at -scrollDist, fast phase moves toward decel zone
             strip.style.transition = `transform ${fastDur}ms linear`;
-            strip.style.transform = `translateY(-${fastDist}px)`;
+            strip.style.transform = `translateY(-${cfg.decelDist}px)`;
             setTimeout(() => {
+              // Decel to overshoot past 0
               strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
-              strip.style.transform = `translateY(-${targetY + overshoot}px)`;
+              strip.style.transform = `translateY(${overshoot}px)`;
               setTimeout(() => {
+                // Settle to 0
                 strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
-                strip.style.transform = `translateY(-${targetY}px)`;
+                strip.style.transform = `translateY(0px)`;
                 setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 100);
               }, cfg.decelMs);
             }, fastDur);
@@ -441,17 +445,16 @@
           let sidesCount = 0;
           for (let col of [0, 2]) {
             const strip = document.querySelector(`#reel-${col} .reel-strip`);
-            const targetY = sideCfg.scrollDist;
-            const fastDist = targetY - sideCfg.decelDist;
+            const fastDist = sideCfg.scrollDist - sideCfg.decelDist;
             const fastDur = Math.round(fastDist / highSpeed);
             strip.style.transition = `transform ${fastDur}ms linear`;
-            strip.style.transform = `translateY(-${fastDist}px)`;
+            strip.style.transform = `translateY(-${sideCfg.decelDist}px)`;
             setTimeout(() => {
               strip.style.transition = `transform ${sideCfg.decelMs}ms ${sideCfg.ease}`;
-              strip.style.transform = `translateY(-${targetY + overshoot}px)`;
+              strip.style.transform = `translateY(${overshoot}px)`;
               setTimeout(() => {
                 strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
-                strip.style.transform = `translateY(-${targetY}px)`;
+                strip.style.transform = `translateY(0px)`;
                 setTimeout(() => {
                   sidesCount++;
                   if (sidesCount === 2) {
@@ -572,18 +575,7 @@
       const cellH = getCellH();
       strip.innerHTML = '';
       strip.style.transition = 'none';
-      strip.style.transform = 'translateY(0px)';
-      for (let i = 0; i < numSym; i++) {
-        const div = document.createElement('div');
-        div.className = 'cell';
-        div.style.height = cellH + 'px';
-        div.innerHTML = `<img src="assets/img/${randomImg()}">`;
-        if (bonusSymbols) {
-          const rSym = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
-          if (rSym !== '—') div.innerHTML += `<span class="cell-bonus">💰${rSym.slice(1)}</span>`;
-        }
-        strip.appendChild(div);
-      }
+      // Final cells first (top), then randoms below
       for (let r = 0; r < 3; r++) {
         const div = document.createElement('div');
         div.className = 'cell';
@@ -595,6 +587,19 @@
         }
         strip.appendChild(div);
       }
+      for (let i = 0; i < numSym; i++) {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.style.height = cellH + 'px';
+        div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+        if (bonusSymbols) {
+          const rSym = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
+          if (rSym !== '—') div.innerHTML += `<span class="cell-bonus">💰${rSym.slice(1)}</span>`;
+        }
+        strip.appendChild(div);
+      }
+      // Start scrolled down (showing randoms), will animate up to show finals
+      strip.style.transform = `translateY(-${numSym * cellH}px)`;
     }
 
     // Animate middle column cells individually for JP (only rows with JP symbol)
