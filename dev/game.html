@@ -1097,6 +1097,18 @@
               if (cell) cell.innerHTML += `<img src="${getJpImg(jpPerRow[r])}" style="position:absolute;bottom:2px;right:2px;width:48px;height:48px;z-index:5;object-fit:contain;">`;
             }
           }
+          // Inject JP badges into spinning strip cells so player sees them rolling
+          const midStrip = document.querySelector('#reel-1 .reel-strip');
+          const cells = midStrip.querySelectorAll('.cell');
+          const minGap = Math.min(...result.judgments.map(j => j.gap));
+          const jpPool = getJpPool(minGap);
+          cells.forEach((c, idx) => {
+            if (idx % 3 === 0 && !c.id) {
+              const sym = pickJpSymbol(jpPool);
+              const img = getJpImg(sym);
+              if (img) c.innerHTML += `<img src="${img}" style="position:absolute;bottom:2px;right:2px;width:48px;height:48px;z-index:5;object-fit:contain;">`;
+            }
+          });
         }
         // Always flash middle reel; red+gold if all 3 rows are narrow
         const midReel = document.getElementById('reel-1');
