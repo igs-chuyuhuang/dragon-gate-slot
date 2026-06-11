@@ -40,7 +40,7 @@ export async function playGateThrough(row, mult) {
   shakeBoard(8, 200);
 
   // Cell glow
-  anime({ targets: cells, backgroundColor: ['#ffd700', 'transparent'], boxShadow: ['0 0 30px 14px #ffd700', '0 0 0px transparent'], duration: 400, easing: 'easeOutExpo' });
+  anime({ targets: cells, backgroundColor: ['#ffd700', 'transparent'], boxShadow: ['0 0 30px 14px #ffd700', '0 0 0px transparent'], duration: 400, easing: 'easeOutExpo', complete: () => { cells.forEach(c => { c.style.backgroundColor = ''; c.style.boxShadow = ''; }); } });
 
   // Particles: star sparks + streaks + debris (mixed shapes)
   burst(cx, cy, { texture: 'star', count: 20, spread: 130, duration: 400, sizeMin: 0.5, sizeMax: 1.3 });
