@@ -369,35 +369,32 @@
         }
 
         if (fgBonusSymbols) {
-          // FG mode: all 3 columns use normal strip animation
+          // FG mode: all 3 columns use strip animation, mid uses single easeOut like Normal
           buildStripN(1, [board[0][1], board[1][1], board[2][1]], MID_SYMBOLS, fgBonusSymbols);
-          const configs = [
-            { col: 0, scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
-            { col: 1, scrollDist: MID_SYMBOLS * cellH, decelDist: 18 * cellH, decelMs: 2400, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
-            { col: 2, scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
-          ];
           let done = 0;
-          for (const cfg of configs) {
-            const strip = document.querySelector(`#reel-${cfg.col} .reel-strip`);
-            const targetY = 0; // end at 0 (finals at top visible)
-            const scrollDist = cfg.scrollDist;
-            const fastDist = scrollDist - cfg.decelDist;
+          // Side reels: fast + decel
+          for (let col of [0, 2]) {
+            const strip = document.querySelector(`#reel-${col} .reel-strip`);
+            const fastDist = sideScrollDist - 9 * cellH;
             const fastDur = Math.round(fastDist / highSpeed);
-            // Start at -scrollDist, fast phase moves toward decel zone
             strip.style.transition = `transform ${fastDur}ms linear`;
-            strip.style.transform = `translateY(-${cfg.decelDist}px)`;
+            strip.style.transform = `translateY(-${9 * cellH}px)`;
             setTimeout(() => {
-              // Decel to overshoot past 0
-              strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
+              strip.style.transition = `transform 1350ms cubic-bezier(0.22, 1, 0.36, 1)`;
               strip.style.transform = `translateY(${overshoot}px)`;
               setTimeout(() => {
-                // Settle to 0
                 strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
                 strip.style.transform = `translateY(0px)`;
                 setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 100);
-              }, cfg.decelMs);
+              }, 1350);
             }, fastDur);
           }
+          // Middle reel: single 5s easeOut
+          const midStrip = document.querySelector('#reel-1 .reel-strip');
+          midStrip.offsetHeight;
+          midStrip.style.transition = `transform 5000ms cubic-bezier(0.1, 0.7, 0.3, 1)`;
+          midStrip.style.transform = `translateY(0px)`;
+          setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 5100);
         } else {
           // Normal mode: all 3 columns use strip animation (mid spins longer)
           buildStripN(1, [board[0][1], board[1][1], board[2][1]], MID_SYMBOLS);
