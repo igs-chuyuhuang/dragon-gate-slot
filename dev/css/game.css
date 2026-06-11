@@ -11,6 +11,8 @@ body {
   width: 100vw; height: 100dvh;
   max-width: calc(100dvh * 9 / 16);
   position: relative; overflow: hidden;
+  -webkit-user-select: none; -moz-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .bg-layer {
   position: absolute; inset: 0;
