@@ -196,6 +196,7 @@
         <button class="rules-tab active" data-page="0">玩法</button>
         <button class="rules-tab" data-page="1">計分</button>
         <button class="rules-tab" data-page="2">Free Game</button>
+        <button class="rules-tab" data-page="3">Bonus Game</button>
       </div>
       <div class="rules-content" id="rules-content"></div>
     </div>
@@ -1287,7 +1288,8 @@
     const RULES_PAGES = [
       `<h3>🎰 遊戲玩法</h3><p>射龍門 Slot，3×3 盤面。</p><p>左右欄決定「門寬」，中欄判定穿門。</p><ul><li>穿門成功 → 依門寬賠率派彩</li><li>碰壁 → 不扣錢，扣 1 個 Scatter 燈</li><li>同值撞柱 → 不扣錢，扣 2 個 Scatter 燈</li></ul>`,
       `<h3>💰 計分規則</h3><p>穿門賠率（依門寬）：</p><ul><li>極窄（差2）：×15</li><li>窄（差3~4）：×6</li><li>中（差5~8）：×3</li><li>寬（差9~11）：×1</li></ul><p>每次 Spin 扣 bet（bet 平均分配給三列）</p><p>🐉 Scatter 龍符號：累積燈號 +1</p>`,
-      `<h3>🐲 Free Game</h3><ul><li>Scatter 累積燈號達 10 個觸發</li><li>碰壁扣 1 燈、同值扣 2 燈（會延遲觸發）</li><li>Free Game 中不出 Scatter、不碰壁</li><li>穿門成功直接獲得彩金</li><li>觸發後燈號歸零重新收集</li></ul>`
+      `<h3>🐲 Free Game</h3><ul><li>Scatter 累積燈號達 10 個觸發</li><li>碰壁扣 1 燈、同值扣 2 燈（會延遲觸發）</li><li>Free Game 中不出 Scatter、不碰壁</li><li>穿門成功直接獲得彩金</li><li>觸發後燈號歸零重新收集</li></ul>`,
+      `<h3>🎰 Bonus Game</h3><p>射龍門牌局 — 高風險高回報！</p><ul><li>獲得 12 局射龍門對決</li><li>初始籌碼 = 投注 × 50</li><li>每局 10 秒下注時間</li><li>看兩張底牌門寬，猜中間能否穿門</li><li>穿門賠率：極窄門×10 / 窄門×5 / 中門×2.5 / 寬門×1</li><li>碰壁 -2× / 未穿 -1× / 同值撞柱 -3×</li><li>贏分即時加回籌碼，可越押越大</li><li>10%~100% 下注選擇</li></ul>`
     ];
     function showRulesPage(page) {
       $('rules-content').innerHTML = RULES_PAGES[page];
