@@ -607,3 +607,22 @@
 **關鍵 prompt / 指令：** 方向反轉；中輪回歸strip；JP全窄觸發；閃爍規則；飛移動畫
 **人工修正：** JP badge大小多次調整(10→72→48)；飛移目標修正(JP池→badge)；閃爍條件修正
 **耗時：** ~5小時
+
+### [2026-06-11] — 數字自適應 + FG中輪統一 + wallHit修正 + SPIN去框 + 防選取 + Rules完善
+
+**環節：** 程式
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. BET/BALANCE 數字自適應縮放（autoFitText 依長度調整 fontSize）
+2. FG 中輪改跟 Main Game 一致（單一 5s easeOut + MID_SYMBOLS 200格）
+3. wallHit 紅色殘留修正（complete callback 強制清除）
+4. 穿門動畫殘留修正（gateThrough complete + doSpin開頭清所有cell樣式）
+5. SPIN 按鈕去黑框（outline:none + tap-highlight:transparent + :focus清除）
+6. 中輪 #reel-1 下移 2px（top 35.0%→35.24%）
+7. 禁止文字選取（game-root user-select:none）
+8. Rules 加 Bonus Game 分頁 + Jackpot 分頁 + FG 說明修正
+**Before：** FG中輪用舊動畫、特效有色彩殘留、SPIN有黑框、Rules缺BG/JP說明
+**After：** 動畫統一、殘留清除、UI乾淨、Rules完整5頁
+**關鍵 prompt / 指令：** 字體自適應；FG中輪統一；wallHit/gateThrough清除；SPIN去框；防選取；Rules加頁
+**人工修正：** 無
+**耗時：** ~3小時
