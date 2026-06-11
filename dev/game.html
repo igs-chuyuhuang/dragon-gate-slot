@@ -989,9 +989,17 @@
 
 
 
+    function autoFitText(el) {
+      const len = el.textContent.length;
+      if (len > 6) el.style.fontSize = '12px';
+      else if (len > 4) el.style.fontSize = '14px';
+      else el.style.fontSize = '';
+    }
     function updateUI() {
       $('balance').textContent = fmt(gm.balance);
       $('bet').textContent = fmt(gm.bet);
+      autoFitText($('balance'));
+      autoFitText($('bet'));
       $('spin-btn').disabled = spinning || !gm.canSpin();
       $('bet-dec').disabled = spinning || gm.betIndex <= 0;
       $('bet-inc').disabled = spinning || gm.betIndex >= 4;
