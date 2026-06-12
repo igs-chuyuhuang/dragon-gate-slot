@@ -77,7 +77,7 @@ body {
   position: relative;
   background: transparent;
 }
-.cell img { width: 85%; height: 85%; object-fit: contain; }
+.cell img { width: 85%; height: 85%; object-fit: contain; margin: auto; }
 .cell-bonus {
   position: absolute; bottom: 2px; right: 2px;
   background: rgba(0,0,0,0.75); border-radius: 10px;
