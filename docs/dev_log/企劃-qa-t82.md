@@ -626,3 +626,22 @@
 **關鍵 prompt / 指令：** 字體自適應；FG中輪統一；wallHit/gateThrough清除；SPIN去框；防選取；Rules加頁
 **人工修正：** 無
 **耗時：** ~3小時
+
+### [2026-06-12] — BG roundBet bug + JP-pool定位 + Symbol對齊 + jpFlash調整
+
+**環節：** 程式
+**AI 工具：** Kiro Agent
+**做了什麼：**
+1. 修正 BG roundBet=0 bug（移除 bgBuildChips 後的覆蓋）
+2. JP-pool 位置/尺寸多次調整（left/top/width/height + object-fit:contain + overflow:hidden）
+3. JP 數字改相對單位（font-size:2.5cqw, width:25%, top:70%）+ 位置微調
+4. Symbol cell 圖片置中（margin:auto + first-child/last-child margin-top微調）
+5. 三列 reel top 統一 + height 調整（34.95% / 36.2%）
+6. .reel-strip top:-1px 補償取整偏移
+7. initReels 多次嘗試（33.33% vs px，最終回歸 getCellH px + 第三格 marginTop:6px）
+8. jpFlash box-shadow spread/Y偏移多次調整（最終 0 -3px 30px 26px / 60px 46px）
+**Before：** BG扣0元、JP數字跑位、Symbol偏移、閃爍框不對齊
+**After：** BG正常扣款、JP數字跟著縮放、Symbol基本置中、閃爍框對齊外框
+**關鍵 prompt / 指令：** 修BG bug；JP-pool定位；Symbol對齊；jpFlash spread調整
+**人工修正：** 多次截圖反饋微調數值（JP位置5次、reel top 4次、jpFlash spread 4次）
+**耗時：** ~4小時
