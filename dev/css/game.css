@@ -52,9 +52,9 @@ body {
   text-align: center;
   width: 25%;
 }
-#jp-grand-val { left: 7.5%; }
-#jp-major-val { left: 38.6%; }
-#jp-mini-val { left: 69.7%; }
+#jp-grand-val { left: 4%; }
+#jp-major-val { left: 37.5%; }
+#jp-mini-val { left: 71%; }
 
 /* Reel containers — absolute positioned on BG grid */
 .reel {
