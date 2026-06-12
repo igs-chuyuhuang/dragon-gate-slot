@@ -1255,10 +1255,11 @@
 
     // Init: show random symbols
     function initReels() {
-      const cellH = getCellH() || 100; // fallback if layout not ready
+      const cellH = getCellH() || 100;
       for (let col = 0; col < 3; col++) {
         const strip = document.querySelector(`#reel-${col} .reel-strip`);
         strip.innerHTML = '';
+        strip.style.transition = 'none';
         strip.style.transform = 'translateY(0)';
         for (let r = 0; r < 3; r++) {
           const div = document.createElement('div');
