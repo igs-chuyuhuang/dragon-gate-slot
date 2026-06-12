@@ -23,15 +23,16 @@ body {
 /* Jackpot Pool */
 .jp-pool-container {
   position: absolute;
-  left: 6.4%;
-  top: 25.1%;
-  width: 92.3%;
-  height: 13.6%;
+  left: 18%;
+  top: 22.3%;
+  width: 59%;
+  height: 8.7%;
   z-index: 2;
 }
 .jp-pool {
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
 .jp-values {
   position: absolute;
