@@ -78,8 +78,9 @@ body {
   background: transparent;
 }
 .cell img { width: 85%; height: 85%; object-fit: contain; margin: auto; }
-.reel-strip .cell:first-child img { margin-top: -3px; }
-.reel-strip .cell:last-child img { margin-top: 1.5px; }
+.reel-strip .cell:first-child img { margin-top: -2px; }
+.reel-strip .cell:nth-child(2) img { margin-top: -0.5px; }
+.reel-strip .cell:last-child img { margin-top: 2px; }
 .cell-bonus {
   position: absolute; bottom: 2px; right: 2px;
   background: rgba(0,0,0,0.75); border-radius: 10px;
