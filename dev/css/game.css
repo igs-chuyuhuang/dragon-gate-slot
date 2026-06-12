@@ -62,12 +62,12 @@ body {
   overflow: hidden;
 }
 #reel-0 { left: 17.2%; top: 34.95%; width: 17.5%; height: 36.2%; }
-#reel-1 { left: 36.3%; top: 35.19%; width: 17.7%; height: 36.2%; }
+#reel-1 { left: 36.3%; top: 34.95%; width: 17.7%; height: 36.2%; }
 #reel-2 { left: 55.6%; top: 34.95%; width: 17.5%; height: 36.2%; }
 
 .reel-strip {
   display: flex; flex-direction: column;
-  position: absolute; top: 0; left: 0; right: 0;
+  position: absolute; top: -1px; left: 0; right: 0;
   will-change: transform;
 }
 .cell {
@@ -473,7 +473,7 @@ body {
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
 }
-.bg-chip-btns { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+.bg-chip-btns { position: absolute; top: -1px; left: 0; right: 0; bottom: 0; pointer-events: none; }
 .bg-chip-btn {
   position: absolute;
   width: clamp(32px, 8vw, 48px); height: clamp(32px, 8vw, 48px); border-radius: 50%;
