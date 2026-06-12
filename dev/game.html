@@ -348,8 +348,8 @@
               div.style.height = cellH + 'px';
               div.id = `cell-${r}-${col}`;
               div.innerHTML = `<img src="assets/img/${cellImg(board[r][col])}">`;
-              if (fgBonusSymbols && col === 1 && fgBonusSymbols[r] !== '—') {
-                div.innerHTML += `<span class="cell-bonus">💰${fgBonusSymbols[r].slice(1)}</span>`;
+              if (fgBonusSymbols && col === 1 && fgBonusSymbols[r] > 0) {
+                div.innerHTML += `<span class="cell-bonus">💰${Math.round(gm.bet * fgBonusSymbols[r])}</span>`;
               }
               strip.appendChild(div);
             }
@@ -451,8 +451,8 @@
         div.style.height = cellH + 'px';
         div.id = `cell-${r}-${col}`;
         div.innerHTML = `<img src="assets/img/${cellImg(finalCells[r])}">`;
-        if (bonusSymbols && bonusSymbols[r] !== '—') {
-          div.innerHTML += `<span class="cell-bonus">💰${bonusSymbols[r].slice(1)}</span>`;
+        if (bonusSymbols && bonusSymbols[r] > 0) {
+          div.innerHTML += `<span class="cell-bonus">💰${Math.round(gm.bet * bonusSymbols[r])}</span>`;
         }
         strip.appendChild(div);
       }
@@ -463,7 +463,7 @@
         div.innerHTML = `<img src="assets/img/${randomImg()}">`;
         if (bonusSymbols) {
           const rSym = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
-          if (rSym !== '—') div.innerHTML += `<span class="cell-bonus">💰${rSym.slice(1)}</span>`;
+          if (rSym > 0) div.innerHTML += `<span class="cell-bonus">💰${Math.round(gm.bet * rSym)}</span>`;
         }
         strip.appendChild(div);
       }
@@ -472,7 +472,7 @@
     }
 
     // Animate middle column cells individually for JP (only rows with JP symbol)
-    const FG_SYMS = ['+5','+10','+15','+25','+40','—'];
+    const FG_SYMS = [0.17, 0.33, 0.5, 0.83, 1.33, 0];
 
     // JP Slot system — extreme narrow gate triggers JP symbols in middle reel
     const JP_NARROW_POOL = ['GRAND','MAJOR','MINI','normal','normal','normal']; // gap=1
@@ -503,7 +503,7 @@
     function flyFgCoins(judgments, bonusSymbols) {
       const flyers = [];
       for (const j of judgments) {
-        if (j.type !== 'through' || bonusSymbols[j.row] === '—') continue;
+        if (j.type !== 'through' || bonusSymbols[j.row] === 0) continue;
         const cell = document.getElementById(`cell-${j.row}-1`);
         const badge = $(`badge-${j.row}`);
         const src = cell && cell.querySelector('.cell-bonus');
@@ -511,7 +511,7 @@
         const srcRect = src.getBoundingClientRect();
         const dstRect = badge.getBoundingClientRect();
         const flyer = document.createElement('span');
-        flyer.textContent = `💰${bonusSymbols[j.row].slice(1)}`;
+        flyer.textContent = `💰${Math.round(gm.bet * bonusSymbols[j.row])}`;
         flyer.style.cssText = `position:fixed;left:${srcRect.left}px;top:${srcRect.top}px;z-index:9999;font-size:13px;color:#ffd700;font-weight:bold;background:rgba(0,0,0,0.7);border-radius:8px;padding:2px 6px;transition:all 600ms cubic-bezier(0.25,1,0.5,1);pointer-events:none;`;
         document.body.appendChild(flyer);
         flyers.push({ clone: flyer, dstRect, badge, sym: bonusSymbols[j.row] });
@@ -1067,7 +1067,7 @@
         sfx('spin_release');
         // Win lines for rows that scored
         const winRows = result.judgments
-          .filter(j => j.type === 'through' && result.bonusSymbols[j.row] !== '—')
+          .filter(j => j.type === 'through' && result.bonusSymbols[j.row] > 0)
           .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
         if (winRows.length > 0) await playWinLines(winRows);
         // Fly coin from mid-column to badge
