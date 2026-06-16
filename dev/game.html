@@ -375,10 +375,10 @@
           buildStripN(1, [board[0][1], board[1][1], board[2][1]], MID_SYMBOLS, fgBonusSymbols);
           let done = 0;
           // Side reels: fast + decel
+          const fastDist = sideScrollDist - 9 * cellH;
+          const fastDur = Math.round(fastDist / highSpeed);
           for (let col of [0, 2]) {
             const strip = document.querySelector(`#reel-${col} .reel-strip`);
-            const fastDist = sideScrollDist - 9 * cellH;
-            const fastDur = Math.round(fastDist / highSpeed);
             strip.style.transition = `transform ${fastDur}ms linear`;
             strip.style.transform = `translateY(-${9 * cellH}px)`;
             setTimeout(() => {
@@ -391,6 +391,8 @@
               }, 1350);
             }, fastDur);
           }
+          // Trigger onSidesStop after sides settle
+          setTimeout(() => { if (onSidesStop) onSidesStop(); }, fastDur + 1350 + 90 + 100);
           // Middle reel: single 5s easeOut
           const midStrip = document.querySelector('#reel-1 .reel-strip');
           midStrip.offsetHeight;
@@ -528,7 +530,8 @@
         setTimeout(() => {
           for (const f of flyers) {
             f.clone.remove();
-            f.badge.textContent = `💰${f.sym.slice(1)}`;
+            const amt = Math.round(gm.bet * f.sym);
+            f.badge.textContent = `💰${fmt(amt)}`;
             f.badge.className = `badge badge-${f.badge.id.slice(-1)} win`;
           }
           resolve();
@@ -1066,17 +1069,14 @@
         window._debugForceScatter = false;
       }
       if (result.mode === 'fg') {
-        document.getElementById('reel-1').style.animation = 'jpFlash 0.15s infinite alternate';
-        await animateSpin(result.board, result.bonusSymbols);
+        await animateSpin(result.board, result.bonusSymbols, () => {
+          document.getElementById('reel-1').style.animation = 'jpFlash 0.15s infinite alternate';
+        });
         document.getElementById('reel-1').style.animation = '';
         sfx('spin_release');
-        // Win lines for rows that scored
-        const winRows = result.judgments
-          .filter(j => j.type === 'through' && result.bonusSymbols[j.row] > 0)
-          .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
-        if (winRows.length > 0) await playWinLines(winRows);
-        // Fly coin from mid-column to badge
-        await flyFgCoins(result.judgments, result.bonusSymbols);
+        // Fly coin from mid-column to badge (non-blocking in FG)
+        flyFgCoins(result.judgments, result.bonusSymbols);
+        await new Promise(r => setTimeout(r, 700));
         $('win').textContent = fmt(result.totalScore);
         updateUI();
         if (result.fgDone) { await showFGResult(result.totalScore); }
