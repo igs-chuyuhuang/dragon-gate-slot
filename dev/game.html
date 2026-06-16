@@ -1214,7 +1214,7 @@
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
-        if (result.fgTriggered) { await playDragonGateOpening(); showFgBgChoice(); gm.scatterLamps = 0; }
+        if (result.fgTriggered) { autoStopped = true; autoSpins = 0; await playDragonGateOpening(); showFgBgChoice(); gm.scatterLamps = 0; }
         else { setTimeout(() => doSpin(), 400); }
       }
       return result;
