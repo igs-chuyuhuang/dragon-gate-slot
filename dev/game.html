@@ -1018,7 +1018,16 @@
     }
 
     async function doSpin() {
-      if (spinning || !gm.canSpin()) return;
+      if (spinning) return;
+      if (!gm.canSpin()) {
+        autoStopped = true; autoSpins = 0; updateUI();
+        const ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;pointer-events:none;';
+        ov.innerHTML = '<div style="color:#fff;font-size:1.5rem;font-weight:bold;">No more money!</div>';
+        document.body.appendChild(ov);
+        setTimeout(() => ov.remove(), 2000);
+        return;
+      }
       // 清除殘留動畫元素（防止記憶體洩漏）
       document.querySelectorAll('.win-sweep, .win-particle, .coin-rain, .coin-burst, .dragon-sweep, .sc-darken, .sc-hint-text').forEach(el => el.remove());
       document.querySelectorAll('[style*="position: fixed"][style*="z-index"]').forEach(el => { if(parseInt(el.style.zIndex)>9000) el.remove(); });
