@@ -1016,8 +1016,11 @@
 
     async function doSpin() {
       if (spinning || !gm.canSpin()) return;
+      // 清除殘留動畫元素（防止記憶體洩漏）
+      document.querySelectorAll('.win-sweep, .win-particle, .coin-rain, .coin-burst, .dragon-sweep, .sc-darken, .sc-hint-text').forEach(el => el.remove());
+      document.querySelectorAll('[style*="position: fixed"][style*="z-index"]').forEach(el => { if(parseInt(el.style.zIndex)>9000) el.remove(); });
+      document.querySelectorAll('.cell').forEach(c => { c.style.backgroundColor=''; c.style.boxShadow=''; c.style.transform=''; });
       for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
-      document.querySelectorAll('.cell').forEach(c => { c.style.backgroundColor = ''; c.style.boxShadow = ''; c.style.transform = ''; });
       const isFG = gm.fg.active;
       sfx('spin_charge');
       updateUI();
