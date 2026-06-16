@@ -374,6 +374,7 @@
           // FG mode: all 3 columns use strip animation, mid uses single easeOut like Normal
           buildStripN(1, [board[0][1], board[1][1], board[2][1]], MID_SYMBOLS, fgBonusSymbols);
           let done = 0;
+          let fgSidesCount = 0;
           // Side reels: fast + decel
           for (let col of [0, 2]) {
             const strip = document.querySelector(`#reel-${col} .reel-strip`);
@@ -387,7 +388,7 @@
               setTimeout(() => {
                 strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
                 strip.style.transform = `translateY(0px)`;
-                setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 100);
+                setTimeout(() => { fgSidesCount++; if (fgSidesCount === 2 && onSidesStop) onSidesStop(); done++; if (done === 3) { for (let c = 0; c < 3; c++) flexifyStrip(c); spinning = false; resolve(); } }, 100);
               }, 1350);
             }, fastDur);
           }
@@ -396,7 +397,7 @@
           midStrip.offsetHeight;
           midStrip.style.transition = `transform 5000ms cubic-bezier(0.1, 0.7, 0.3, 1)`;
           midStrip.style.transform = `translateY(0px)`;
-          setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 5100);
+          setTimeout(() => { done++; if (done === 3) { for (let c = 0; c < 3; c++) flexifyStrip(c); spinning = false; resolve(); } }, 5100);
         } else {
           // Normal mode: all 3 columns use strip animation (mid spins longer)
           buildStripN(1, [board[0][1], board[1][1], board[2][1]], MID_SYMBOLS);
@@ -1066,7 +1067,10 @@
         window._debugForceScatter = false;
       }
       if (result.mode === 'fg') {
-        await animateSpin(result.board, result.bonusSymbols);
+        await animateSpin(result.board, result.bonusSymbols, () => {
+          document.getElementById('reel-1').style.animation = 'jpFlash 0.15s infinite alternate';
+        });
+        document.getElementById('reel-1').style.animation = '';
         sfx('spin_release');
         // Win lines for rows that scored
         const winRows = result.judgments
@@ -1125,10 +1129,9 @@
             if (img) c.innerHTML += `<img src="${img}" style="position:absolute;bottom:2px;right:2px;width:48px;height:48px;z-index:5;object-fit:contain;">`;
           });
         }
-        // Always flash middle reel; red+gold if all 3 rows are narrow
+        // Always flash middle reel (unified effect for all gate types)
         const midReel = document.getElementById('reel-1');
-        const allNarrow = result.judgments.every(j => j.gap >= 1 && j.gap <= 3 && j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss');
-        midReel.style.animation = allNarrow ? 'jpFlashRedGold 0.3s infinite' : 'jpFlash 0.15s infinite alternate';
+        midReel.style.animation = 'jpFlash 0.15s infinite alternate';
       });
       sfx('spin_release');
       // Clear mid reel flash after stop (unless JP win)
