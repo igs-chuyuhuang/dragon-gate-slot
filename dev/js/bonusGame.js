@@ -52,12 +52,13 @@ export class BonusGame {
     } else {
       const lo = Math.min(this.left, this.right);
       const hi = Math.max(this.left, this.right);
-      if (Math.random() < 0.35) {
-        this.mid = Math.floor(Math.random() * 13) + 1;
+      const inside = [];
+      for (let v = lo + 1; v < hi; v++) inside.push(v);
+
+      if (inside.length > 0 && Math.random() < 0.45) {
+        this.mid = inside[Math.floor(Math.random() * inside.length)];
       } else {
-        const outside = [];
-        for (let v = 1; v <= 13; v++) { if (v <= lo || v >= hi) outside.push(v); }
-        this.mid = outside.length > 0 ? outside[Math.floor(Math.random() * outside.length)] : Math.floor(Math.random() * 13) + 1;
+        this.mid = Math.floor(Math.random() * 13) + 1;
       }
     }
     return this.judge();
