@@ -9,7 +9,7 @@ const SCATTER_LAMP_THRESHOLD = 10;
 
 export class GameManager {
   constructor() {
-    this.balance = 10000;
+    this.balance = 50000;
     this.betIndex = 1;
     this.scatterLamps = 0;
     this.fg = new FreeGame();
