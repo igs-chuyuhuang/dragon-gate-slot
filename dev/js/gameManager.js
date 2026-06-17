@@ -51,8 +51,8 @@ export class GameManager {
 
     // Normal mode
     const judgments = judgeBoard(board);
-    const totalPayout = calculate(judgments, this.bet, board);
-    this.balance += totalPayout;
+    const { winnings, total } = calculate(judgments, this.bet, board);
+    this.balance += total;
 
     // Scatter lamp accumulation
     const sc = countScatters(board);
@@ -72,7 +72,7 @@ export class GameManager {
       fgTriggered = true; // UI handles choice (FG or BG)
     }
 
-    return { board, mode: 'normal', judgments, totalPayout, scatterCount: sc, fgTriggered, scatterLamps: this.scatterLamps, lampDelta };
+    return { board, mode: 'normal', judgments, totalPayout: winnings, _refund: total - winnings, scatterCount: sc, fgTriggered, scatterLamps: this.scatterLamps, lampDelta };
   }
 
   triggerFreeGame() {

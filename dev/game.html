@@ -1057,7 +1057,7 @@
         result.judgments = judgeBoard(result.board);
         result.totalPayout = 0;
         for (const j of result.judgments) {
-          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult + gm.bet / 3;
+          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult;
         }
         window._debugForceNarrow = false;
         window._debugJpNoWin = false;
@@ -1084,7 +1084,7 @@
         result.scatterLamps = threshold;
         result.totalPayout = 0;
         for (const j of result.judgments) {
-          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult + gm.bet / 3;
+          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult;
         }
         window._debugForceScatter = false;
       }
@@ -1162,12 +1162,15 @@
             result.judgments[r] = { row: r, type: jpSlotWin ? 'jp-win' : 'jp-none', lampChange: 0, gap: result.judgments[r].gap };
           }
         }
-        let recalc = 0;
+        let recalcWin = 0, recalcRefund = 0;
         for (const j of result.judgments) {
-          if (j.type === 'through') recalc += (gm.bet / 3) * j.mult + gm.bet / 3;
+          if (j.type === 'through') { recalcWin += (gm.bet / 3) * j.mult; recalcRefund += gm.bet / 3; }
         }
-        gm.balance += recalc - result.totalPayout;
-        result.totalPayout = recalc;
+        const oldTotal = result.totalPayout + result._refund;
+        const newTotal = recalcWin + recalcRefund;
+        gm.balance += newTotal - oldTotal;
+        result.totalPayout = recalcWin;
+        result._refund = recalcRefund;
       } else {
         midReelPost.style.animation = '';
       }
