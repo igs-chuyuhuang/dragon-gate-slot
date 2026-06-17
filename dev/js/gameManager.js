@@ -4,12 +4,12 @@ import { calculate } from './payoutCalculator.js';
 import { FreeGame, FG_SYMBOLS } from './freeGame.js';
 import { JpSystem } from './jpSystem.js';
 
-const BET_OPTIONS = [15, 30, 60, 150, 300];
+const BET_OPTIONS = [15, 30, 60, 150, 300, 600, 900, 1200];
 const SCATTER_LAMP_THRESHOLD = 10;
 
 export class GameManager {
   constructor() {
-    this.balance = 1000;
+    this.balance = 10000;
     this.betIndex = 1;
     this.scatterLamps = 0;
     this.fg = new FreeGame();

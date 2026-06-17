@@ -477,8 +477,8 @@
     const FG_SYMS = [0.33, 0.5, 0.83, 1.5, 2.5, 0];
 
     // JP Slot system — extreme narrow gate triggers JP symbols in middle reel
-    const JP_NARROW_POOL = ['GRAND','MAJOR','MINI','normal','normal','normal']; // gap=1
-    const JP_MID_POOL = ['MAJOR','MINI','normal','normal','normal','normal'];   // gap≤3
+    const JP_NARROW_POOL = ['GRAND','MAJOR','MINI','normal','normal','normal','normal','normal','normal']; // gap=1
+    const JP_MID_POOL = ['MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal'];   // gap≤3
     function getJpPool(gap) {
       if (gap === 1) return JP_NARROW_POOL;
       if (gap <= 3) return JP_MID_POOL;
@@ -1008,7 +1008,7 @@
       autoFitText($('bet'), 'bet');
       $('spin-btn').disabled = spinning || !gm.canSpin();
       $('bet-dec').disabled = spinning || gm.betIndex <= 0;
-      $('bet-inc').disabled = spinning || gm.betIndex >= 4;
+      $('bet-inc').disabled = spinning || gm.betIndex >= 7;
       $('auto-btn').textContent = autoSpins > 0 ? `${autoSpins}` : 'AUTO';
       const fgEl = $('fg-info');
       if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉`; }
