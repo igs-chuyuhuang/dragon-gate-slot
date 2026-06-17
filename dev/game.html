@@ -868,35 +868,38 @@
         const result = bgInstance.reveal();
         midCard.innerHTML = `<img src="assets/img/${CARD_IMG[result.mid]}">`;
         midCard.className = 'bg-card face';
-        bgInstance.applyResult(result);
-        // Show result with animation
         const resEl = $('bg-result-text');
         const winEl = $('bg-win');
         const balEl = $('bg-balance');
         if (result.mult > 0) {
-          const won = bgInstance.roundBet * result.mult;
+          const winBefore = bgInstance.winnings;
+          bgInstance.applyResult(result);
+          const won = bgInstance.winnings - winBefore;
           resEl.textContent = `穿門！×${result.mult}`;
           resEl.className = 'bg-result-text win';
           sfx('gate_through');
-          bgAnimateValue(winEl, '', bgInstance.winnings - won, bgInstance.winnings, 900, true);
+          bgAnimateValue(winEl, '', winBefore, bgInstance.winnings, 900, true);
           bgAnimateValue(balEl, '', bgInstance.chips - won, bgInstance.chips, 900, false);
         } else if (result.type === 'wall') {
-          const lost = Math.abs(bgInstance.roundBet * result.mult);
+          const chipsBefore = bgInstance.chips;
+          bgInstance.applyResult(result);
           resEl.textContent = `碰壁！`;
           resEl.className = 'bg-result-text lose';
           sfx('wall_hit');
-          bgAnimateValue(balEl, '', bgInstance.chips + lost, bgInstance.chips, 600, false);
+          bgAnimateValue(balEl, '', chipsBefore, bgInstance.chips, 600, false);
         } else if (result.type === 'same-hit') {
-          const lost = Math.abs(bgInstance.roundBet * result.mult);
+          const chipsBefore = bgInstance.chips;
+          bgInstance.applyResult(result);
           resEl.textContent = `同值撞柱！`;
           resEl.className = 'bg-result-text lose';
           sfx('wall_hit');
-          bgAnimateValue(balEl, '', bgInstance.chips + lost, bgInstance.chips, 600, false);
+          bgAnimateValue(balEl, '', chipsBefore, bgInstance.chips, 600, false);
         } else {
-          const lost = Math.abs(bgInstance.roundBet * result.mult);
+          const chipsBefore = bgInstance.chips;
+          bgInstance.applyResult(result);
           resEl.textContent = `未穿`;
           resEl.className = 'bg-result-text lose';
-          bgAnimateValue(balEl, '', bgInstance.chips + lost, bgInstance.chips, 600, false);
+          bgAnimateValue(balEl, '', chipsBefore, bgInstance.chips, 600, false);
         }
         $('bg-round-counter').textContent = `${bgInstance.rounds}/${bgInstance.maxRounds}`;
         // Next round after delay
