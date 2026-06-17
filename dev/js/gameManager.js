@@ -35,6 +35,7 @@ export class GameManager {
     const board = spin(isFG);
 
     if (!isFG) {
+      this.balance -= this.bet;
       this.jp.contribute(this.bet);
     }
 
@@ -57,7 +58,7 @@ export class GameManager {
     const sc = countScatters(board);
     let lampDelta = sc; // each scatter +1
     for (const j of judgments) {
-      if (j.lampChange) {
+      if (j.type === 'same-hit' && j.lampChange) {
         const rowHasScatter = board[j.row].some(c => c.isScatter);
         if (!rowHasScatter) lampDelta += j.lampChange;
       }

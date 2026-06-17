@@ -477,14 +477,21 @@
     const FG_SYMS = [0.33, 0.5, 0.83, 1.5, 2.5, 0];
 
     // JP Slot system — extreme narrow gate triggers JP symbols in middle reel
-    const JP_NARROW_POOL = ['GRAND','MAJOR','MINI','normal','normal','normal','normal','normal','normal']; // gap=1
-    const JP_MID_POOL = ['MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal'];   // gap≤3
+    const JP_NARROW_POOL = ['GRAND','MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal']; // gap=1
+    const JP_MID_POOL = ['MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal'];   // gap≤3
     function getJpPool(gap) {
       if (gap === 1) return JP_NARROW_POOL;
       if (gap <= 3) return JP_MID_POOL;
       return null;
     }
-    function pickJpSymbol(pool) { return pool[Math.floor(Math.random() * pool.length)]; }
+    function pickJpSymbol(pool) {
+      const p = [...pool];
+      if (gm.bet >= 300) {
+        const jpSyms = pool.filter(s => s !== 'normal');
+        if (jpSyms.length > 0) p.push(jpSyms[Math.floor(Math.random() * jpSyms.length)]);
+      }
+      return p[Math.floor(Math.random() * p.length)];
+    }
     function checkJpSlotWin(symbols) {
       // All 3 must be the same non-null JP symbol
       if (symbols[0] && symbols[0] !== 'normal' && symbols[0] === symbols[1] && symbols[1] === symbols[2]) return symbols[0];
@@ -1050,8 +1057,7 @@
         result.judgments = judgeBoard(result.board);
         result.totalPayout = 0;
         for (const j of result.judgments) {
-          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult;
-          else if (!result.board[j.row].some(c => c.isScatter)) result.totalPayout -= gm.bet / 3;
+          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult + gm.bet / 3;
         }
         window._debugForceNarrow = false;
         window._debugJpNoWin = false;
@@ -1078,8 +1084,7 @@
         result.scatterLamps = threshold;
         result.totalPayout = 0;
         for (const j of result.judgments) {
-          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult;
-          else if (!result.board[j.row].some(c => c.isScatter)) result.totalPayout -= gm.bet / 3;
+          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult + gm.bet / 3;
         }
         window._debugForceScatter = false;
       }
@@ -1159,8 +1164,7 @@
         }
         let recalc = 0;
         for (const j of result.judgments) {
-          if (j.type === 'through') recalc += (gm.bet / 3) * j.mult;
-          else if (j.type !== 'jp-win' && j.type !== 'jp-none' && !result.board[j.row].some(c => c.isScatter)) recalc -= gm.bet / 3;
+          if (j.type === 'through') recalc += (gm.bet / 3) * j.mult + gm.bet / 3;
         }
         gm.balance += recalc - result.totalPayout;
         result.totalPayout = recalc;

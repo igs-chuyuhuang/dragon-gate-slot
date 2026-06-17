@@ -52,7 +52,7 @@ export class BonusGame {
     } else {
       const lo = Math.min(this.left, this.right);
       const hi = Math.max(this.left, this.right);
-      if (Math.random() < 0.28) {
+      if (Math.random() < 0.35) {
         this.mid = Math.floor(Math.random() * 13) + 1;
       } else {
         const outside = [];
