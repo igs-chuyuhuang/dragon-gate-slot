@@ -35,7 +35,6 @@ export class GameManager {
     const board = spin(isFG);
 
     if (!isFG) {
-      this.balance -= this.bet;
       this.jp.contribute(this.bet);
     }
 

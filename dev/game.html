@@ -1049,7 +1049,10 @@
         }
         result.judgments = judgeBoard(result.board);
         result.totalPayout = 0;
-        for (const j of result.judgments) { if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult; }
+        for (const j of result.judgments) {
+          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult;
+          else if (!result.board[j.row].some(c => c.isScatter)) result.totalPayout -= gm.bet / 3;
+        }
         window._debugForceNarrow = false;
         window._debugJpNoWin = false;
       }
@@ -1074,7 +1077,10 @@
         result.fgTriggered = true;
         result.scatterLamps = threshold;
         result.totalPayout = 0;
-        for (const j of result.judgments) { if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult; }
+        for (const j of result.judgments) {
+          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult;
+          else if (!result.board[j.row].some(c => c.isScatter)) result.totalPayout -= gm.bet / 3;
+        }
         window._debugForceScatter = false;
       }
       if (result.mode === 'fg') {
@@ -1152,7 +1158,10 @@
           }
         }
         let recalc = 0;
-        for (const j of result.judgments) { if (j.type === 'through') recalc += (gm.bet / 3) * j.mult; }
+        for (const j of result.judgments) {
+          if (j.type === 'through') recalc += (gm.bet / 3) * j.mult;
+          else if (j.type !== 'jp-win' && j.type !== 'jp-none' && !result.board[j.row].some(c => c.isScatter)) recalc -= gm.bet / 3;
+        }
         gm.balance += recalc - result.totalPayout;
         result.totalPayout = recalc;
       } else {
