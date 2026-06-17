@@ -1,4 +1,4 @@
-const SCATTER_RATE = 0.03;
+const SCATTER_RATE = 0.05;
 const MISS_BIAS = 0.55;
 
 export function spin(fgMode = false) {

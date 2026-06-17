@@ -58,7 +58,7 @@ export class GameManager {
     const sc = countScatters(board);
     let lampDelta = sc; // each scatter +1
     for (const j of judgments) {
-      if (j.type === 'same-hit' && j.lampChange) {
+      if (j.lampChange) {
         const rowHasScatter = board[j.row].some(c => c.isScatter);
         if (!rowHasScatter) lampDelta += j.lampChange;
       }
