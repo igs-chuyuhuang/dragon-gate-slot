@@ -80,10 +80,8 @@ export class BonusGame {
   applyResult(result) {
     if (result.mult > 0) {
       const win = this.roundBet * result.mult;
-      const actual = Math.min(win, this.pool);
-      this.winnings += actual;
-      this.chips += actual;
-      this.pool -= actual;
+      this.winnings += win;
+      this.chips += win;
     } else {
       this.chips += this.roundBet * result.mult;
       if (this.chips < 0) this.chips = 0;
