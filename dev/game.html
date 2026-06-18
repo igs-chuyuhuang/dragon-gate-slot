@@ -153,11 +153,9 @@
 
     <!-- Tutorial Overlay -->
     <div class="rules-overlay" id="tutorial-overlay" style="display:none;z-index:2200">
-      <div class="rules-panel" style="width:80%;max-height:65vh;">
+      <div class="rules-panel" style="width:80%;max-height:65vh;position:relative;">
+        <button class="rules-close" id="tutorial-close" style="position:absolute;top:-30px;right:-10px;">✕</button>
         <div class="rules-content" id="tutorial-content"></div>
-        <label style="color:#aaa;font-size:12px;margin-top:10px;display:flex;align-items:center;gap:6px;cursor:pointer;">
-          <input type="checkbox" id="tutorial-dismiss"> 不再顯示
-        </label>
         <button class="bg-deal-btn" id="tutorial-start" style="margin-top:12px;width:100%;padding:0.8rem;">開始遊戲</button>
       </div>
     </div>
@@ -746,6 +744,7 @@
       };
     }
     $('tutorial-start').addEventListener('click', () => { if (_tutorialCallback) _tutorialCallback(); });
+    $('tutorial-close').addEventListener('click', () => { $('tutorial-overlay').style.display = 'none'; showFgBgChoice(); });
 
     $('choose-fg').addEventListener('click', () => {
       $('fgbg-choice').style.display = 'none';
