@@ -737,12 +737,10 @@
 
     let _tutorialCallback = null;
     function showTutorial(content, storageKey, callback) {
-      if (sessionStorage.getItem(storageKey)) { callback(); return; }
       $('tutorial-content').innerHTML = content;
       $('tutorial-dismiss').checked = false;
       $('tutorial-overlay').style.display = 'flex';
       _tutorialCallback = () => {
-        if ($('tutorial-dismiss').checked) sessionStorage.setItem(storageKey, '1');
         $('tutorial-overlay').style.display = 'none';
         callback();
       };
@@ -875,7 +873,7 @@
           const winBefore = bgInstance.winnings;
           bgInstance.applyResult(result);
           const won = bgInstance.winnings - winBefore;
-          resEl.textContent = `穿門！×${result.mult}`;
+          resEl.textContent = '穿門!';
           resEl.className = 'bg-result-text win';
           sfx('gate_through');
           bgAnimateValue(winEl, '', winBefore, bgInstance.winnings, 900, true);
