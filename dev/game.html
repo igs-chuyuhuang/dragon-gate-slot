@@ -736,7 +736,6 @@
     let _tutorialCallback = null;
     function showTutorial(content, storageKey, callback) {
       $('tutorial-content').innerHTML = content;
-      $('tutorial-dismiss').checked = false;
       $('tutorial-overlay').style.display = 'flex';
       _tutorialCallback = () => {
         $('tutorial-overlay').style.display = 'none';
