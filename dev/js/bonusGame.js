@@ -1,14 +1,11 @@
 function getPassMult(gap) {
-  if (gap <= 0) return 0; // gap=0: impossible to pass
-  if (gap === 1) return 5;
-  if (gap <= 3) return 3;
-  if (gap <= 7) return 2;
-  return 1;
+  return gap > 0 ? 1 : 0;
 }
 
 export class BonusGame {
   constructor(bet, pool) {
     this.chips = bet * 50;
+    this.initialChips = this.chips;
     this.winnings = 0;
     this.pool = pool;
     this.roundBet = 0;
@@ -83,8 +80,8 @@ export class BonusGame {
       this.winnings += win;
       this.chips += win;
     } else {
-      this.chips += this.roundBet * result.mult;
-      if (this.chips < 0) this.chips = 0;
+      const loss = this.roundBet * Math.abs(result.mult);
+      this.chips = Math.max(this.initialChips, this.chips - loss);
     }
     this.rounds++;
     if (this.chips <= 0 || this.rounds >= this.maxRounds) this.active = false;
