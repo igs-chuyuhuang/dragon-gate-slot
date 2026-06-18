@@ -87,7 +87,8 @@ export class BonusGame {
         this.active = false;
       } else {
         const loss = this.roundBet * Math.abs(result.mult);
-        this.chips = Math.max(this.initialChips, this.chips - loss);
+        this.chips -= loss;
+        if (this.chips < 0) this.chips = 0;
       }
     }
     this.rounds++;
@@ -96,6 +97,6 @@ export class BonusGame {
 
   cashOut() {
     this.active = false;
-    return this.winnings;
+    return Math.max(this.winnings, this.initialChips);
   }
 }

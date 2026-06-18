@@ -938,8 +938,8 @@
     async function bgEnd() {
       if (!bgInstance) return;
       if (bgRoundTimer) clearInterval(bgRoundTimer);
-      bgInstance.active = false;
-      const winnings = bgInstance.winnings;
+      const finalWin = bgInstance.cashOut();
+      const isGuaranteed = finalWin === bgInstance.initialChips && bgInstance.winnings <= bgInstance.initialChips;
       // Hide BG inline UI
       $('bg-inline').style.display = 'none';
       $('bg-chip-bar').style.display = 'none';
@@ -955,10 +955,10 @@
       const jpContainer = document.querySelector('.jp-pool-container'); if (jpContainer) jpContainer.style.display = '';
       bgInstance = null;
       updateUI();
-      await showBGResult(winnings);
+      await showBGResult(finalWin, isGuaranteed);
     }
 
-    async function showBGResult(total) {
+    async function showBGResult(total, isGuaranteed) {
       const ratio = total / gm.bet;
       if (ratio >= 5) {
         const label = ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!';
@@ -972,7 +972,7 @@
       const amountEl = $('fg-result-amount');
       const bigEl = $('fg-result-big');
       const titleEl = overlay.querySelector('.fg-result-title');
-      titleEl.textContent = 'BONUS GAME';
+      titleEl.textContent = isGuaranteed ? 'BONUS GAME（保底）' : 'BONUS GAME';
       overlay.style.display = 'flex';
       bigEl.style.display = 'none';
       amountEl.textContent = '0';
