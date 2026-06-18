@@ -45,20 +45,7 @@ export class BonusGame {
   }
 
   reveal() {
-    if (this.left === this.right) {
-      this.mid = Math.floor(Math.random() * 13) + 1;
-    } else {
-      const lo = Math.min(this.left, this.right);
-      const hi = Math.max(this.left, this.right);
-      const inside = [];
-      for (let v = lo + 1; v < hi; v++) inside.push(v);
-
-      if (inside.length > 0 && Math.random() < 0.45) {
-        this.mid = inside[Math.floor(Math.random() * inside.length)];
-      } else {
-        this.mid = Math.floor(Math.random() * 13) + 1;
-      }
-    }
+    this.mid = Math.floor(Math.random() * 13) + 1;
     return this.judge();
   }
 
