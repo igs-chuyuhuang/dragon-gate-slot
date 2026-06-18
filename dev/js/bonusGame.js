@@ -4,9 +4,9 @@ function getPassMult(gap) {
 
 export class BonusGame {
   constructor(bet, pool) {
-    this.chips = bet * 10;
+    this.chips = bet * 6;
     this.initialChips = this.chips;
-    this.guarantee = bet * 10;
+    this.guarantee = bet * 6;
     this.winnings = 0;
     this.pool = pool;
     this.roundBet = 0;
