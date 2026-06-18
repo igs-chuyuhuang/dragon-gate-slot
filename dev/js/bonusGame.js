@@ -80,8 +80,15 @@ export class BonusGame {
       this.winnings += win;
       this.chips += win;
     } else {
-      const loss = this.roundBet * Math.abs(result.mult);
-      this.chips = Math.max(this.initialChips, this.chips - loss);
+      if (this.roundBet >= this.chips) {
+        // All in 輸：歸零只拿初始值，BG 結束
+        this.winnings = 0;
+        this.chips = this.initialChips;
+        this.active = false;
+      } else {
+        const loss = this.roundBet * Math.abs(result.mult);
+        this.chips = Math.max(this.initialChips, this.chips - loss);
+      }
     }
     this.rounds++;
     if (this.chips <= 0 || this.rounds >= this.maxRounds) this.active = false;
