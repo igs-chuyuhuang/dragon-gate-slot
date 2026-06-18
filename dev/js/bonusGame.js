@@ -6,6 +6,7 @@ export class BonusGame {
   constructor(bet, pool) {
     this.chips = bet * 50;
     this.initialChips = this.chips;
+    this.guarantee = bet * 10;
     this.winnings = 0;
     this.pool = pool;
     this.roundBet = 0;
@@ -81,9 +82,9 @@ export class BonusGame {
       this.chips += win;
     } else {
       if (this.roundBet >= this.chips) {
-        // All in 輸：保底拿回初始值，BG 結束
-        this.winnings = this.initialChips;
-        this.chips = this.initialChips;
+        // All in 輸：保底，BG 結束
+        this.winnings = this.guarantee;
+        this.chips = 0;
         this.active = false;
       } else {
         const loss = this.roundBet * Math.abs(result.mult);
@@ -97,6 +98,6 @@ export class BonusGame {
 
   cashOut() {
     this.active = false;
-    return Math.max(this.winnings, this.initialChips);
+    return Math.max(this.winnings, this.guarantee);
   }
 }

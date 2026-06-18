@@ -935,7 +935,7 @@
       if (!bgInstance) return;
       if (bgRoundTimer) clearInterval(bgRoundTimer);
       const finalWin = bgInstance.cashOut();
-      const isGuaranteed = finalWin === bgInstance.initialChips && bgInstance.winnings <= bgInstance.initialChips;
+      const isGuaranteed = finalWin === bgInstance.guarantee && bgInstance.winnings <= bgInstance.guarantee;
       // Hide BG inline UI
       $('bg-inline').style.display = 'none';
       $('bg-chip-bar').style.display = 'none';
