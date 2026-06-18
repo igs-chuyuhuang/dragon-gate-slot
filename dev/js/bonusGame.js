@@ -81,8 +81,8 @@ export class BonusGame {
       this.chips += win;
     } else {
       if (this.roundBet >= this.chips) {
-        // All in 輸：歸零只拿初始值，BG 結束
-        this.winnings = 0;
+        // All in 輸：保底拿回初始值，BG 結束
+        this.winnings = this.initialChips;
         this.chips = this.initialChips;
         this.active = false;
       } else {
