@@ -880,26 +880,22 @@
           sfx('gate_through');
           bgAnimateValue(winEl, '', winBefore, bgInstance.winnings, 900, true);
           bgAnimateValue(balEl, '', bgInstance.chips - won, bgInstance.chips, 900, false);
-        } else if (result.type === 'wall') {
-          const chipsBefore = bgInstance.chips;
-          bgInstance.applyResult(result);
-          resEl.textContent = `碰壁！`;
-          resEl.className = 'bg-result-text lose';
-          sfx('wall_hit');
-          bgAnimateValue(balEl, '', chipsBefore, bgInstance.chips, 600, false);
-        } else if (result.type === 'same-hit') {
-          const chipsBefore = bgInstance.chips;
-          bgInstance.applyResult(result);
-          resEl.textContent = `同值撞柱！`;
-          resEl.className = 'bg-result-text lose';
-          sfx('wall_hit');
-          bgAnimateValue(balEl, '', chipsBefore, bgInstance.chips, 600, false);
         } else {
+          const wasAllIn = bgInstance.roundBet >= bgInstance.chips;
           const chipsBefore = bgInstance.chips;
+          const winBefore = bgInstance.winnings;
           bgInstance.applyResult(result);
-          resEl.textContent = `未穿`;
+          if (result.type === 'wall') { resEl.textContent = '碰壁！'; sfx('wall_hit'); }
+          else if (result.type === 'same-hit') { resEl.textContent = '同值撞柱！'; sfx('wall_hit'); }
+          else { resEl.textContent = '未穿'; }
           resEl.className = 'bg-result-text lose';
-          bgAnimateValue(balEl, '', chipsBefore, bgInstance.chips, 600, false);
+          if (wasAllIn && !bgInstance.active) {
+            // All in 輸：演出歸零效果
+            bgAnimateValue(balEl, '', chipsBefore, 0, 600, false);
+            bgAnimateValue(winEl, '', winBefore, bgInstance.winnings, 600, false);
+          } else {
+            bgAnimateValue(balEl, '', chipsBefore, bgInstance.chips, 600, false);
+          }
         }
         $('bg-round-counter').textContent = `${bgInstance.rounds}/${bgInstance.maxRounds}`;
         // Next round after delay
