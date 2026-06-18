@@ -794,7 +794,7 @@
       $('bg-card-m').innerHTML = `<img src="assets/img/back.png">`;
       $('bg-card-m').className = 'bg-card back';
       const info = bgInstance.getGateInfo();
-      $('bg-gate-info').textContent = `${info.label} ×${info.mult}`;
+      $('bg-gate-info').textContent = '';
       bgBuildChips();
       $('spin-btn').disabled = true;
       // Round timer
