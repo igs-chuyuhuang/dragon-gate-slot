@@ -325,7 +325,7 @@
     // Get cell height from reel
     function getCellH() {
       const reel = document.querySelector('.reel');
-      return reel.getBoundingClientRect().height / 3;
+      return Math.floor(reel.getBoundingClientRect().height / 3);
     }
 
     function buildStrip(col, finalCells) { buildStripN(col, finalCells, REEL_SYMBOLS); }
