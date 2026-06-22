@@ -227,7 +227,7 @@
     const SFX_NAMES = ['gate_through','dragon_growl','dragon_roar','coin_fly','countup','lose','chip_select','card_deal','narrow_gate','bigwin','megawin','supermegawin','gate_rise','gate_open_sfx'];
     var loaded = 0, total = PRELOAD_IMGS.length;
     var bar = document.getElementById('loading-bar');
-    function check() { loaded++; bar.style.width = (loaded/total*100)+'%'; if(loaded>=total) document.getElementById('loading-overlay').style.display='none'; }
+    function check() { loaded++; bar.style.width = (loaded/total*100)+'%'; if(loaded>=total) { document.getElementById('loading-overlay').style.display='none'; document.getElementById('rules-overlay').style.display='flex'; document.getElementById('rules-close').textContent='開始遊戲'; document.getElementById('rules-close').style.cssText='padding:8px 24px;font-size:1rem;border-radius:8px;background:linear-gradient(180deg,#ffd700,#c9a032);color:#1a1a2e;border:none;cursor:pointer;font-weight:bold;'; } }
     PRELOAD_IMGS.forEach(function(src){ var img=new Image(); img.onload=img.onerror=check; img.src='assets/img/'+src; });
     // SFX preload cache
     window.SFX_CACHE = {};
@@ -1323,8 +1323,9 @@
       document.querySelectorAll('.rules-tab').forEach(t => t.classList.toggle('active', +t.dataset.page === page));
     }
     $('rules-btn').addEventListener('click', () => { $('rules-overlay').style.display = 'flex'; showRulesPage(0); });
-    $('rules-close').addEventListener('click', () => { $('rules-overlay').style.display = 'none'; });
-    $('rules-overlay').addEventListener('click', e => { if (e.target === $('rules-overlay')) $('rules-overlay').style.display = 'none'; });
+    $('rules-close').addEventListener('click', () => { $('rules-overlay').style.display = 'none'; $('rules-close').textContent = '✕'; $('rules-close').style.cssText = ''; startBGM(); });
+    $('rules-overlay').addEventListener('click', e => { if (e.target === $('rules-overlay')) { $('rules-overlay').style.display = 'none'; $('rules-close').textContent = '✕'; $('rules-close').style.cssText = ''; } });
+    showRulesPage(0);
     document.querySelectorAll('.rules-tab').forEach(t => t.addEventListener('click', () => showRulesPage(+t.dataset.page)));
     $('vol-btn').addEventListener('click', () => {
       muted = !muted;
