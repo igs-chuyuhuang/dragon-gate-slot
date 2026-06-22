@@ -188,9 +188,10 @@
 
   <!-- Rules Panel -->
   <div class="rules-overlay" id="rules-overlay" style="display:none">
-    <div class="rules-panel" style="width:90%;max-width:600px;height:80vh;padding:0;position:relative;">
+    <div style="width:90%;max-width:600px;height:80vh;position:relative;display:flex;flex-direction:column;align-items:center;">
       <button class="rules-close" id="rules-close" style="position:absolute;top:-36px;right:0;z-index:1;">✕</button>
-      <iframe src="rules.html" style="width:100%;height:100%;border:none;border-radius:8px;"></iframe>
+      <iframe src="rules.html" style="width:100%;flex:1;border:none;border-radius:8px;"></iframe>
+      <button id="rules-start-btn" class="bg-deal-btn" style="margin-top:12px;padding:10px 40px;font-size:1.1rem;display:none;">開始遊戲</button>
     </div>
   </div>
 
@@ -220,7 +221,7 @@
     const SFX_NAMES = ['gate_through','dragon_growl','dragon_roar','coin_fly','countup','lose','chip_select','card_deal','narrow_gate','bigwin','megawin','supermegawin','gate_rise','gate_open_sfx'];
     var loaded = 0, total = PRELOAD_IMGS.length;
     var bar = document.getElementById('loading-bar');
-    function check() { loaded++; bar.style.width = (loaded/total*100)+'%'; if(loaded>=total) { document.getElementById('loading-overlay').style.display='none'; document.getElementById('rules-overlay').style.display='flex'; document.getElementById('rules-close').textContent='開始遊戲'; document.getElementById('rules-close').style.cssText='padding:8px 24px;font-size:1rem;border-radius:8px;background:linear-gradient(180deg,#ffd700,#c9a032);color:#1a1a2e;border:none;cursor:pointer;font-weight:bold;'; } }
+    function check() { loaded++; bar.style.width = (loaded/total*100)+'%'; if(loaded>=total) { document.getElementById('loading-overlay').style.display='none'; document.getElementById('rules-overlay').style.display='flex'; document.getElementById('rules-start-btn').style.display='block'; } }
     PRELOAD_IMGS.forEach(function(src){ var img=new Image(); img.onload=img.onerror=check; img.src='assets/img/'+src; });
     // SFX preload cache
     window.SFX_CACHE = {};
@@ -1304,9 +1305,11 @@
     $('auto-dec').addEventListener('click', () => { autoCount = Math.max(10, autoCount-10); $('auto-count-display').textContent = autoCount+' 局'; });
     $('auto-inc').addEventListener('click', () => { autoCount = Math.min(100, autoCount+10); $('auto-count-display').textContent = autoCount+' 局'; });
     // Rules overlay
+    function closeRules() { $('rules-overlay').style.display = 'none'; $('rules-start-btn').style.display = 'none'; startBGM(); }
     $('rules-btn').addEventListener('click', () => { $('rules-overlay').style.display = 'flex'; });
-    $('rules-close').addEventListener('click', () => { $('rules-overlay').style.display = 'none'; $('rules-close').textContent = '✕'; $('rules-close').style.cssText = 'position:absolute;top:-36px;right:0;z-index:1;'; startBGM(); });
-    $('rules-overlay').addEventListener('click', e => { if (e.target === $('rules-overlay')) { $('rules-overlay').style.display = 'none'; $('rules-close').textContent = '✕'; $('rules-close').style.cssText = 'position:absolute;top:-36px;right:0;z-index:1;'; } });
+    $('rules-close').addEventListener('click', closeRules);
+    $('rules-start-btn').addEventListener('click', closeRules);
+    $('rules-overlay').addEventListener('click', e => { if (e.target === $('rules-overlay')) closeRules(); });
     $('vol-btn').addEventListener('click', () => {
       muted = !muted;
       $('vol-btn').classList.toggle('muted', muted);
