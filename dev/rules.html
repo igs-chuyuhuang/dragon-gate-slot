@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>射龍門 Slot — 遊戲規則</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, sans-serif; line-height: 1.6; padding: 16px; max-width: 600px; margin: 0 auto; }
+h1 { color: #ffd700; text-align: center; font-size: 1.8rem; margin: 16px 0; text-shadow: 0 2px 8px rgba(255,215,0,0.4); }
+h2 { color: #ffd700; font-size: 1.2rem; margin: 24px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+h3 { color: #ffb347; font-size: 1rem; margin: 16px 0 8px; }
+p { margin: 8px 0; }
+.hero { text-align: center; margin: 16px 0; }
+.hero img { width: 100%; max-width: 400px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.cards { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0; }
+.cards img { width: 50px; height: auto; border-radius: 4px; }
+.cards .arrow { font-size: 1.5rem; color: #ffd700; }
+.result { text-align: center; font-weight: bold; margin: 4px 0 16px; }
+.result.win { color: #4caf50; }
+.result.lose { color: #ff4444; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { padding: 8px 12px; text-align: center; border: 1px solid #333; }
+th { background: #2d1b00; color: #ffd700; }
+td { background: #1e1e3a; }
+.mult-high { color: #ff4444; font-weight: bold; }
+.mult-mid { color: #ffb347; font-weight: bold; }
+.mult-low { color: #4caf50; font-weight: bold; }
+.mult-wide { color: #aaa; }
+.icon-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+.icon-row img { width: 48px; height: 48px; object-fit: contain; }
+.jp-icons { display: flex; gap: 16px; justify-content: center; margin: 12px 0; }
+.jp-icons img { width: 64px; height: 64px; object-fit: contain; }
+ul { padding-left: 20px; margin: 8px 0; }
+li { margin: 4px 0; }
+.section { background: #16213e; border-radius: 10px; padding: 16px; margin: 16px 0; }
+.mascot { position: fixed; bottom: 10px; right: 10px; width: 60px; opacity: 0.6; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<h1>🐲 射龍門 Slot</h1>
+<div class="hero"><img src="assets/img/BG.png" alt="遊戲背景"></div>
+
+<div class="section">
+<h2>🎰 Main Game 規則</h2>
+<p>3×3 盤面，每列獨立判定射龍門。每局扣 bet，平均分配到 3 列。</p>
+
+<h3>✅ 穿門範例</h3>
+<div class="cards">
+  <img src="assets/img/CD-06_num3.png" alt="3">
+  <span class="arrow">＜</span>
+  <img src="assets/img/CD-08_num5.png" alt="5">
+  <span class="arrow">＜</span>
+  <img src="assets/img/CD-11_num8.png" alt="8">
+</div>
+<p class="result win">3 &lt; 5 &lt; 8 → 穿門！贏得 bet/3 × 倍率 + 歸還本金</p>
+
+<h3>❌ 碰壁範例</h3>
+<div class="cards">
+  <img src="assets/img/CD-06_num3.png" alt="3">
+  <span class="arrow">＝</span>
+  <img src="assets/img/CD-06_num3.png" alt="3">
+  <span class="arrow">＜</span>
+  <img src="assets/img/CD-11_num8.png" alt="8">
+</div>
+<p class="result lose">中間牌 = 左牌 → 碰壁！扣 bet/3</p>
+
+<h3>❌ 未中範例</h3>
+<div class="cards">
+  <img src="assets/img/CD-06_num3.png" alt="3">
+  <span class="arrow">  </span>
+  <img src="assets/img/CD-12_num9.png" alt="9">
+  <span class="arrow">＞</span>
+  <img src="assets/img/CD-11_num8.png" alt="8">
+</div>
+<p class="result lose">9 &gt; 8 → 在門外！扣 bet/3</p>
+</div>
+
+<div class="section">
+<h2>💰 穿門倍率表</h2>
+<table>
+  <tr><th>門類型</th><th>Gap</th><th>倍率</th></tr>
+  <tr><td>極窄門</td><td>1</td><td class="mult-high">×15</td></tr>
+  <tr><td>窄門</td><td>2~3</td><td class="mult-mid">×6</td></tr>
+  <tr><td>普通門</td><td>4~7</td><td class="mult-low">×3</td></tr>
+  <tr><td>寬門</td><td>8+</td><td class="mult-wide">×1</td></tr>
+  <tr><td>同值門</td><td>—</td><td class="mult-wide">×1</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🐉 Scatter 收集</h2>
+<div class="icon-row">
+  <img src="assets/img/SC-01_scatter_dragon.png" alt="Scatter">
+  <div>
+    <p>盤面隨機出現龍珠 Scatter，每個 <strong>+1</strong></p>
+    <p>碰壁 <strong>-1</strong>，同值碰壁 <strong>-2</strong></p>
+    <p>收集滿 <strong>10 個</strong>可選擇進入 Free Game 或 Bonus Game</p>
+  </div>
+</div>
+</div>
+
+<div class="section">
+<h2>🐲 Free Game</h2>
+<ul>
+  <li>8 轉免費遊戲</li>
+  <li>中輪帶有獎勵符號（依 bet 大小決定）</li>
+  <li>穿門時獲得對應金額獎勵</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>🎰 Bonus Game</h2>
+<ul>
+  <li>12 局射龍門</li>
+  <li>初始籌碼 = bet × 3</li>
+  <li>穿門：贏得下注金額（×1）</li>
+  <li>碰壁：扣 2 倍下注</li>
+  <li>同值碰壁：扣 3 倍下注</li>
+  <li>未中：扣 1 倍下注</li>
+  <li>All in 輸：歸零只拿回初始籌碼，遊戲結束</li>
+  <li>12 局結束後，獲得累積贏分；若贏分低於初始籌碼，則保底拿回初始籌碼</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>🏆 Jackpot 彩金</h2>
+<p>3 列全為窄門或極窄門時有機會觸發！</p>
+<div class="jp-icons">
+  <img src="assets/img/GRAND.png" alt="GRAND">
+  <img src="assets/img/MAJOR.png" alt="MAJOR">
+  <img src="assets/img/MINI.png" alt="MINI">
+</div>
+<ul>
+  <li>中輪三格帶上 JP 符號</li>
+  <li>三格同色 = 贏走對應彩金池</li>
+  <li>極窄門：GRAND + MAJOR + MINI 都可能</li>
+  <li>窄門：只有 MAJOR + MINI</li>
+  <li>下注越大，JP 符號出現機率越高</li>
+</ul>
+</div>
+
+<img class="mascot" src="assets/img/MS-01_mascot_dragon.png" alt="">
+</body>
+</html>
