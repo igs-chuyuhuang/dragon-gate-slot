@@ -465,7 +465,7 @@ body {
   51% { transform: rotateY(90deg); } 100% { transform: rotateY(0deg); }
 }
 .bg-gate-info { color: #ffd700; font-size: clamp(0.8rem, 2.5vw, 1.1rem); }
-.bg-result-text { font-size: clamp(1rem, 3.5vw, 1.5rem); font-weight: bold; min-height: 1.8rem; }
+.bg-result-text { font-size: clamp(1rem, 3.5vw, 1.5rem); font-weight: bold; min-height: 1.8rem; text-align: center; }
 .bg-result-text.win { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.6); }
 .bg-result-text.lose { color: #ff4444; }
 .bg-info-bar { display: flex; gap: 1rem; justify-content: center; color: #eee; font-size: clamp(0.7rem, 2vw, 0.9rem); margin-top: 0.3rem; }
