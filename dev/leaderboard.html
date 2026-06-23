@@ -26,12 +26,12 @@ td { font-size: 1rem; }
   <tbody id="lb-body"><tr><td colspan="3" class="empty">載入中...</td></tr></tbody>
 </table>
 <script>
-const API = 'http://192.168.131.199:8001';
+const API = 'https://script.google.com/macros/s/AKfycbweo-faVzavafJkoQ0gXDfOv5XnVKEwP0_GgntrOeq_uQaPAjAAW4gJZ2SUNBx4vHcu/exec';
 const medals = ['','🥇','🥈','🥉'];
 function fmt(n) { return Math.round(n).toLocaleString(); }
 async function refresh() {
   try {
-    const resp = await fetch(`${API}/api/v1/leaderboard`);
+    const resp = await fetch(API);
     const data = await resp.json();
     const tbody = document.getElementById('lb-body');
     if (!data.scores || data.scores.length === 0) {

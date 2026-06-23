@@ -1321,7 +1321,7 @@
     let compEndTime = 0;
     let compTimerInterval = null;
     let compEnded = false;
-    const API_BASE = 'http://192.168.131.199:8001';
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbweo-faVzavafJkoQ0gXDfOv5XnVKEwP0_GgntrOeq_uQaPAjAAW4gJZ2SUNBx4vHcu/exec';
 
     function closeRules() { $('rules-overlay').style.display = 'none'; $('rules-start-btn').style.display = 'none'; startBGM(); }
     function startCompetition() {
@@ -1357,14 +1357,15 @@
       while (spinning || gm.fg.active || bgInstance) await new Promise(r => setTimeout(r, 500));
       autoStopped = true; autoSpins = 0;
       const finalScore = gm.balance;
-      try { await fetch(`${API_BASE}/api/v1/score`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: playerName, score: finalScore}) }); } catch(e) {}
+      try { await fetch(API_BASE, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({name: playerName, score: finalScore}) }); } catch(e) {}
+      await new Promise(r => setTimeout(r, 1000));
       const ov = document.createElement('div');
       ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;padding:24px;overflow-y:auto;';
       ov.innerHTML = `<div style="color:#ffd700;font-size:1.4rem;font-weight:bold;margin:16px 0;">⏰ 時間到！</div><div style="color:#fff;margin-bottom:4px;">你的分數</div><div style="color:#ffd700;font-size:2.2rem;font-weight:bold;margin-bottom:16px;">${fmt(finalScore)}</div><div style="color:#ffd700;font-size:1.1rem;font-weight:bold;margin-bottom:8px;">🏆 排行榜</div><div id="comp-lb" style="width:100%;max-width:360px;"></div>`;
       document.body.appendChild(ov);
       async function refreshLb() {
         try {
-          const resp = await fetch(`${API_BASE}/api/v1/leaderboard`);
+          const resp = await fetch(API_BASE);
           const data = await resp.json();
           const medals = ['','🥇','🥈','🥉'];
           const lb = document.getElementById('comp-lb');
