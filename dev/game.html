@@ -1354,28 +1354,32 @@
       if (compEnded) return;
       compEnded = true;
       $('comp-timer').textContent = '時間到！';
-      // Wait for current spin/FG/BG to finish
       while (spinning || gm.fg.active || bgInstance) await new Promise(r => setTimeout(r, 500));
       autoStopped = true; autoSpins = 0;
-      // Show result + submit
       const finalScore = gm.balance;
-      let rank = '—';
-      try {
-        const resp = await fetch(`${API_BASE}/api/v1/score`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: playerName, score: finalScore}) });
-        const data = await resp.json();
-        rank = data.rank;
-      } catch(e) { console.error('Score submit failed', e); }
-      // Show overlay
+      try { await fetch(`${API_BASE}/api/v1/score`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: playerName, score: finalScore}) }); } catch(e) {}
       const ov = document.createElement('div');
-      ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
-      ov.innerHTML = `
-        <div style="color:#ffd700;font-size:1.5rem;font-weight:bold;">⏱️ 時間到！</div>
-        <div style="color:#fff;font-size:1.1rem;">${playerName}</div>
-        <div style="color:#ffd700;font-size:2.5rem;font-weight:bold;">${fmt(finalScore)}</div>
-        <div style="color:#aaa;">排名：第 ${rank} 名</div>
-        <a href="leaderboard.html" target="_blank" style="margin-top:12px;padding:10px 24px;background:linear-gradient(180deg,#ffd700,#c9a032);color:#1a1a2e;border-radius:8px;font-weight:bold;text-decoration:none;">查看排行榜</a>
-      `;
+      ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;padding:24px;overflow-y:auto;';
+      ov.innerHTML = `<div style="color:#ffd700;font-size:1.4rem;font-weight:bold;margin:16px 0;">⏰ 時間到！</div><div style="color:#fff;margin-bottom:4px;">你的分數</div><div style="color:#ffd700;font-size:2.2rem;font-weight:bold;margin-bottom:16px;">${fmt(finalScore)}</div><div style="color:#ffd700;font-size:1.1rem;font-weight:bold;margin-bottom:8px;">🏆 排行榜</div><div id="comp-lb" style="width:100%;max-width:360px;"></div>`;
       document.body.appendChild(ov);
+      async function refreshLb() {
+        try {
+          const resp = await fetch(`${API_BASE}/api/v1/leaderboard`);
+          const data = await resp.json();
+          const medals = ['','🥇','🥈','🥉'];
+          const lb = document.getElementById('comp-lb');
+          if (!data.scores || !data.scores.length) { lb.innerHTML = '<div style="color:#666;text-align:center;">尚無紀錄</div>'; return; }
+          lb.innerHTML = data.scores.map((s,i) => {
+            const isMe = s.name === playerName && s.score === finalScore;
+            const bg = isMe ? 'background:rgba(255,215,0,0.15);border:1px solid #ffd700;' : 'border:1px solid #333;';
+            const medal = medals[i+1] || '';
+            const tag = isMe ? ' <span style="color:#ffd700;font-size:0.75rem;">← 你</span>' : '';
+            return `<div style="${bg}border-radius:6px;padding:8px 12px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;"><span style="color:#aaa;">#${i+1} ${medal} ${s.name}${tag}</span><span style="color:#ffd700;font-weight:bold;">${Math.round(s.score).toLocaleString()}</span></div>`;
+          }).join('');
+        } catch(e) {}
+      }
+      refreshLb();
+      setInterval(refreshLb, 5000);
     }
     $('vol-btn').addEventListener('click', () => {
       muted = !muted;
