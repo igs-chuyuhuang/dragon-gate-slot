@@ -41,7 +41,7 @@ async function refresh() {
     tbody.innerHTML = data.scores.map((s, i) => {
       const rc = i < 3 ? ` class="rank-${i+1}"` : '';
       const medal = medals[i+1] || '';
-      return `<tr${rc}><td>${medal} ${i+1}</td><td>${s.name}</td><td class="score">${fmt(s.score)}</td></tr>`;
+      return `<tr${rc}><td>${medal} ${i+1}</td><td>${s.name.replace(/\u200B/g,'')}</td><td class="score">${fmt(s.score)}</td></tr>`;
     }).join('');
   } catch(e) { console.error(e); }
 }
