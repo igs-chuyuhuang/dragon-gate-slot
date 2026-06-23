@@ -958,6 +958,7 @@
       bgInstance = null;
       updateUI();
       await showBGResult(finalWin, isGuaranteed);
+      tryEndCompetition();
     }
 
     async function showBGResult(total, isGuaranteed) {
@@ -1026,7 +1027,7 @@
     }
 
     async function doSpin() {
-      if (spinning || compEnded) return;
+      if (spinning || compSubmitted) return;
       if (!gm.canSpin()) {
         autoStopped = true; autoSpins = 0; updateUI();
         const ov = document.createElement('div');
@@ -1100,7 +1101,7 @@
         await new Promise(r => setTimeout(r, 700));
         $('win').textContent = fmt(result.totalScore);
         updateUI();
-        if (result.fgDone) { await showFGResult(result.totalScore); }
+        if (result.fgDone) { await showFGResult(result.totalScore); tryEndCompetition(); }
         else { setTimeout(() => doSpin(), 400); }
         return result;
       }
@@ -1245,6 +1246,7 @@
         if (result.fgTriggered) { autoStopped = true; autoSpins = 0; await playDragonGateOpening(); showFgBgChoice(); gm.scatterLamps = 0; }
         else { setTimeout(() => doSpin(), 400); }
       }
+      tryEndCompetition();
       return result;
     }
 
@@ -1321,6 +1323,7 @@
     let compEndTime = 0;
     let compTimerInterval = null;
     let compEnded = false;
+    let compSubmitted = false;
     const API_BASE = 'https://script.google.com/macros/s/AKfycbweo-faVzavafJkoQ0gXDfOv5XnVKEwP0_GgntrOeq_uQaPAjAAW4gJZ2SUNBx4vHcu/exec';
 
     function closeRules() { $('rules-overlay').style.display = 'none'; $('rules-start-btn').style.display = 'none'; startBGM(); }
@@ -1346,15 +1349,19 @@
         const m = Math.floor(left / 60000);
         const s = Math.floor((left % 60000) / 1000);
         $('comp-timer').textContent = `剩餘 ${m}:${s.toString().padStart(2,'0')}`;
-        if (left <= 0) { clearInterval(compTimerInterval); endCompetition(); }
+        if (left <= 0) { clearInterval(compTimerInterval); compEnded = true; $('comp-timer').textContent = '時間到，等待當局結束...'; tryEndCompetition(); }
       }, 1000);
     });
 
+    function tryEndCompetition() {
+      if (!compEnded || gm.fg.active || bgInstance || spinning) return;
+      endCompetition();
+    }
+
     async function endCompetition() {
-      if (compEnded) return;
-      compEnded = true;
+      if (compSubmitted) return;
+      compSubmitted = true;
       $('comp-timer').textContent = '時間到！';
-      while (spinning || gm.fg.active || bgInstance) await new Promise(r => setTimeout(r, 500));
       autoStopped = true; autoSpins = 0;
       const finalScore = gm.balance;
       try { await fetch(API_BASE, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({name: '\u200B' + playerName, score: finalScore}) }); } catch(e) {}
