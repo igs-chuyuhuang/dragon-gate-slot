@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>射龍門 排行榜</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, sans-serif; padding: 16px; max-width: 500px; margin: 0 auto; }
+h1 { color: #ffd700; text-align: center; font-size: 1.6rem; margin: 20px 0; text-shadow: 0 2px 8px rgba(255,215,0,0.4); }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px 12px; text-align: center; border-bottom: 1px solid #333; }
+th { color: #ffd700; font-size: 0.85rem; }
+td { font-size: 1rem; }
+.rank-1 { color: #ffd700; font-weight: bold; }
+.rank-2 { color: #c0c0c0; font-weight: bold; }
+.rank-3 { color: #cd7f32; font-weight: bold; }
+.score { color: #ffd700; font-weight: bold; }
+.empty { text-align: center; color: #666; margin-top: 40px; }
+</style>
+</head>
+<body>
+<h1>🏆 射龍門 排行榜</h1>
+<table>
+  <thead><tr><th>排名</th><th>姓名</th><th>分數</th></tr></thead>
+  <tbody id="lb-body"><tr><td colspan="3" class="empty">載入中...</td></tr></tbody>
+</table>
+<script>
+const API = 'http://192.168.131.199:8001';
+const medals = ['','🥇','🥈','🥉'];
+function fmt(n) { return Math.round(n).toLocaleString(); }
+async function refresh() {
+  try {
+    const resp = await fetch(`${API}/api/v1/leaderboard`);
+    const data = await resp.json();
+    const tbody = document.getElementById('lb-body');
+    if (!data.scores || data.scores.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">尚無紀錄</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.scores.map((s, i) => {
+      const rc = i < 3 ? ` class="rank-${i+1}"` : '';
+      const medal = medals[i+1] || '';
+      return `<tr${rc}><td>${medal} ${i+1}</td><td>${s.name}</td><td class="score">${fmt(s.score)}</td></tr>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>

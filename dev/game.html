@@ -16,6 +16,18 @@
     <img class="bg-layer" src="assets/img/BG.png" alt="">
     <img class="bg-bonus" id="bg-bonus" src="assets/img/BG-bonus.png" style="display:none" alt="">
 
+    <!-- Competition Timer -->
+    <div id="comp-timer" style="display:none;position:absolute;top:1%;left:50%;transform:translateX(-50%);z-index:100;background:rgba(0,0,0,0.7);color:#ffd700;padding:4px 16px;border-radius:16px;font-size:0.9rem;font-weight:bold;"></div>
+
+    <!-- Name Input Overlay -->
+    <div id="name-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;">
+      <div style="background:#16213e;border:2px solid #ffd700;border-radius:12px;padding:24px;text-align:center;width:80%;max-width:320px;">
+        <div style="color:#ffd700;font-size:1.2rem;font-weight:bold;margin-bottom:12px;">輸入你的名字</div>
+        <input id="player-name-input" type="text" maxlength="12" placeholder="名字" style="width:100%;padding:10px;border-radius:6px;border:1px solid #ffd700;background:#1a1a2e;color:#fff;font-size:1rem;text-align:center;margin-bottom:12px;">
+        <button id="name-confirm-btn" class="bg-deal-btn" style="width:100%;padding:10px;">開始競賽（15分鐘）</button>
+      </div>
+    </div>
+
     <!-- Jackpot Pool -->
     <div class="jp-pool-container">
       <img class="jp-pool" src="assets/img/JP-pool.png" alt="Jackpot Pool">
@@ -1014,7 +1026,7 @@
     }
 
     async function doSpin() {
-      if (spinning) return;
+      if (spinning || compEnded) return;
       if (!gm.canSpin()) {
         autoStopped = true; autoSpins = 0; updateUI();
         const ov = document.createElement('div');
@@ -1305,11 +1317,66 @@
     $('auto-dec').addEventListener('click', () => { autoCount = Math.max(10, autoCount-10); $('auto-count-display').textContent = autoCount+' 局'; });
     $('auto-inc').addEventListener('click', () => { autoCount = Math.min(100, autoCount+10); $('auto-count-display').textContent = autoCount+' 局'; });
     // Rules overlay
+    let playerName = '';
+    let compEndTime = 0;
+    let compTimerInterval = null;
+    let compEnded = false;
+    const API_BASE = 'http://192.168.131.199:8001';
+
     function closeRules() { $('rules-overlay').style.display = 'none'; $('rules-start-btn').style.display = 'none'; startBGM(); }
+    function startCompetition() {
+      closeRules();
+      $('name-overlay').style.display = 'flex';
+    }
     $('rules-btn').addEventListener('click', () => { $('rules-overlay').style.display = 'flex'; });
     $('rules-close').addEventListener('click', closeRules);
-    $('rules-start-btn').addEventListener('click', closeRules);
+    $('rules-start-btn').addEventListener('click', startCompetition);
     $('rules-overlay').addEventListener('click', e => { if (e.target === $('rules-overlay')) closeRules(); });
+
+    $('name-confirm-btn').addEventListener('click', () => {
+      const name = $('player-name-input').value.trim();
+      if (!name) return;
+      playerName = name;
+      $('name-overlay').style.display = 'none';
+      // Start 15 min timer
+      compEndTime = Date.now() + 15 * 60 * 1000;
+      $('comp-timer').style.display = 'block';
+      compTimerInterval = setInterval(() => {
+        const left = Math.max(0, compEndTime - Date.now());
+        const m = Math.floor(left / 60000);
+        const s = Math.floor((left % 60000) / 1000);
+        $('comp-timer').textContent = `剩餘 ${m}:${s.toString().padStart(2,'0')}`;
+        if (left <= 0) { clearInterval(compTimerInterval); endCompetition(); }
+      }, 1000);
+    });
+
+    async function endCompetition() {
+      if (compEnded) return;
+      compEnded = true;
+      $('comp-timer').textContent = '時間到！';
+      // Wait for current spin/FG/BG to finish
+      while (spinning || gm.fg.active || bgInstance) await new Promise(r => setTimeout(r, 500));
+      autoStopped = true; autoSpins = 0;
+      // Show result + submit
+      const finalScore = gm.balance;
+      let rank = '—';
+      try {
+        const resp = await fetch(`${API_BASE}/api/v1/score`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: playerName, score: finalScore}) });
+        const data = await resp.json();
+        rank = data.rank;
+      } catch(e) { console.error('Score submit failed', e); }
+      // Show overlay
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
+      ov.innerHTML = `
+        <div style="color:#ffd700;font-size:1.5rem;font-weight:bold;">⏱️ 時間到！</div>
+        <div style="color:#fff;font-size:1.1rem;">${playerName}</div>
+        <div style="color:#ffd700;font-size:2.5rem;font-weight:bold;">${fmt(finalScore)}</div>
+        <div style="color:#aaa;">排名：第 ${rank} 名</div>
+        <a href="leaderboard.html" target="_blank" style="margin-top:12px;padding:10px 24px;background:linear-gradient(180deg,#ffd700,#c9a032);color:#1a1a2e;border-radius:8px;font-weight:bold;text-decoration:none;">查看排行榜</a>
+      `;
+      document.body.appendChild(ov);
+    }
     $('vol-btn').addEventListener('click', () => {
       muted = !muted;
       $('vol-btn').classList.toggle('muted', muted);
