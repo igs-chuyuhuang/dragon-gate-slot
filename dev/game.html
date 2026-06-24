@@ -556,6 +556,7 @@
     }
 
     function showBigWin(amount, label, coinColors) {
+      compPaused = true;
       return new Promise(resolve => {
         // Play corresponding win SFX (loop until collect)
         const winSfxName = label.includes('SUPER') ? 'supermegawin' : 'megawin';
@@ -633,7 +634,7 @@
             gm.balance = startBal + Math.round(amount * ease);
             $('balance').textContent = fmt(gm.balance);
             if (p < 1) requestAnimationFrame(tick);
-            else { clearInterval(coinInterval); countSfx.pause(); ov.remove(); resolve(); }
+            else { clearInterval(coinInterval); countSfx.pause(); ov.remove(); compPaused = false; resolve(); }
           }
           requestAnimationFrame(tick);
         };
@@ -1324,6 +1325,7 @@
     $('auto-dec').addEventListener('click', () => { autoCount = Math.max(10, autoCount-10); $('auto-count-display').textContent = autoCount+' 局'; });
     $('auto-inc').addEventListener('click', () => { autoCount = Math.min(100, autoCount+10); $('auto-count-display').textContent = autoCount+' 局'; });
     // Rules overlay
+    let compPaused = false;
     let playerName = '';
     let playerTeam = 'SF';
     let compEndTime = 0;
@@ -1352,6 +1354,7 @@
       compEndTime = Date.now() + 60 * 1000;
       $('comp-timer').style.display = 'block';
       compTimerInterval = setInterval(() => {
+        if (compPaused) { compEndTime += 1000; return; }
         const left = Math.max(0, compEndTime - Date.now());
         const m = Math.floor(left / 60000);
         const s = Math.floor((left % 60000) / 1000);
