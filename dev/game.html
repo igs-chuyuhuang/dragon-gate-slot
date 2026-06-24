@@ -616,6 +616,7 @@
         spawnCoins();
         const coinInterval = setInterval(spawnCoins, 300);
         document.body.appendChild(ov);
+        setTimeout(() => { if (!btn.disabled) btn.click(); }, 3000);
         // Collect button handler
         btn.onclick = () => {
           btn.disabled = true;
