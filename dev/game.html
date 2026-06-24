@@ -1376,7 +1376,14 @@
       $('comp-timer').textContent = '時間到！';
       autoStopped = true; autoSpins = 0;
       const finalScore = gm.balance;
-      try { await fetch(API_BASE, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({name: '\u200B' + playerName, score: finalScore, team: playerTeam}) }); } catch(e) {}
+      async function submitScore(name, score, team) {
+        for (let i = 0; i < 3; i++) {
+          try { await fetch(API_BASE, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({name, score, team})}); return true; } catch(e) {}
+          await new Promise(r => setTimeout(r, 1000 + i * 1000));
+        }
+        return false;
+      }
+      await submitScore('\u200B' + playerName, finalScore, playerTeam);
       await new Promise(r => setTimeout(r, 1000));
       const ov = document.createElement('div');
       ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;padding:24px;overflow-y:auto;';
