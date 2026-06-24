@@ -740,6 +740,7 @@
     }
 
     function showFgBgChoice() {
+      compPaused = true;
       $('fgbg-choice').style.display = 'flex';
     }
 
@@ -760,12 +761,12 @@
 
     $('choose-fg').addEventListener('click', () => {
       $('fgbg-choice').style.display = 'none';
-      showTutorial(FG_INFO, 'fgTutorialDismissed', () => { gm.fg.start(); setTimeout(doSpin, 300); });
+      showTutorial(FG_INFO, 'fgTutorialDismissed', () => { compPaused = false; gm.fg.start(); setTimeout(doSpin, 300); });
     });
 
     $('choose-bg').addEventListener('click', () => {
       $('fgbg-choice').style.display = 'none';
-      showTutorial(BG_INFO, 'bgTutorialDismissed', () => { startBonusGame(); });
+      showTutorial(BG_INFO, 'bgTutorialDismissed', () => { compPaused = false; startBonusGame(); });
     });
 
     $('choice-info-close').addEventListener('click', () => { $('choice-info-overlay').style.display = 'none'; });
