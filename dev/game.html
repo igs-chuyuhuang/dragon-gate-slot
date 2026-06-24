@@ -1342,7 +1342,7 @@
       playerName = name;
       $('name-overlay').style.display = 'none';
       // Start 15 min timer
-      compEndTime = Date.now() + 10 * 1000;
+      compEndTime = Date.now() + 60 * 1000;
       $('comp-timer').style.display = 'block';
       compTimerInterval = setInterval(() => {
         const left = Math.max(0, compEndTime - Date.now());
