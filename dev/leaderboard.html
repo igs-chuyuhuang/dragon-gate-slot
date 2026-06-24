@@ -25,6 +25,11 @@ td { font-size: 1rem; }
   <thead><tr><th>排名</th><th>姓名</th><th>分數</th></tr></thead>
   <tbody id="lb-body"><tr><td colspan="3" class="empty">載入中...</td></tr></tbody>
 </table>
+<h2 style="color:#ffd700;font-size:1.2rem;margin-top:24px;text-align:center;">👥 組別排行</h2>
+<table>
+  <thead><tr><th>排名</th><th>組別</th><th>總分</th></tr></thead>
+  <tbody id="team-lb-body"><tr><td colspan="3" class="empty">載入中...</td></tr></tbody>
+</table>
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbweo-faVzavafJkoQ0gXDfOv5XnVKEwP0_GgntrOeq_uQaPAjAAW4gJZ2SUNBx4vHcu/exec';
 const medals = ['','🥇','🥈','🥉'];
@@ -34,14 +39,26 @@ async function refresh() {
     const resp = await fetch(API);
     const data = await resp.json();
     const tbody = document.getElementById('lb-body');
+    const teamBody = document.getElementById('team-lb-body');
     if (!data.scores || data.scores.length === 0) {
       tbody.innerHTML = '<tr><td colspan="3" class="empty">尚無紀錄</td></tr>';
+      teamBody.innerHTML = '<tr><td colspan="3" class="empty">尚無紀錄</td></tr>';
       return;
     }
     tbody.innerHTML = data.scores.map((s, i) => {
       const rc = i < 3 ? ` class="rank-${i+1}"` : '';
       const medal = medals[i+1] || '';
-      return `<tr${rc}><td>${medal} ${i+1}</td><td>${s.name.replace(/\u200B/g,'')}</td><td class="score">${fmt(s.score)}</td></tr>`;
+      const tm = s.team ? `[${s.team}] ` : '';
+      return `<tr${rc}><td>${medal} ${i+1}</td><td>${tm}${s.name.replace(/\u200B/g,'')}</td><td class="score">${fmt(s.score)}</td></tr>`;
+    }).join('');
+    // Team rankings
+    const teams = {};
+    data.scores.forEach(s => { const t = s.team || '?'; teams[t] = (teams[t] || 0) + s.score; });
+    const sorted = Object.entries(teams).sort((a,b) => b[1] - a[1]);
+    teamBody.innerHTML = sorted.map(([t, total], i) => {
+      const rc = i < 3 ? ` class="rank-${i+1}"` : '';
+      const medal = medals[i+1] || '';
+      return `<tr${rc}><td>${medal} ${i+1}</td><td>${t}</td><td class="score">${fmt(total)}</td></tr>`;
     }).join('');
   } catch(e) { console.error(e); }
 }
