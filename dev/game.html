@@ -1405,15 +1405,16 @@
             const tm = s.team ? `[${s.team}] ` : '';
             return `<div style="${bg}border-radius:6px;padding:8px 12px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;"><span style="color:#aaa;">#${i+1} ${medal} ${tm}${s.name.replace(/\u200B/g,'')}${tag}</span><span style="color:#ffd700;font-weight:bold;">${Math.round(s.score).toLocaleString()}</span></div>`;
           }).join('');
-          // Team rankings
+          // Team rankings (average)
           const teams = {};
-          data.scores.forEach(s => { const t = s.team || '?'; teams[t] = (teams[t] || 0) + s.score; });
-          const sorted = Object.entries(teams).sort((a,b) => b[1] - a[1]);
-          tlb.innerHTML = sorted.map(([ t, total ], i) => {
+          const teamCount = {};
+          data.scores.forEach(s => { const t = s.team || '?'; teams[t] = (teams[t] || 0) + s.score; teamCount[t] = (teamCount[t] || 0) + 1; });
+          const sorted = Object.entries(teams).map(([t, total]) => [t, total, teamCount[t], Math.round(total / teamCount[t])]).sort((a,b) => b[3] - a[3]);
+          tlb.innerHTML = sorted.map(([t, total, cnt, avg], i) => {
             const isMyTeam = t === playerTeam;
             const bg = isMyTeam ? 'background:rgba(255,215,0,0.15);border:1px solid #ffd700;' : 'border:1px solid #333;';
             const medal = medals[i+1] || '';
-            return `<div style="${bg}border-radius:6px;padding:8px 12px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;"><span style="color:#aaa;">#${i+1} ${medal} ${t}</span><span style="color:#ffd700;font-weight:bold;">${Math.round(total).toLocaleString()}</span></div>`;
+            return `<div style="${bg}border-radius:6px;padding:8px 12px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;"><span style="color:#aaa;">#${i+1} ${medal} ${t}（${cnt}人）</span><span style="color:#ffd700;font-weight:bold;">平均 ${avg.toLocaleString()}</span></div>`;
           }).join('');
         } catch(e) {}
       }

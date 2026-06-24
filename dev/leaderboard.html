@@ -51,14 +51,15 @@ async function refresh() {
       const tm = s.team ? `[${s.team}] ` : '';
       return `<tr${rc}><td>${medal} ${i+1}</td><td>${tm}${s.name.replace(/\u200B/g,'')}</td><td class="score">${fmt(s.score)}</td></tr>`;
     }).join('');
-    // Team rankings
+    // Team rankings (average)
     const teams = {};
-    data.scores.forEach(s => { const t = s.team || '?'; teams[t] = (teams[t] || 0) + s.score; });
-    const sorted = Object.entries(teams).sort((a,b) => b[1] - a[1]);
-    teamBody.innerHTML = sorted.map(([t, total], i) => {
+    const teamCount = {};
+    data.scores.forEach(s => { const t = s.team || '?'; teams[t] = (teams[t] || 0) + s.score; teamCount[t] = (teamCount[t] || 0) + 1; });
+    const sorted = Object.entries(teams).map(([t, total]) => [t, total, teamCount[t], Math.round(total / teamCount[t])]).sort((a,b) => b[3] - a[3]);
+    teamBody.innerHTML = sorted.map(([t, total, cnt, avg], i) => {
       const rc = i < 3 ? ` class="rank-${i+1}"` : '';
       const medal = medals[i+1] || '';
-      return `<tr${rc}><td>${medal} ${i+1}</td><td>${t}</td><td class="score">${fmt(total)}</td></tr>`;
+      return `<tr${rc}><td>${medal} ${i+1}</td><td>${t}（${cnt}人）</td><td class="score">平均 ${fmt(avg)}</td></tr>`;
     }).join('');
   } catch(e) { console.error(e); }
 }
