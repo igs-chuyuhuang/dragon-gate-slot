@@ -1,4 +1,4 @@
-function getPassMult(gap) { return gap > 0 ? 3 : 0; }
+function getPassMult(gap) { return gap > 0 ? 2 : 0; }
 
 export class BonusGame {
   constructor(bet, pool) {
