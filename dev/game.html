@@ -963,7 +963,6 @@
     }
 
     async function showBGResult(total, isGuaranteed) {
-      gm.balance += total;
       const ratio = total / gm.bet;
       if (ratio >= 5) {
         const label = ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!';
@@ -991,6 +990,7 @@
       const close = () => {
         overlay.style.display = 'none';
         titleEl.textContent = 'FREE GAME';
+        gm.balance += total;
         updateUI(); updateRing(0);
       };
       overlay.onclick = close;
