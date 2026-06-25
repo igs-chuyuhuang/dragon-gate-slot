@@ -963,11 +963,11 @@
     }
 
     async function showBGResult(total, isGuaranteed) {
+      gm.balance += total;
       const ratio = total / gm.bet;
       if (ratio >= 5) {
         const label = ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!';
         const colors = ratio >= 30 ? '#ffd700,#ff8c00' : ratio >= 15 ? '#c0c0c0,#808080' : '#cd7f32,#8b4513';
-        gm.balance += total;
         await showBigWin(total, label, colors);
         updateUI(); updateRing(0);
         return;
@@ -991,7 +991,6 @@
       const close = () => {
         overlay.style.display = 'none';
         titleEl.textContent = 'FREE GAME';
-        gm.balance += total;
         updateUI(); updateRing(0);
       };
       overlay.onclick = close;
