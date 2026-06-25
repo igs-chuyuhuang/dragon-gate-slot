@@ -1,5 +1,6 @@
 const SCATTER_RATE = 0.05;
 const MISS_BIAS = 0.20;
+const FG_MISS_BIAS = 0.30;
 
 export function spin(fgMode = false) {
   const board = [];
@@ -11,9 +12,10 @@ export function spin(fgMode = false) {
         ? { value: null, isScatter: true }
         : { value: Math.floor(Math.random() * 13) + 1, isScatter: false };
     }
-    if (!fgMode && !board[r][0].isScatter && !board[r][2].isScatter) {
+    if (!board[r][0].isScatter && !board[r][2].isScatter) {
       const l = board[r][0].value, ri = board[r][2].value;
-      if (l !== ri && Math.random() < MISS_BIAS) {
+      const bias = fgMode ? FG_MISS_BIAS : MISS_BIAS;
+      if (l !== ri && Math.random() < bias) {
         const lo = Math.min(l, ri), hi = Math.max(l, ri);
         const outside = [];
         for (let v = 1; v <= 13; v++) { if (v < lo || v > hi) outside.push(v); }
