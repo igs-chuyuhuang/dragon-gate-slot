@@ -27,8 +27,8 @@ function judgeRow(row, left, mid, right) {
 
 function getPassMult(gap) {
   if (gap <= 0) return 0;
-  if (gap === 1) return 15;
-  if (gap <= 3) return 6;
+  if (gap === 1) return 12;
+  if (gap <= 3) return 5;
   if (gap <= 7) return 3;
   return 1;
 }

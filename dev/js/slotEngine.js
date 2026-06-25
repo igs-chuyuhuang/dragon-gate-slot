@@ -1,5 +1,5 @@
 const SCATTER_RATE = 0.05;
-const MISS_BIAS = 0.15;
+const MISS_BIAS = 0.20;
 
 export function spin(fgMode = false) {
   const board = [];
