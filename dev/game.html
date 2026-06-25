@@ -485,25 +485,18 @@
     // Animate middle column cells individually for JP (only rows with JP symbol)
     const FG_SYMS = [0.33, 0.5, 0.83, 1.5, 2.5, 0];
 
-    // JP Slot system — extreme narrow gate triggers JP symbols in middle reel
-    const JP_NARROW_POOL = ['GRAND','MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal']; // gap=1
-    const JP_MID_POOL = ['MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal'];   // gap≤3
-    function getJpPool(gap) {
-      if (gap === 1) return JP_NARROW_POOL;
-      if (gap <= 3) return JP_MID_POOL;
-      return null;
-    }
-    function pickJpSymbol(pool) {
-      const p = [...pool];
-      if (gm.bet >= 300) {
-        const jpSyms = pool.filter(s => s !== 'normal');
-        if (jpSyms.length > 0) p.push(jpSyms[Math.floor(Math.random() * jpSyms.length)]);
-      }
-      return p[Math.floor(Math.random() * p.length)];
-    }
-    function checkJpSlotWin(symbols) {
-      // All 3 must be the same non-null JP symbol
-      if (symbols[0] && symbols[0] !== 'normal' && symbols[0] === symbols[1] && symbols[1] === symbols[2]) return symbols[0];
+    // JP system — background probability control
+    const JP_BASE = { grand: 0.0000022, major: 0.0000108, mini: 0.0000432 };
+    const MIN_BET = 15;
+    function checkJpWin(bet) {
+      const ratio = bet / MIN_BET;
+      const r = Math.random();
+      const g = JP_BASE.grand * ratio;
+      const m = g + JP_BASE.major * ratio;
+      const n = m + JP_BASE.mini * ratio;
+      if (r < g) return 'GRAND';
+      if (r < m) return 'MAJOR';
+      if (r < n) return 'MINI';
       return null;
     }
     function getJpImg(sym) {
@@ -1056,48 +1049,6 @@
       const result = gm.executeSpin();
       if (!result) return;
       // Debug: force narrow gate for JP testing
-      if (window._debugForceNarrow && result.mode === 'normal') {
-        const gapSize = window._debugJpNext === 'GRAND' ? 2 : window._debugJpNoWin ? 3 : 3;
-        for (let r = 0; r < 3; r++) {
-          const base = 2 + Math.floor(Math.random() * (11 - gapSize));
-          result.board[r][0] = { value: base, isScatter: false };
-          result.board[r][2] = { value: base + gapSize, isScatter: false };
-          result.board[r][1] = { value: base + 1, isScatter: false };
-        }
-        result.judgments = judgeBoard(result.board);
-        result.totalPayout = 0;
-        for (const j of result.judgments) {
-          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult;
-        }
-        window._debugForceNarrow = false;
-        window._debugJpNoWin = false;
-      }
-      // Debug: force scatter to fill progress to threshold
-      if (window._debugForceScatter && result.mode === 'normal') {
-        const threshold = 10;
-        // Override: force exactly 1 scatter, set lamps to threshold-1 so it triggers
-        gm.scatterLamps = threshold - 1;
-        // Place exactly 1 scatter on the board
-        let placed = false;
-        for (let r = 0; r < 3 && !placed; r++) {
-          for (let c = 0; c < 3 && !placed; c++) {
-            if (!result.board[r][c].isScatter) {
-              result.board[r][c] = { value: null, isScatter: true };
-              placed = true;
-            }
-          }
-        }
-        result.judgments = judgeBoard(result.board);
-        result.scatterCount = 1;
-        gm.scatterLamps = threshold; // now at 10
-        result.fgTriggered = true;
-        result.scatterLamps = threshold;
-        result.totalPayout = 0;
-        for (const j of result.judgments) {
-          if (j.type === 'through') result.totalPayout += (gm.bet / 3) * j.mult;
-        }
-        window._debugForceScatter = false;
-      }
       if (result.mode === 'fg') {
         await animateSpin(result.board, result.bonusSymbols, () => {
           document.getElementById('reel-1').style.animation = 'jpFlash 0.15s infinite alternate';
@@ -1113,77 +1064,18 @@
         else { setTimeout(() => doSpin(), 400); }
         return result;
       }
-      // Normal mode: determine JP symbols per-row, pass onSidesStop callback
+      // Normal mode: check JP on all-narrow
       let jpSlotWin = null;
-      let jpPerRow = [null, null, null]; // per-row JP symbol (null = normal)
-      if (window._debugJpNext) {
-        if (window._debugJpNext === 'FORCE_NO_WIN') {
-          jpPerRow = ['GRAND', 'MINI', 'MAJOR'];
-        } else {
-          jpPerRow = [window._debugJpNext, window._debugJpNext, window._debugJpNext];
-        }
-        window._debugJpNext = null;
-        console.log("[DEBUG JP] jpPerRow set to:", jpPerRow);
-      }
+      const allNarrow = result.judgments.every(j => j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss' && j.gap >= 1 && j.gap <= 3);
+      if (allNarrow) jpSlotWin = checkJpWin(gm.bet);
       await animateSpin(result.board, null, () => {
-        // Sides stopped — per-row JP determination
-        if (jpPerRow.every(x => x === null)) {
-          const allNarrowJp = result.judgments.every(j => j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss' && j.gap >= 1 && j.gap <= 3);
-          if (allNarrowJp && jpPerRow.every(x => x === null)) {
-            const minGap = Math.min(...result.judgments.map(j => j.gap));
-            const jpOnly = minGap === 1 ? ['GRAND','MAJOR','MINI'] : ['MAJOR','MINI'];
-            for (let r = 0; r < 3; r++) jpPerRow[r] = jpOnly[Math.floor(Math.random() * jpOnly.length)];
-            console.log('[JP] All narrow! Per-row:', jpPerRow);
-          }
-        }
-        if (jpPerRow.some(x => x !== null)) {
-          sfx('narrow_gate');
-          // Add JP badges to mid column final cells
-          for (let r = 0; r < 3; r++) {
-            if (jpPerRow[r] && jpPerRow[r] !== 'normal') {
-              const cell = document.getElementById(`cell-${r}-1`);
-              if (cell) cell.innerHTML += `<img src="${getJpImg(jpPerRow[r])}" style="position:absolute;bottom:2px;right:2px;width:48px;height:48px;z-index:5;object-fit:contain;">`;
-            }
-          }
-          // Inject JP badges into ALL spinning strip cells
-          const midStrip = document.querySelector('#reel-1 .reel-strip');
-          const cells = midStrip.querySelectorAll('.cell');
-          const minGap2 = Math.min(...result.judgments.map(j => j.gap));
-          const jpOnly2 = minGap2 === 1 ? ['GRAND','MAJOR','MINI'] : ['MAJOR','MINI'];
-          cells.forEach(c => {
-            if (c.id) return; // skip final cells (already set by jpPerRow)
-            const sym = jpOnly2[Math.floor(Math.random() * jpOnly2.length)];
-            const img = getJpImg(sym);
-            if (img) c.innerHTML += `<img src="${img}" style="position:absolute;bottom:2px;right:2px;width:48px;height:48px;z-index:5;object-fit:contain;">`;
-          });
-        }
-        // Always flash middle reel (unified effect for all gate types)
         const midReel = document.getElementById('reel-1');
         midReel.style.animation = 'jpFlash 0.15s infinite alternate';
+        if (allNarrow) sfx('narrow_gate');
       });
       sfx('spin_release');
-      // Clear mid reel flash after stop (unless JP win)
       const midReelPost = document.getElementById('reel-1');
-      if (jpPerRow.some(x => x !== null)) {
-        jpSlotWin = checkJpSlotWin(jpPerRow);
-        if (!jpSlotWin) { midReelPost.style.animation = ''; }
-        for (let r = 0; r < 3; r++) {
-          if (jpPerRow[r] && jpPerRow[r] !== 'normal') {
-            result.judgments[r] = { row: r, type: jpSlotWin ? 'jp-win' : 'jp-none', lampChange: 0, gap: result.judgments[r].gap };
-          }
-        }
-        let recalcWin = 0, recalcRefund = 0;
-        for (const j of result.judgments) {
-          if (j.type === 'through') { recalcWin += (gm.bet / 3) * j.mult; recalcRefund += gm.bet / 3; }
-        }
-        const oldTotal = result.totalPayout + result._refund;
-        const newTotal = recalcWin + recalcRefund;
-        gm.balance += newTotal - oldTotal;
-        result.totalPayout = recalcWin;
-        result._refund = recalcRefund;
-      } else {
-        midReelPost.style.animation = '';
-      }
+      midReelPost.style.animation = '';
       showResult(result);
       // Play result sfx + win line effect
       if (result.mode === 'normal') {
@@ -1203,27 +1095,10 @@
           .filter(j => j.type === 'through')
           .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
         if (winRows.length > 0) await playWinLines(winRows);
-        // JP Slot win
+        // JP win
         if (jpSlotWin) {
-          // Fly JP badges to JP pool
           sfx('coin_fly');
-          for (let r = 0; r < 3; r++) {
-            const cell = document.getElementById(`cell-${r}-1`);
-            const targetEl = document.getElementById(`badge-${r}`);
-            if (!cell || !targetEl) continue;
-            const srcRect = cell.getBoundingClientRect();
-            const dstRect = targetEl.getBoundingClientRect();
-            const dstX = dstRect.left + dstRect.width/2 - 10;
-            const dstY = dstRect.top + dstRect.height/2 - 10;
-            const flyer = document.createElement('img');
-            flyer.src = getJpImg(jpSlotWin);
-            flyer.style.cssText = `position:fixed;left:${srcRect.left}px;top:${srcRect.top}px;width:48px;height:48px;z-index:9999;object-fit:contain;transition:all 500ms cubic-bezier(0.25,1,0.5,1);pointer-events:none;`;
-            document.body.appendChild(flyer);
-            setTimeout(() => { flyer.style.left = dstX+'px'; flyer.style.top = dstY+'px'; flyer.style.width = '20px'; flyer.style.height = '20px'; }, r * 150);
-            setTimeout(() => { flyer.style.transition = 'all 300ms ease-out'; flyer.style.width = '48px'; flyer.style.height = '48px'; flyer.style.left = (dstX-14)+'px'; flyer.style.top = (dstY-14)+'px'; }, 500 + r * 150);
-            setTimeout(() => { flyer.remove(); const b = document.getElementById(`badge-${r}`); if(b) b.innerHTML = `<img src="${getJpImg(jpSlotWin)}" style="width:100%;height:100%;object-fit:contain;">`; }, 800 + r * 150);
-          }
-          await new Promise(res => setTimeout(res, 1800));
+          await new Promise(res => setTimeout(res, 800));
           const jpAmount = jpSlotWin === 'GRAND' ? jpGrand : jpSlotWin === 'MAJOR' ? jpMajor : jpMini;
           gm.balance += jpAmount;
           if (jpSlotWin === 'GRAND') jpGrand = 30000;
@@ -1231,23 +1106,12 @@
           else jpMini = 1500;
           const jpSubLabel = jpSlotWin === 'GRAND' ? 'SUPER MEGA WIN!' : jpSlotWin === 'MAJOR' ? 'MEGA WIN!' : 'BIG WIN!';
           await showBigWin(jpAmount, 'JACKPOT!\n' + jpSubLabel, '#ffd700,#ff8c00');
-          // Clear JP flash after showing result
-          const mr = document.getElementById('reel-1');
-          if (mr) mr.style.animation = '';
         }
       }
       // BIG WIN check (skip if JP already showing its own overlay)
       if (result.mode === 'normal' && !jpSlotWin && result.totalPayout > 0) {
         const ratio = result.totalPayout / gm.bet;
         if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!', ratio >= 30 ? '#ffd700,#ff8c00' : ratio >= 15 ? '#e8e8e8,#b0b0b0' : '#e8a04a,#cd7f32');
-      }
-      // Debug B key: force BIG WIN display
-      if (window._debugForceBigWin && result.mode === 'normal') {
-        const lvl = window._debugForceBigWin;
-        window._debugForceBigWin = false;
-        if (lvl === 'super') await showBigWin(gm.bet * 30, 'SUPER MEGA WIN!', '#ffd700,#ff8c00');
-        else if (lvl === 'mega') await showBigWin(gm.bet * 15, 'MEGA WIN!', '#e8e8e8,#b0b0b0');
-        else await showBigWin(gm.bet * 5, 'BIG WIN!', '#e8a04a,#cd7f32');
       }
       updateUI();
       if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
@@ -1264,9 +1128,7 @@
       result.judgments.forEach(j => {
         const badge = $(`badge-${j.row}`);
         const rowScatters = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].filter(c => c.isScatter).length;
-        if (j.type === 'jp-win') { badge.textContent = ''; }
-        else if (j.type === 'jp-none') { badge.textContent = '—'; }
-        else if (rowScatters > 0) { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> +${rowScatters}`; badge.classList.add('sc'); }
+        if (rowScatters > 0) { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> +${rowScatters}`; badge.classList.add('sc'); }
         else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
         else if (j.type === 'wall') { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> -1`; badge.classList.add('wall'); }
         else if (j.type === 'same-hit') { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> -2`; badge.classList.add('wall'); }
