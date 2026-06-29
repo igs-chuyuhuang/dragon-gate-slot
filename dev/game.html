@@ -644,6 +644,7 @@
     }
 
     async function showFGResult(total) {
+      $('auto-btn').disabled = false;
       const ratio = total / gm.bet;
       if (ratio >= 5) {
         const label = ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!';
@@ -762,7 +763,7 @@
 
     $('choose-fg').addEventListener('click', () => {
       $('fgbg-choice').style.display = 'none';
-      showTutorial(FG_INFO, 'fgTutorialDismissed', () => { compPaused = false; gm.fg.start(); setTimeout(doSpin, 300); });
+      showTutorial(FG_INFO, 'fgTutorialDismissed', () => { compPaused = false; gm.fg.start(); $('auto-btn').disabled = true; setTimeout(doSpin, 300); });
     });
 
     $('choose-bg').addEventListener('click', () => {
@@ -1275,6 +1276,7 @@
       $('name-overlay').style.display = 'flex';
     }
     $('rules-btn').addEventListener('click', () => { $('rules-overlay').style.display = 'flex'; });
+    $('bg-rules-btn').addEventListener('click', () => { $('rules-overlay').style.display = 'flex'; });
     $('rules-close').addEventListener('click', closeRules);
     $('rules-start-btn').addEventListener('click', startCompetition);
     $('rules-overlay').addEventListener('click', e => { if (e.target === $('rules-overlay')) closeRules(); });
