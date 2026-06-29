@@ -30,9 +30,9 @@ td{background:#0f0f2a}
 .compare-col.new h4{color:#4caf50}
 .compare-col ul{padding-left:18px}
 .compare-col li{margin:6px 0;font-size:0.9rem}
-img.screenshot{width:100%;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.5);margin:12px 0}
+img.screenshot{width:100%;max-width:300px;display:block;margin:12px auto;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.5);margin:12px 0}
 .img-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:16px 0}
-.img-row img{width:calc(50% - 6px);max-width:300px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.5)}
+.img-row img{width:calc(50% - 6px);max-width:300px;height:auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.5)}
 .flow{background:#0f0f2a;border-radius:8px;padding:16px;margin:16px 0;text-align:center;font-size:0.9rem;color:#ccc}
 .flow .arrow{color:#ffd700;font-size:1.2rem;margin:0 8px}
 .code-block{background:#0d0d20;border:1px solid #333;border-radius:6px;padding:12px;overflow-x:auto;font-family:monospace;font-size:0.8rem;color:#a8d8ea;margin:12px 0}
@@ -52,10 +52,10 @@ canvas{max-width:100%;height:auto!important}
 <div class="container">
 
 <h1>🐲 射龍門 Slot</h1>
-<p class="subtitle">AI Agent Fleet 協作開發報告<br>2026.05.18 — 2026.06.29 | 1 人 + 11 AI Agents</p>
+<p class="subtitle">AI Agent Fleet 協作開發報告<br>2026.05.18 — 2026.06.29 | 11 AI Agents</p>
 
 <!-- ===== 第一章 ===== -->
-<h2>一、製程創新的程度（25%）</h2>
+<h2>一、製程創新的程度</h2>
 
 <div class="section">
 <h3>傳統流程 vs AI Fleet 流程</h3>
@@ -79,7 +79,7 @@ canvas{max-width:100%;height:auto!important}
 <li>11 Agent 平行作業</li>
 <li>即時修正（回饋→修正 &lt; 5 分鐘）</li>
 <li>自動 commit + push + 部署</li>
-<li><strong>合計：34 天 / 1 人</strong></li>
+<li><strong>合計：34 天 / 11 AI agents</strong></li>
 </ul>
 </div>
 </div>
@@ -98,7 +98,7 @@ canvas{max-width:100%;height:auto!important}
 <div class="agent-card"><div class="emoji">🏆</div><div class="name">挑戰者</div><div class="role">壓力測試</div></div>
 <div class="agent-card"><div class="emoji">🎬</div><div class="name">創意總監</div><div class="role">風格一致性</div></div>
 <div class="agent-card"><div class="emoji">📊</div><div class="name">市場調查</div><div class="role">競品分析</div></div>
-<div class="agent-card"><div class="emoji">📚</div><div class="name">知識庫</div><div class="role">文件管理</div></div>
+
 </div>
 </div>
 
@@ -114,7 +114,7 @@ canvas{max-width:100%;height:auto!important}
 </div>
 
 <!-- ===== 第二章 ===== -->
-<h2>二、AI 技術與應用能力（25%）</h2>
+<h2>二、AI 技術與應用能力</h2>
 
 <div class="section">
 <h3>AI 工具清單</h3>
@@ -165,7 +165,7 @@ if (l !== ri && Math.random() < bias) {
 </div>
 
 <!-- ===== 第三章 ===== -->
-<h2>三、開發效率與成本優化（25%）</h2>
+<h2>三、開發效率與成本優化</h2>
 
 <div class="section">
 <div class="stat-row">
@@ -197,7 +197,7 @@ if (l !== ri && Math.random() < bias) {
 <div class="compare-col new">
 <h4>AI Fleet</h4>
 <ul>
-<li>1 人 + 11 AI</li>
+<li>11 AI agents</li>
 <li>34 天</li>
 <li>即時溝通（Telegram 一句話）</li>
 <li>Bug 修正：&lt; 5 分鐘</li>
@@ -208,7 +208,7 @@ if (l !== ri && Math.random() < bias) {
 </div>
 
 <!-- ===== 第四章 ===== -->
-<h2>四、專案落地與遊戲品質（25%）</h2>
+<h2>四、專案落地與遊戲品質</h2>
 
 <div class="section">
 <h3>遊戲截圖</h3>
