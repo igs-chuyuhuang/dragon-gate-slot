@@ -1252,17 +1252,9 @@
       playerName = name;
       playerTeam = $('player-team-select').value;
       $('name-overlay').style.display = 'none';
-      // Start 15 min timer
-      compEndTime = Date.now() + 15 * 60 * 1000;
-      $('comp-timer').style.display = 'block';
-      compTimerInterval = setInterval(() => {
-        if (compPaused) { compEndTime += 1000; return; }
-        const left = Math.max(0, compEndTime - Date.now());
-        const m = Math.floor(left / 60000);
-        const s = Math.floor((left % 60000) / 1000);
-        $('comp-timer').textContent = `剩餘 ${m}:${s.toString().padStart(2,'0')}`;
-        if (left <= 0) { clearInterval(compTimerInterval); compEnded = true; $('comp-timer').textContent = '時間到，等待當局結束...'; tryEndCompetition(); }
-      }, 1000);
+      // Timer disabled
+      compEndTime = 0;
+      $('comp-timer').style.display = 'none';
     });
 
     function tryEndCompetition() {
