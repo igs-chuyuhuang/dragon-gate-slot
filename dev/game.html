@@ -1368,6 +1368,7 @@
       if (e.key === 'j' || e.key === 'J') { window._debugForceJp = 'GRAND'; window._debugForceNarrow = true; }
       if (e.key === 'm' || e.key === 'M') { window._debugForceJp = 'MAJOR'; window._debugForceNarrow = true; }
       if (e.key === 'n' || e.key === 'N') { window._debugForceJp = 'MINI'; window._debugForceNarrow = true; }
+      if (e.key === 'k' || e.key === 'K') { window._debugForceNarrow = true; }
     });
     // Mobile debug panel (long press 2s)
     (function(){
@@ -1383,11 +1384,12 @@
         'j': () => { window._debugForceJp = 'GRAND'; window._debugForceNarrow = true; },
         'm': () => { window._debugForceJp = 'MAJOR'; window._debugForceNarrow = true; },
         'n': () => { window._debugForceJp = 'MINI'; window._debugForceNarrow = true; },
+        'k': () => { window._debugForceNarrow = true; },
       };
       function showDbg() {
         const d = document.createElement('div');
         d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(0,0,0,0.9);border:2px solid #ffd700;border-radius:12px;padding:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;';
-        const btns = [['F','f'],['B','b'],['V','v'],['X','x'],['J','j'],['M','m'],['N','n']];
+        const btns = [['F','f'],['B','b'],['V','v'],['X','x'],['J','j'],['M','m'],['N','n'],['K','k']];
         btns.forEach(([label, key]) => {
           const b = document.createElement('button');
           b.textContent = label;
