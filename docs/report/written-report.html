@@ -63,6 +63,36 @@ canvas{max-width:100%;height:auto!important}
 
 <!-- ═══ 一、專案概覽 ═══ -->
 <h2>一、專案概覽</h2>
+<p>《射龍門 Slot》是一款以傳統撲克牌「射龍門」玩法為核心的 3×3 老虎機遊戲，採用<strong>現代國潮風格（墨黑底／中國紅／燙金）</strong>，由 <strong>1 位企劃 + 10 個 AI Agent</strong> 分工協作，在 5 週內從零開發完成的完整可玩 Web 遊戲原型。</p>
+
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin: 2rem 0;">
+  <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; padding: 1.5rem; text-align: center;">
+    <div style="font-size: 2.2rem; font-weight: 700; color: #fff;">9,267+</div>
+    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem;">行程式碼</div>
+  </div>
+  <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; padding: 1.5rem; text-align: center;">
+    <div style="font-size: 2.2rem; font-weight: 700; color: #fff;">196</div>
+    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem;">張 AI 生成美術</div>
+  </div>
+  <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; padding: 1.5rem; text-align: center;">
+    <div style="font-size: 2.2rem; font-weight: 700; color: #fff;">80</div>
+    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem;">個音效檔</div>
+  </div>
+  <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; padding: 1.5rem; text-align: center;">
+    <div style="font-size: 2.2rem; font-weight: 700; color: #fff;">752</div>
+    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem;">次 Git Commits</div>
+  </div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; margin: 0 auto; max-width: 50%;">
+  <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; padding: 1.5rem; text-align: center;">
+    <div style="font-size: 2.2rem; font-weight: 700; color: #fff;">10</div>
+    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem;">個 AI Agent 協作</div>
+  </div>
+  <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; padding: 1.5rem; text-align: center;">
+    <div style="font-size: 2.2rem; font-weight: 700; color: #fff;">5</div>
+    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem;">週開發期</div>
+  </div>
+</div>
 
 <div class="section">
 <table>
@@ -217,6 +247,32 @@ canvas{max-width:100%;height:auto!important}
 
 <div class="item"><div class="date">06/29 — JP 視覺演出完成</div><div class="desc">🔧 特效爽感 Agent：全窄門紅金閃爍、JP 符號在中輪滾動時可見、停輪顯示結果、中獎飛移動畫到 badge 區。</div></div>
 </div>
+</div>
+
+<div class="section">
+<h3>美術素材生成的瓶頸與突破</h3>
+
+<p>開發初期使用 Pollinations.ai 批量生成素材，但遇到嚴重品質問題：生成風格不統一、解析度不穩定、構圖無法直接用於遊戲 UI。原始 AI 生成的畫面風格粗糙，與期望的國潮龍門主題差距甚大。</p>
+
+<p>解決方案：改用 GPT 逐張生成單一素材圖片（撲克牌、龍珠、背景等），上傳到 GitHub 後透過 Agent 協助調整 CSS 座標與排版進行手工拼接。整個過程透過 Telegram 與 Agent 反覆描述位置座標，逐步微調到正確位置——等同於用自然語言「遙控」AI 做 UI 排版。</p>
+
+<p>最終產出了風格統一的國潮龍門遊戲介面，所有元素（轉輪、按鈕、背景、吉祥物）視覺一致。</p>
+
+<h3 style="color:#ff6b6b;margin-top:20px">Before：AI 原始生成</h3>
+<img class="fig" src="assets/%E5%8E%9F%E5%A7%8B%E9%A2%A8%E6%A0%BC.jpg" alt="AI 原始生成（Pollinations）">
+<p style="text-align:center;color:#888;font-size:0.8rem">▲ Pollinations AI 原始生成 — 風格粗糙、不可控</p>
+
+<h3 style="color:#ffb347;margin-top:20px">Process：拼接調整過程</h3>
+<div class="img-row">
+<img src="assets/%E5%88%9D%E7%89%88%E8%AA%BF%E6%95%B4%E9%81%8E%E7%A8%8B1.jpg" alt="初版畫面+調整過程">
+<img src="assets/%E5%88%9D%E7%89%88%E8%AA%BF%E6%95%B4%E9%81%8E%E7%A8%8B2.jpg" alt="座標調整中">
+</div>
+<img class="fig" src="assets/%E5%88%9D%E7%89%88%E8%AA%BF%E6%95%B4%E9%81%8E%E7%A8%8B3.jpg" alt="拼接優化">
+<p style="text-align:center;color:#888;font-size:0.8rem">▲ 透過 Telegram 與 Agent 反覆調整座標、排版、比例</p>
+
+<h3 style="color:#4caf50;margin-top:20px">After：最終成果</h3>
+<img class="fig" src="assets/%E9%81%8A%E6%88%B2%E4%B8%BB%E7%95%AB%E9%9D%A2%2B%E8%B4%8F%E5%88%86.jpg" alt="最終成果">
+<p style="text-align:center;color:#888;font-size:0.8rem">▲ 風格統一的國潮龍門遊戲介面</p>
 </div>
 
 <!-- ═══ 六、遊戲成果展示 ═══ -->
