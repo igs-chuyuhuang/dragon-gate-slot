@@ -1102,7 +1102,7 @@
       }
       await animateSpin(result.board, null, () => {
         const midReel = document.getElementById('reel-1');
-        const flashAnim = allNarrow ? 'jpFlashRedGold 0.15s infinite alternate' : '';
+        const flashAnim = allNarrow ? 'jpFlashRedGold 0.15s infinite alternate' : 'jpFlash 0.15s infinite alternate';
         midReel.style.animation = flashAnim;
         if (allNarrow) {
           sfx('narrow_gate');
