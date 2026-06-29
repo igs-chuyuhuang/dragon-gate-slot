@@ -485,18 +485,26 @@
     // Animate middle column cells individually for JP (only rows with JP symbol)
     const FG_SYMS = [0.2, 0.33, 0.5, 1.0, 1.5, 0];
 
-    // JP system — background probability control
-    const JP_BASE = { grand: 0.0000022, major: 0.0000108, mini: 0.0000432 };
-    const MIN_BET = 15;
-    function checkJpWin(bet) {
-      const ratio = bet / MIN_BET;
-      const r = Math.random();
-      const g = JP_BASE.grand * ratio;
-      const m = g + JP_BASE.major * ratio;
-      const n = m + JP_BASE.mini * ratio;
-      if (r < g) return 'GRAND';
-      if (r < m) return 'MAJOR';
-      if (r < n) return 'MINI';
+    // JP system — symbol pool with bet-weighted content
+    const JP_PRIZE = { GRAND: 30000, MAJOR: 6000, MINI: 1500 };
+    function getJpPool(gap, bet) {
+      const pool = [];
+      if (gap === 1) {
+        if (bet >= 1200) pool.push('GRAND','GRAND','GRAND','MAJOR','MAJOR','MAJOR','MAJOR','MINI','MINI','MINI','MINI','normal','normal','normal','normal');
+        else if (bet >= 600) pool.push('GRAND','GRAND','MAJOR','MAJOR','MAJOR','MINI','MINI','MINI','normal','normal','normal','normal','normal','normal','normal');
+        else if (bet >= 300) pool.push('GRAND','MAJOR','MAJOR','MINI','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+        else pool.push('MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+      } else {
+        if (bet >= 1200) pool.push('MAJOR','MAJOR','MAJOR','MAJOR','MINI','MINI','MINI','MINI','normal','normal','normal','normal','normal','normal','normal');
+        else if (bet >= 600) pool.push('MAJOR','MAJOR','MAJOR','MINI','MINI','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+        else if (bet >= 300) pool.push('MAJOR','MAJOR','MINI','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+        else pool.push('MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+      }
+      return pool;
+    }
+    function pickJpSymbol(pool) { return pool[Math.floor(Math.random() * pool.length)]; }
+    function checkJpSlotWin(symbols) {
+      if (symbols[0] && symbols[0] !== 'normal' && symbols[0] === symbols[1] && symbols[1] === symbols[2]) return symbols[0];
       return null;
     }
     function getJpImg(sym) {
@@ -1063,18 +1071,47 @@
         else { setTimeout(() => doSpin(), 400); }
         return result;
       }
-      // Normal mode: check JP on all-narrow
+      // Normal mode: JP pool on all-narrow
       let jpSlotWin = null;
+      let jpPerRow = [null, null, null];
       const allNarrow = result.judgments.every(j => j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss' && j.gap >= 1 && j.gap <= 3);
-      if (allNarrow) jpSlotWin = checkJpWin(gm.bet);
+      if (allNarrow) {
+        const minGap = Math.min(...result.judgments.map(j => j.gap));
+        const pool = getJpPool(minGap, gm.bet);
+        // Debug force
+        if (window._debugForceJp) {
+          const tier = window._debugForceJp; window._debugForceJp = null;
+          jpPerRow = [tier, tier, tier];
+        } else {
+          for (let r = 0; r < 3; r++) jpPerRow[r] = pickJpSymbol(pool);
+        }
+        jpSlotWin = checkJpSlotWin(jpPerRow);
+      }
       await animateSpin(result.board, null, () => {
         const midReel = document.getElementById('reel-1');
-        midReel.style.animation = 'jpFlash 0.15s infinite alternate';
+        const minGap = Math.min(...result.judgments.map(j => j.gap));
+        const flashAnim = allNarrow && minGap === 1 ? 'jpFlashRedGold 0.15s infinite alternate' : 'jpFlash 0.15s infinite alternate';
+        midReel.style.animation = flashAnim;
         if (allNarrow) sfx('narrow_gate');
       });
       sfx('spin_release');
       const midReelPost = document.getElementById('reel-1');
-      midReelPost.style.animation = '';
+      // Show JP symbols on mid column
+      if (allNarrow) {
+        for (let r = 0; r < 3; r++) {
+          const cell = document.getElementById(`cell-${r}-1`);
+          if (!cell || !jpPerRow[r] || jpPerRow[r] === 'normal') continue;
+          cell.style.position = 'relative';
+          cell.innerHTML += `<img class="jp-overlay-icon" src="${getJpImg(jpPerRow[r])}" style="position:absolute;inset:0;margin:auto;width:70%;height:70%;object-fit:contain;z-index:5;">`;
+        }
+        await new Promise(res => setTimeout(res, 1200));
+        if (!jpSlotWin) {
+          document.querySelectorAll('.jp-overlay-icon').forEach(el => el.remove());
+          midReelPost.style.animation = '';
+        }
+      } else {
+        midReelPost.style.animation = '';
+      }
       showResult(result);
       // Play result sfx + win line effect
       if (result.mode === 'normal') {
@@ -1105,6 +1142,8 @@
           else jpMini = 1500;
           const jpSubLabel = jpSlotWin === 'GRAND' ? 'SUPER MEGA WIN!' : jpSlotWin === 'MAJOR' ? 'MEGA WIN!' : 'BIG WIN!';
           await showBigWin(jpAmount, 'JACKPOT!\n' + jpSubLabel, '#ffd700,#ff8c00');
+          document.querySelectorAll('.jp-overlay-icon').forEach(el => el.remove());
+          midReelPost.style.animation = '';
         }
       }
       // BIG WIN check (skip if JP already showing its own overlay)
