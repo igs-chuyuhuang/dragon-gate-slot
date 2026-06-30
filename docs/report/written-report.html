@@ -233,6 +233,40 @@ canvas{max-width:100%;height:auto!important}
 </div>
 
 <div class="section">
+<h3>Before / After 案例</h3>
+
+<div class="compare">
+<div class="compare-col old"><h4>Before</h4><p>unity/ 目錄僅有 README.md，無任何程式碼</p></div>
+<div class="compare-col new"><h4>After（5 分鐘）</h4><p>4 支核心模組：SlotEngine、DragonGateJudge、PayoutCalculator、GameManager。完整一輪 Spin→判定→派彩可運行。</p></div>
+</div>
+<p style="color:#ffd700;font-weight:bold;margin:8px 0 20px;">📌 V1 核心邏輯 — 從零到可玩</p>
+
+<div class="compare">
+<div class="compare-col old"><h4>Before</h4><p>無任何遊戲美術素材</p></div>
+<div class="compare-col new"><h4>After（5 分鐘）</h4><p>GPT 產出 24 張國潮風格素材（撲克牌面 13 張 + 背景 + JP 符號 + 特效元素）</p></div>
+</div>
+<p style="color:#ffd700;font-weight:bold;margin:8px 0 20px;">📌 美術素材批次生成</p>
+
+<div class="compare">
+<div class="compare-col old"><h4>Before</h4><p>RTP >100%（玩家可 exploit 獲利）</p></div>
+<div class="compare-col new"><h4>After（2 分鐘）</h4><p>MISS_BIAS 20% + FG_MISS_BIAS 30%，RTP 壓到 ~82%，exploit 策略也 &lt;100%</p></div>
+</div>
+<p style="color:#ffd700;font-weight:bold;margin:8px 0 20px;">📌 RTP 機率修正</p>
+
+<div class="compare">
+<div class="compare-col old"><h4>Before</h4><p>固定金額 JP（無策略深度）</p></div>
+<div class="compare-col new"><h4>After（10 分鐘）</h4><p>Symbol pool + bet 加權 + 三同中獎，高 bet 有更高 GRAND 機率</p></div>
+</div>
+<p style="color:#ffd700;font-weight:bold;margin:8px 0 20px;">📌 Jackpot 機制迭代</p>
+
+<div class="compare">
+<div class="compare-col old"><h4>Before</h4><p>單機遊戲，無社交互動</p></div>
+<div class="compare-col new"><h4>After（15 分鐘）</h4><p>Google Apps Script 後端 + LockService 防並發 + 即時排行榜</p></div>
+</div>
+<p style="color:#ffd700;font-weight:bold;margin:8px 0 20px;">📌 排行榜多人競賽</p>
+</div>
+
+<div class="section">
 <h3>美術素材生成的瓶頸與突破</h3>
 
 <p>開發初期使用 Pollinations.ai 批量生成素材，但遇到嚴重品質問題：生成風格不統一、解析度不穩定、構圖無法直接用於遊戲 UI。原始 AI 生成的畫面風格粗糙，與期望的國潮龍門主題差距甚大。</p>
