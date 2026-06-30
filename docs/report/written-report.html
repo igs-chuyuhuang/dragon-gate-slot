@@ -222,21 +222,35 @@ canvas{max-width:100%;height:auto!important}
 
 <div class="section">
 <div class="timeline">
-<div class="item"><div class="date">05/26 — 數學模型建立</div><span class="agent-badge">🔧 數學模型 Agent</span><div class="desc">設計穿門倍率表（×15/×6/×3/×1），用 Python 模擬確認 RTP ~82%。發現純隨機穿門率過高導致 RTP > 100%，加入 MISS_BIAS 控制。</div></div>
+<div class="item"><div class="date">05/14 — 專案啟動</div><span class="agent-badge">🔧 General（Coordinator）</span><div class="desc">初始化專案結構、建立企劃書 v1.3、規劃 V1/V2/V3 里程碑時程。</div></div>
 
-<div class="item"><div class="date">06/04 — 前端轉輪引擎完成</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">實作 CSS transform 動畫引擎（fast→decel→overshoot→settle），支援 Turbo 模式。getCellH 用 Math.floor 解決不同解析度的 sub-pixel 問題。</div></div>
+<div class="item"><div class="date">05/18 — V1 核心邏輯完成</div><span class="agent-badge">🔧 程式核心 Agent</span><div class="desc">從零建立 SlotEngine、DragonGateJudge、PayoutCalculator、GameManager 四大模組，完整 Spin→判定→派彩流程可運行。</div></div>
 
-<div class="item"><div class="date">06/15 — S23 Ultra 適配修正</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">玩家回報 3088×1440 解析度 symbol 偏移。根因：reel 高度除 3 產生小數。修正：停輪後切換 flex 佈局自動等分。</div></div>
+<div class="item"><div class="date">05/20 — 美術素材批次生成 + 特效系統</div><span class="agent-badge">🔧 美術音效 Agent + 特效爽感 Agent</span><div class="desc">GPT 產出 24 張國潮風格素材，同日實作 Spin 蓄力、穿門火花、碰壁裂痕、連擊系統四大特效。</div></div>
 
-<div class="item"><div class="date">06/17 — MG 輸贏邏輯重構</div><span class="agent-badge">🔧 程式核心 Agent</span><div class="desc">原本「先扣全額+穿門補回」改為「穿門歸還本金+倍率獎勵」。WIN 只顯示純獎勵，本金靜默歸還。payoutCalculator 回傳 {winnings, refund, total}。</div></div>
+<div class="item"><div class="date">05/22 — 轉輪動畫引擎迭代</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">轉輪動畫根本重寫 3 次（top定位/strip組合/多段式），最終確定上往下掉落+變速曲線。同日修復 Q 牌面全黑 bug。</div></div>
 
-<div class="item"><div class="date">06/23 — 多人競賽系統上線</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">實作姓名+組別輸入、倒計時、BIG WIN 暫停、Google Apps Script 排行榜、組別平均分排名。前後端 2 小時內完成。</div></div>
+<div class="item"><div class="date">05/25 — 轉輪動畫 v4 產品版</div><span class="agent-badge">🔧 程式前端 Agent + 特效爽感 Agent</span><div class="desc">轉輪從 v1 迭代到 v4：加入中輪焦點導引(glow+壓暗)、blur、停輪衝擊感(shake+flash)、回彈 90ms。</div></div>
 
-<div class="item"><div class="date">06/25 — JP 機制從固定金額改為 Symbol Pool</div><span class="agent-badge">🔧 數學模型+程式核心 Agent</span><div class="desc">原本用背景機率直接判定，改為三格獨立抽 pool（15 元素），依 bet 動態調整 JP symbol 比例。三同中獎，視覺上看到符號跟著轉。</div></div>
+<div class="item"><div class="date">05/26 — 數學模型建立 + UI 大改造</div><span class="agent-badge">🔧 數學模型 Agent + 程式前端 Agent</span><div class="desc">設計穿門倍率表，Python 模擬確認 RTP，加入 MISS_BIAS。同日完成中獎線動畫系統、Auto Spin 面板、押注 +/- 按鈕。</div></div>
 
-<div class="item"><div class="date">06/25 — RTP 修正：普通門 ×3→×2</div><span class="agent-badge">🔧 挑戰者 Agent</span><div class="desc">發現普通門×3 讓 RTP 超標。數學模型重算後調降為 ×2，配合 MISS_BIAS 20% 將 RTP 穩定在 ~82%。</div></div>
+<div class="item"><div class="date">05/28 — Scatter 收集機制 + 波動性調整</div><span class="agent-badge">🔧 數學模型 Agent + 企劃 QA Agent</span><div class="desc">蒙地卡羅模擬 Scatter 收集機率，確定門檻 10 + SR 5%。診斷基礎 RTP 並推薦調整方案。</div></div>
 
-<div class="item"><div class="date">06/29 — JP 視覺演出完成</div><span class="agent-badge">🔧 特效爽感 Agent</span><div class="desc">全窄門紅金閃爍、JP 符號在中輪滾動時可見、停輪顯示結果、中獎飛移動畫到 badge 區。</div></div>
+<div class="item"><div class="date">06/04 — 前端轉輪引擎完成</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">實作 CSS transform 動畫引擎（fast→decel→overshoot→settle），支援 Turbo 模式。getCellH 用 Math.floor 解決 sub-pixel 問題。</div></div>
+
+<div class="item"><div class="date">06/10 — 手機自適應 + BIG WIN 動畫</div><span class="agent-badge">🔧 程式前端 Agent + 特效爽感 Agent</span><div class="desc">完成多裝置自適應佈局，實作 BIG WIN / MEGA WIN / SUPER MEGA WIN 三級動畫演出。</div></div>
+
+<div class="item"><div class="date">06/15 — S23 Ultra 適配修正</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">玩家回報 3088×1440 解析度 symbol 偏移。根因：reel 高度除 3 產生小數。修正：停輪後切換 flex 佈局。</div></div>
+
+<div class="item"><div class="date">06/17 — MG 輸贏邏輯重構</div><span class="agent-badge">🔧 程式核心 Agent</span><div class="desc">「先扣全額+穿門補回」改為「穿門歸還本金+倍率獎勵」。WIN 只顯示純獎勵，payoutCalculator 回傳 {winnings, refund, total}。</div></div>
+
+<div class="item"><div class="date">06/23 — 多人競賽系統上線</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">實作姓名+組別輸入、倒計時、BIG WIN 暫停、Google Apps Script 排行榜、組別平均分排名。</div></div>
+
+<div class="item"><div class="date">06/25 — JP 機制重構 + RTP 調校</div><span class="agent-badge">🔧 數學模型+程式核心+挑戰者 Agent</span><div class="desc">JP 改為 Symbol pool 三格獨立抽獎，依 bet 加權。挑戰者發現普通門×3 超標，調降為 ×2，RTP 穩定 ~82%。</div></div>
+
+<div class="item"><div class="date">06/29 — JP 視覺演出 + 最終修正</div><span class="agent-badge">🔧 特效爽感 Agent + 程式核心 Agent</span><div class="desc">全窄門紅金閃爍、JP 符號滾動可見、中獎飛移動畫。同日修復 BG 說明、FG AUTO 禁用等最終 bug。</div></div>
+
+<div class="item"><div class="date">06/30 — 書面報告 + Skill 文件</div><span class="agent-badge">🔧 General（Coordinator）</span><div class="desc">完成七章書面報告、4 份 Skill 知識文件，準備競賽 Demo。</div></div>
 </div>
 </div>
 
