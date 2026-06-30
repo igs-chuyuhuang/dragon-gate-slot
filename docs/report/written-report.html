@@ -47,11 +47,13 @@ canvas{max-width:100%;height:auto!important}
 .arch-box{background:#0c0c22;border:1px solid #2a2a4a;border-radius:8px;padding:16px;margin:14px 0;font-family:monospace;font-size:0.78rem;color:#a8d8ea;white-space:pre;overflow-x:auto}
 .btn-demo{display:inline-block;padding:12px 28px;background:linear-gradient(180deg,#ffd700,#c9a032);color:#1a1a2e;font-weight:bold;font-size:1rem;border-radius:8px;text-decoration:none;box-shadow:0 3px 10px rgba(255,215,0,0.3)}
 .center{text-align:center}
-.timeline{border-left:3px solid #ffd700;padding-left:16px;margin:16px 0}
-.timeline .item{margin:16px 0;position:relative}
-.timeline .item::before{content:'';position:absolute;left:-22px;top:6px;width:10px;height:10px;border-radius:50%;background:#ffd700}
-.timeline .item .date{color:#ffd700;font-size:0.8rem;font-weight:bold}
-.timeline .item .desc{font-size:0.9rem}
+.timeline{border-left:3px solid #d4a855;padding-left:20px;margin:16px 0}
+.timeline .item{margin:24px 0;position:relative;padding-bottom:24px;border-bottom:1px solid #1e1e3e}
+.timeline .item:last-child{border-bottom:none}
+.timeline .item::before{content:'';position:absolute;left:-27px;top:8px;width:12px;height:12px;border-radius:50%;background:#d4a855}
+.timeline .item .date{color:#d4a855;font-size:1rem;font-weight:bold;margin-bottom:6px}
+.timeline .item .agent-badge{display:inline-block;background:rgba(212,168,85,0.15);border:1px solid #d4a855;color:#d4a855;padding:3px 10px;border-radius:12px;font-size:0.8rem;margin-bottom:8px}
+.timeline .item .desc{font-size:0.95rem;color:rgba(255,255,255,0.85)}
 @media(max-width:600px){.compare{grid-template-columns:1fr}.img-row img{width:100%}h1{font-size:1.5rem}}
 </style>
 </head>
@@ -220,21 +222,21 @@ canvas{max-width:100%;height:auto!important}
 
 <div class="section">
 <div class="timeline">
-<div class="item"><div class="date">05/26 — 數學模型建立</div><div class="desc">🔧 數學模型 Agent：設計穿門倍率表（×15/×6/×3/×1），用 Python 模擬確認 RTP ~82%。發現純隨機穿門率過高導致 RTP > 100%，加入 MISS_BIAS 控制。</div></div>
+<div class="item"><div class="date">05/26 — 數學模型建立</div><span class="agent-badge">🔧 數學模型 Agent</span><div class="desc">設計穿門倍率表（×15/×6/×3/×1），用 Python 模擬確認 RTP ~82%。發現純隨機穿門率過高導致 RTP > 100%，加入 MISS_BIAS 控制。</div></div>
 
-<div class="item"><div class="date">06/04 — 前端轉輪引擎完成</div><div class="desc">🔧 程式前端 Agent：實作 CSS transform 動畫引擎（fast→decel→overshoot→settle），支援 Turbo 模式。getCellH 用 Math.floor 解決不同解析度的 sub-pixel 問題。</div></div>
+<div class="item"><div class="date">06/04 — 前端轉輪引擎完成</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">實作 CSS transform 動畫引擎（fast→decel→overshoot→settle），支援 Turbo 模式。getCellH 用 Math.floor 解決不同解析度的 sub-pixel 問題。</div></div>
 
-<div class="item"><div class="date">06/15 — S23 Ultra 適配修正</div><div class="desc">🔧 程式前端 Agent：玩家回報 3088×1440 解析度 symbol 偏移。根因：reel 高度除 3 產生小數。修正：停輪後切換 flex 佈局自動等分。</div></div>
+<div class="item"><div class="date">06/15 — S23 Ultra 適配修正</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">玩家回報 3088×1440 解析度 symbol 偏移。根因：reel 高度除 3 產生小數。修正：停輪後切換 flex 佈局自動等分。</div></div>
 
-<div class="item"><div class="date">06/17 — MG 輸贏邏輯重構</div><div class="desc">🔧 程式核心 Agent：原本「先扣全額+穿門補回」改為「穿門歸還本金+倍率獎勵」。WIN 只顯示純獎勵，本金靜默歸還。payoutCalculator 回傳 {winnings, refund, total}。</div></div>
+<div class="item"><div class="date">06/17 — MG 輸贏邏輯重構</div><span class="agent-badge">🔧 程式核心 Agent</span><div class="desc">原本「先扣全額+穿門補回」改為「穿門歸還本金+倍率獎勵」。WIN 只顯示純獎勵，本金靜默歸還。payoutCalculator 回傳 {winnings, refund, total}。</div></div>
 
-<div class="item"><div class="date">06/23 — 多人競賽系統上線</div><div class="desc">🔧 程式前端 Agent：實作姓名+組別輸入、倒計時、BIG WIN 暫停、Google Apps Script 排行榜、組別平均分排名。前後端 2 小時內完成。</div></div>
+<div class="item"><div class="date">06/23 — 多人競賽系統上線</div><span class="agent-badge">🔧 程式前端 Agent</span><div class="desc">實作姓名+組別輸入、倒計時、BIG WIN 暫停、Google Apps Script 排行榜、組別平均分排名。前後端 2 小時內完成。</div></div>
 
-<div class="item"><div class="date">06/25 — JP 機制從固定金額改為 Symbol Pool</div><div class="desc">🔧 數學模型+程式核心：原本用背景機率直接判定，改為三格獨立抽 pool（15 元素），依 bet 動態調整 JP symbol 比例。三同中獎，視覺上看到符號跟著轉。</div></div>
+<div class="item"><div class="date">06/25 — JP 機制從固定金額改為 Symbol Pool</div><span class="agent-badge">🔧 數學模型+程式核心 Agent</span><div class="desc">原本用背景機率直接判定，改為三格獨立抽 pool（15 元素），依 bet 動態調整 JP symbol 比例。三同中獎，視覺上看到符號跟著轉。</div></div>
 
-<div class="item"><div class="date">06/25 — RTP 修正：普通門 ×3→×2</div><div class="desc">🔧 挑戰者 Agent 發現普通門×3 讓 RTP 超標。數學模型重算後調降為 ×2，配合 MISS_BIAS 20% 將 RTP 穩定在 ~82%。</div></div>
+<div class="item"><div class="date">06/25 — RTP 修正：普通門 ×3→×2</div><span class="agent-badge">🔧 挑戰者 Agent</span><div class="desc">發現普通門×3 讓 RTP 超標。數學模型重算後調降為 ×2，配合 MISS_BIAS 20% 將 RTP 穩定在 ~82%。</div></div>
 
-<div class="item"><div class="date">06/29 — JP 視覺演出完成</div><div class="desc">🔧 特效爽感 Agent：全窄門紅金閃爍、JP 符號在中輪滾動時可見、停輪顯示結果、中獎飛移動畫到 badge 區。</div></div>
+<div class="item"><div class="date">06/29 — JP 視覺演出完成</div><span class="agent-badge">🔧 特效爽感 Agent</span><div class="desc">全窄門紅金閃爍、JP 符號在中輪滾動時可見、停輪顯示結果、中獎飛移動畫到 badge 區。</div></div>
 </div>
 </div>
 
