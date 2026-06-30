@@ -208,6 +208,10 @@ canvas{max-width:100%;height:auto!important}
 <tr><td>S23 Ultra symbol 不置中</td><td>~5 min</td><td>停輪後改用 CSS flex 等分，避免 sub-pixel</td></tr>
 <tr><td>BG 穿門倍率 ×3→×1</td><td>~30 sec</td><td>改 getPassMult return 值，commit+push</td></tr>
 <tr><td>排行榜分數被當字串拼接</td><td>~3 min</td><td>所有 score 加 Number() 轉換+排序修正</td></tr>
+<tr><td>FG 進入時 AUTO 按鈕可按</td><td>~2 min</td><td>FG 啟動時 disable AUTO，結束後恢復</td></tr>
+<tr><td>BG 遊戲說明無法點開</td><td>~3 min</td><td>調整 z-index，確保 rules-btn 不被 overlay 蓋住</td></tr>
+<tr><td>中輪閃黃特效消失</td><td>~1 min</td><td>onSidesStop 的 flashAnim 條件修正，非全窄門也閃黃</td></tr>
+<tr><td>JP 中獎後餘額未更新</td><td>~2 min</td><td>payoutCalculator 加入 JP 獎金到 balance 計算</td></tr>
 </table>
 </div>
 
