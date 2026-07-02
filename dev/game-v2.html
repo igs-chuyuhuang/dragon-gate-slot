@@ -6,31 +6,28 @@
   <title>射龍門 Slot V2</title>
   <link rel="stylesheet" href="css/game.css">
   <style>
-    /* === V2 UI Enhancements === */
+    /* === V2 UI Enhancements (收斂版) === */
 
-    /* 1. 背景退焦 + 暗角 */
-    .bg-layer { filter: blur(2px) saturate(0.5) brightness(0.6); }
+    /* 1. 背景輕微調整 + 淡暗角 */
+    .bg-layer { filter: saturate(0.85) brightness(0.85); }
     .game-root::before {
       content: ''; position: absolute; inset: 0; z-index: 1;
-      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.3) 100%);
       pointer-events: none;
     }
 
-    /* 2. 盤面浮出 */
-    .reel { box-shadow: 0 0 40px rgba(255,215,0,0.4), 0 0 80px rgba(0,0,0,0.8); }
+    /* 2. 盤面浮出（減弱） */
+    .reel { box-shadow: 0 0 20px rgba(255,215,0,0.2), 0 0 40px rgba(0,0,0,0.4); }
 
-    /* 3. 視覺優先序：裝飾降 opacity */
-    .mascot-dragon { opacity: 0.5; }
+    /* 3. 視覺優先序：裝飾輕微降 opacity */
+    .mascot-dragon { opacity: 0.6; }
 
-    /* 4. 負空間 */
-    .jp-pool-container { margin-bottom: 8px; }
-
-    /* 5. 符號辨識度 */
+    /* 5. 符號辨識度（減弱） */
     .cell img[src*="CD-01_ace"],
     .cell img[src*="CD-04_jack"],
     .cell img[src*="CD-03_queen"],
     .cell img[src*="CD-02_king"] {
-      filter: drop-shadow(0 0 6px rgba(255,215,0,0.7));
+      filter: drop-shadow(0 0 3px rgba(255,215,0,0.5));
     }
     .cell img[src*="CD-05_num"],
     .cell img[src*="CD-06_num"],
@@ -41,7 +38,7 @@
     .cell img[src*="CD-11_num"],
     .cell img[src*="CD-12_num"],
     .cell img[src*="CD-13_num"] {
-      filter: brightness(0.85);
+      filter: brightness(0.9);
     }
 
     /* 6. Hold 欄位 placeholder */
