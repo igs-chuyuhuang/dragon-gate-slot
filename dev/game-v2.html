@@ -22,10 +22,20 @@
     /* 裝飾壓暗 */
     .mascot-dragon { opacity: 0.5; }
 
-    /* Symbol 放大滿版 */
-    .cell img { width: 95%; height: 95%; object-fit: contain; }
+    /* 1. 格線極細 */
+    .cell { border: none; padding: 1px; }
 
-    /* 符號：高階微亮，數字不處理（自然亮度即焦點） */
+    /* 2. Symbol 放大滿版+間距最小 */
+    .cell img { width: 98%; height: 98%; object-fit: contain; }
+    .reel-strip { gap: 0; }
+
+    /* 3. 盤面佔比加大 */
+    #reel-0, #reel-1, #reel-2 { height: 39%; }
+
+    /* 4. 底部 UI 壓縮 */
+    .ctrl-panel { transform: scale(0.92); transform-origin: bottom center; }
+
+    /* 符號：高階微亮 */
     .cell img[src*="CD-01_ace"],
     .cell img[src*="CD-04_jack"],
     .cell img[src*="CD-03_queen"],
