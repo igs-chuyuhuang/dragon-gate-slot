@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>射龍門 Slot V2</title>
+  <link rel="stylesheet" href="css/game.css">
+  <style>
+    /* === V2 UI Enhancements === */
+
+    /* 1. 背景退焦 + 暗角 */
+    .bg-layer { filter: blur(2px) saturate(0.5) brightness(0.6); }
+    .game-root::before {
+      content: ''; position: absolute; inset: 0; z-index: 1;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none;
+    }
+
+    /* 2. 盤面浮出 */
+    .reel { box-shadow: 0 0 40px rgba(255,215,0,0.4), 0 0 80px rgba(0,0,0,0.8); }
+
+    /* 3. 視覺優先序：裝飾降 opacity */
+    .mascot-dragon { opacity: 0.5; }
+
+    /* 4. 負空間 */
+    .jp-pool-container { margin-bottom: 8px; }
+
+    /* 5. 符號辨識度 */
+    .cell img[src*="CD-01_ace"],
+    .cell img[src*="CD-04_jack"],
+    .cell img[src*="CD-03_queen"],
+    .cell img[src*="CD-02_king"] {
+      filter: drop-shadow(0 0 6px rgba(255,215,0,0.7));
+    }
+    .cell img[src*="CD-05_num"],
+    .cell img[src*="CD-06_num"],
+    .cell img[src*="CD-07_num"],
+    .cell img[src*="CD-08_num"],
+    .cell img[src*="CD-09_num"],
+    .cell img[src*="CD-10_num"],
+    .cell img[src*="CD-11_num"],
+    .cell img[src*="CD-12_num"],
+    .cell img[src*="CD-13_num"] {
+      filter: brightness(0.85);
+    }
+
+    /* 6. Hold 欄位 placeholder */
+    .scatter-ring .ring-bg { border: 2px dashed rgba(255,215,0,0.3); }
+
+    /* 7. JP 卡片 */
+    .jp-values { gap: 12px; font-family: monospace; font-size: 1.1em; }
+    .jp-val { letter-spacing: 1px; }
+
+    /* 8. 底部功能列放大 */
+    .ctrl-adj { transform: scale(1.15); background: rgba(255,255,255,0.08); }
+    .ctrl-auto-upper { transform: scale(1.1); background: rgba(255,255,255,0.08); }
+    .ctrl-func { transform: scale(1.1); }
+
+    /* 9. 進度條 */
+    #scatter-progress-bar {
+      position: absolute; bottom: -8px; left: 10%; right: 10%; height: 5px;
+      background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;
+    }
+    #scatter-progress-fill {
+      height: 100%; width: 0%; border-radius: 3px;
+      background: linear-gradient(90deg, #7b2ff7, #c471f5);
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-overlay" style="position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+    <div style="color:#ffd700;font-size:1.5rem;font-weight:bold;margin-bottom:16px;">LOADING...</div>
+    <div style="width:200px;height:6px;background:#333;border-radius:3px;overflow:hidden;"><div id="loading-bar" style="width:0%;height:100%;background:linear-gradient(90deg,#ffd700,#ff8c00);transition:width 0.2s;"></div></div>
+  </div>
+  <div class="game-root">
+    <img class="bg-layer" src="assets/img/BG.png" alt="">
+    <img class="bg-bonus" id="bg-bonus" src="assets/img/BG-bonus.png" style="display:none" alt="">
+
+    <!-- Competition Timer -->
+    <div id="comp-timer" style="display:none;position:absolute;top:1%;left:50%;transform:translateX(-50%);z-index:100;background:rgba(0,0,0,0.7);color:#ffd700;padding:4px 16px;border-radius:16px;font-size:0.9rem;font-weight:bold;"></div>
+
+    <!-- Name Input Overlay -->
+    <div id="name-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;">
+      <div style="background:#16213e;border:2px solid #ffd700;border-radius:12px;padding:24px;text-align:center;width:80%;max-width:320px;">
+        <div style="color:#ffd700;font-size:1.2rem;font-weight:bold;margin-bottom:12px;">輸入你的名字</div>
+        <select id="player-team-select" style="width:100%;padding:10px;border-radius:6px;border:1px solid #ffd700;background:#1a1a2e;color:#fff;font-size:1rem;text-align:center;margin-bottom:12px;">
+          <option value="SF">SF</option>
+          <option value="HP">HP</option>
+          <option value="QS">QS</option>
+          <option value="其他">其他</option>
+        </select>
+        <input id="player-name-input" type="text" maxlength="12" placeholder="名字" style="width:100%;padding:10px;border-radius:6px;border:1px solid #ffd700;background:#1a1a2e;color:#fff;font-size:1rem;text-align:center;margin-bottom:12px;">
+        <button id="name-confirm-btn" class="bg-deal-btn" style="width:100%;padding:10px;">開始競賽</button>
+      </div>
+    </div>
+
+    <!-- Jackpot Pool -->
+    <div class="jp-pool-container">
+      <img class="jp-pool" src="assets/img/JP-pool.png" alt="Jackpot Pool">
+      <div class="jp-values">
+        <span class="jp-val" id="jp-grand-val">3,000</span>
+        <span class="jp-val" id="jp-major-val">500</span>
+        <span class="jp-val" id="jp-mini-val">100</span>
+      </div>
+    </div>
+
+    <!-- 3 Reel containers (absolute positioned on BG grid) -->
+    <div class="reel" id="reel-0"><div class="reel-strip"></div></div>
+    <div class="reel" id="reel-1"><div class="reel-strip"></div></div>
+    <div class="reel" id="reel-2"><div class="reel-strip"></div></div>
+
+    <!-- Badges -->
+    <div class="badge badge-0" id="badge-0"></div>
+    <div class="badge badge-1" id="badge-1"></div>
+    <div class="badge badge-2" id="badge-2"></div>
+
+    <!-- FG Bonus Reel -->
+    <div class="fg-reel" id="fg-reel" style="display:none">
+      <div class="fg-reel-strip" id="fg-reel-strip"></div>
+    </div>
+
+    <img class="mascot-dragon" src="assets/img/MS-01_mascot_dragon.png" alt="mascot">
+
+    <!-- Bottom Control Panel -->
+    <div class="ctrl-panel">
+      <div class="ctrl-info-cell" id="cell-balance">
+        <span class="ctrl-label">BALANCE</span>
+        <span class="ctrl-val" id="balance">1,000</span>
+      </div>
+      <button class="ctrl-auto-upper" id="auto-btn">AUTO</button>
+      <button class="spin-btn" id="spin-btn">SPIN</button>
+      <div class="ctrl-bet-group">
+        <span class="ctrl-label">BET</span>
+        <span class="ctrl-val" id="bet">10</span>
+      </div>
+      <button class="ctrl-adj" id="bet-dec">−</button>
+      <button class="ctrl-adj" id="bet-inc">+</button>
+      <div class="ctrl-info-cell" id="cell-win">
+        <span class="ctrl-label">WIN</span>
+        <span class="ctrl-val" id="win">0</span>
+      </div>
+      <div class="ctrl-action-row">
+        <button class="ctrl-func" id="vol-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
+        </button>
+        <button class="ctrl-func" id="turbo-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </button>
+        <button class="ctrl-func" id="rules-btn">i</button>
+      </div>
+    </div>
+
+    <!-- BG Control Panel (hidden by default) -->
+    <div class="ctrl-panel" id="bg-ctrl-panel" style="display:none">
+      <div class="ctrl-info-cell" style="position:absolute;left:7.7%;top:87.9%;">
+        <span class="ctrl-label">BALANCE</span>
+        <span class="ctrl-val" id="bg-balance">0</span>
+      </div>
+      <div class="ctrl-info-cell" style="position:absolute;left:26.7%;top:87.9%;">
+        <span class="ctrl-label">TIME</span>
+        <span class="ctrl-val" id="bg-round-timer">15</span>
+      </div>
+      <button class="spin-btn" id="bg-deal-btn" disabled>DEAL</button>
+      <div class="ctrl-bet-group">
+        <span class="ctrl-label">ROUND</span>
+        <span class="ctrl-val" id="bg-round-counter">0/12</span>
+      </div>
+      <div class="ctrl-info-cell" style="position:absolute;left:80.8%;top:87.9%;">
+        <span class="ctrl-label">WIN</span>
+        <span class="ctrl-val" id="bg-win">0</span>
+      </div>
+      <div class="ctrl-action-row">
+        <button class="ctrl-func" id="bg-vol-btn" style="left:9.7%;width:11.8%;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
+        </button>
+        <button class="ctrl-func" id="bg-turbo-btn" style="left:24%;width:11.8%;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </button>
+        <button class="ctrl-func" id="bg-rules-btn" style="left:79.5%;width:8.7%;">i</button>
+      </div>
+    </div>
+
+    <!-- FG info -->
+    <div class="fg-info" id="fg-info" style="display:none"></div>
+    <div class="results-bar" id="results"></div>
+
+    <!-- FG Result Overlay -->
+    <div class="fg-result-overlay" id="fg-result-overlay" style="display:none">
+      <div class="fg-result-panel">
+        <div class="fg-result-title">FREE GAME</div>
+        <div class="fg-result-big" id="fg-result-big" style="display:none">BIG WIN!</div>
+        <div class="fg-result-label">總贏分</div>
+        <div class="fg-result-amount" id="fg-result-amount">0</div>
+      </div>
+    </div>
+
+    <!-- Bonus Game (inline on game-root, not overlay) -->
+    <div class="bg-inline" id="bg-inline" style="display:none">
+      <div class="bg-cards">
+        <div class="bg-card face" id="bg-card-l">?</div>
+        <div class="bg-card back" id="bg-card-m">🐉</div>
+        <div class="bg-card face" id="bg-card-r">?</div>
+      </div>
+      <div class="bg-gate-info" id="bg-gate-info"></div>
+      <div class="bg-result-text" id="bg-result-text"></div>
+    </div>
+    <!-- BG chip buttons (replaces bet area) -->
+    <div class="bg-chip-bar" id="bg-chip-bar" style="display:none">
+      <div class="bg-chip-btns" id="bg-chip-btns"></div>
+    </div>
+
+    <!-- FG/BG Choice Overlay -->
+    <div class="fg-result-overlay" id="fgbg-choice" style="display:none">
+      <div class="fg-result-panel" style="position:relative;">
+        <button class="rules-close" id="fgbg-close" style="position:absolute;top:-30px;right:-10px;">✕</button>
+        <div class="fg-result-title">選擇獎勵模式</div>
+        <div style="display:flex;flex-direction:column;gap:1rem;margin-top:1.5rem;width:100%;padding:0 1rem;pointer-events:auto;position:relative;z-index:9999;">
+          <button class="bg-deal-btn" id="choose-fg" style="background:linear-gradient(135deg,#1a8c5c,#2ecc71);padding:1rem;pointer-events:auto;">FREE GAME</button>
+          <button class="bg-deal-btn" id="choose-bg" style="padding:1rem;pointer-events:auto;">BONUS GAME</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FG/BG Info Overlay -->
+    <div class="rules-overlay" id="choice-info-overlay" style="display:none;z-index:2100">
+      <div class="rules-panel" style="width:80%;max-height:60vh;">
+        <button class="rules-close" id="choice-info-close">✕</button>
+        <div class="rules-content" id="choice-info-content"></div>
+      </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div class="rules-overlay" id="tutorial-overlay" style="display:none;z-index:2200">
+      <div class="rules-panel" style="width:80%;max-height:65vh;position:relative;">
+        <button class="rules-close" id="tutorial-close" style="position:absolute;top:-30px;right:-10px;">✕</button>
+        <div class="rules-content" id="tutorial-content"></div>
+        <button class="bg-deal-btn" id="tutorial-start" style="margin-top:12px;width:100%;padding:0.8rem;">開始遊戲</button>
+      </div>
+    </div>
+
+    <!-- Scatter Progress Ring -->
+    <div class="scatter-ring" id="scatter-ring">
+      <div class="ring-bg"></div>
+      <svg class="ring-svg" viewBox="0 0 100 100">
+        <defs>
+          <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+            <feFlood flood-color="#00ffc8" flood-opacity="0.7" result="color"/>
+            <feComposite in="color" in2="blur" operator="in" result="glow"/>
+            <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g id="ring-segments"></g>
+        <g id="ring-glow" filter="url(#glow-filter)"></g>
+      </svg>
+      <div class="ring-orb" id="ring-orb"></div>
+      <img class="ring-icon" src="assets/img/SC-01_scatter_dragon.png" alt="scatter">
+      <span class="ring-label" id="ring-label">0/10</span>
+      <div id="scatter-progress-bar"><div id="scatter-progress-fill"></div></div>
+    </div>
+
+    <!-- JP hidden -->
+    <span id="jp-basic" style="display:none">500</span>
+    <span id="jp-major" style="display:none">2000</span>
+    <span id="jp-grand" style="display:none">10000</span>
+  </div>
+
+  <!-- Rules Panel -->
+  <div class="rules-overlay" id="rules-overlay" style="display:none">
+    <div style="width:90%;max-width:600px;height:80vh;position:relative;display:flex;flex-direction:column;align-items:center;">
+      <button class="rules-close" id="rules-close" style="position:absolute;top:-36px;right:0;z-index:1;">✕</button>
+      <iframe src="rules.html" style="width:100%;flex:1;border:none;border-radius:8px;"></iframe>
+      <button id="rules-start-btn" class="bg-deal-btn" style="margin-top:12px;padding:10px 40px;font-size:1.1rem;display:none;">開始遊戲</button>
+    </div>
+  </div>
+
+  <!-- Auto Panel -->
+  <div class="auto-overlay" id="auto-overlay" style="display:none">
+    <div class="auto-panel">
+      <div class="auto-stepper">
+        <button class="ctrl-adj" id="auto-dec">−</button>
+        <span id="auto-count-display">50 局</span>
+        <button class="ctrl-adj" id="auto-inc">+</button>
+      </div>
+      <div class="auto-actions">
+        <button class="auto-start" id="auto-start">開始</button>
+        <button class="auto-cancel" id="auto-cancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const PRELOAD_IMGS = ['BG.png','BG-bonus.png','SC-01_scatter_dragon.png','JP-pool.png',
+      'FR-01_slot_frame_mobile.png','MS-01_mascot_dragon.png','golden-dragon.png',
+      'GRAND.png','MAJOR.png','MINI.png','back.png',
+      'CD-01_ace.png','CD-02_king.png','CD-03_queen.png','CD-04_jack.png',
+      'CD-05_num2.png','CD-06_num3.png','CD-07_num4.png','CD-08_num5.png',
+      'CD-09_num6.png','CD-10_num7.png','CD-11_num8.png','CD-12_num9.png','CD-13_num10.png'];
+    const SFX_NAMES = ['gate_through','dragon_growl','dragon_roar','coin_fly','countup','lose','chip_select','card_deal','narrow_gate','bigwin','megawin','supermegawin','gate_rise','gate_open_sfx'];
+    var loaded = 0, total = PRELOAD_IMGS.length;
+    var bar = document.getElementById('loading-bar');
+    function check() { loaded++; bar.style.width = (loaded/total*100)+'%'; if(loaded>=total) { document.getElementById('loading-overlay').style.display='none'; document.getElementById('rules-overlay').style.display='flex'; document.getElementById('rules-start-btn').style.display='block'; } }
+    PRELOAD_IMGS.forEach(function(src){ var img=new Image(); img.onload=img.onerror=check; img.src='assets/img/'+src; });
+    // SFX preload cache
+    window.SFX_CACHE = {};
+    SFX_NAMES.forEach(function(n){ window.SFX_CACHE[n] = new Audio('assets/sfx/'+n+'.mp3'); });
+  })();
+  </script>
+  <script type="module">
+    import { spin, countScatters } from './js/slotEngine.js';
+    import { GameManager } from './js/gameManager.js';
+    import { BonusGame } from './js/bonusGame.js';
+    import { judgeBoard } from './js/dragonGateJudge.js';
+    import { playSfx } from './js/effects/sfxBus.js';
+    import { playWinLines } from './js/effects/winLine.js';
+    import { playWallHit } from './js/effects/wallHit.js';
+    import { revealScatters } from './js/effects/scatterReveal.js';
+
+    let muted = false;
+    let turbo = false;
+    function sfx(name) { if (!muted) playSfx(name); }
+
+    // === BGM ===
+    const bgm = new Audio('assets/audio/bgm.mp3');
+    bgm.loop = true;
+    bgm.volume = 0.173;
+    function startBGM() { bgm.play().catch(() => {}); }
+    document.addEventListener('click', startBGM, { once: true });
+    document.addEventListener('keydown', startBGM, { once: true });
+
+    const gm = new GameManager();
+    const $ = id => document.getElementById(id);
+    let spinning = false;
+
+    // Build scatter ring segments (10 arcs with gaps)
+    (function initRing() {
+      const g = $('ring-segments');
+      const R = 47, SEG = 10, GAP = 4;
+      const arcLen = (360 - GAP * SEG) / SEG;
+      for (let i = 0; i < SEG; i++) {
+        const startAngle = i * (arcLen + GAP);
+        const endAngle = startAngle + arcLen;
+        const s = startAngle * Math.PI / 180, e = endAngle * Math.PI / 180;
+        const x1 = 50 + R * Math.cos(s), y1 = 50 + R * Math.sin(s);
+        const x2 = 50 + R * Math.cos(e), y2 = 50 + R * Math.sin(e);
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M ${x1} ${y1} A ${R} ${R} 0 0 1 ${x2} ${y2}`);
+        path.setAttribute('class', 'ring-segment');
+        path.dataset.idx = i;
+        g.appendChild(path);
+      }
+    })();
+
+    function updateRing(count) {
+      const segs = document.querySelectorAll('.ring-segment');
+      const glowG = $('ring-glow');
+      glowG.innerHTML = '';
+      segs.forEach((s, i) => {
+        const active = i < count;
+        s.classList.toggle('active', active);
+        s.removeAttribute('filter');
+        if (active) {
+          const clone = s.cloneNode(true);
+          clone.setAttribute('stroke', '#ffd700');
+          clone.setAttribute('stroke-width', '9');
+          glowG.appendChild(clone);
+        }
+      });
+      $('ring-label').textContent = `${count}/10`;
+      const pFill = document.getElementById('scatter-progress-fill');
+      if (pFill) pFill.style.width = `${Math.min(count,10) * 10}%`;
+      // Position orb at end of progress
+      const orb = $('ring-orb');
+      if (count === 0) { orb.style.display = 'none'; return; }
+      orb.style.display = 'block';
+      const SEG = 10, GAP = 4, arcLen = (360 - GAP * SEG) / SEG;
+      const angle = (count * (arcLen + GAP) - GAP / 2) - 90;
+      const rad = angle * Math.PI / 180;
+      const R = 47;
+      orb.style.left = `${50 + R * Math.cos(rad) - 6}%`;
+      orb.style.top = `${50 + R * Math.sin(rad) - 6}%`;
+    }
+    let autoSpins = 0, autoStopped = false, autoCount = 50;
+
+    const CARD_IMG = {
+      1:'CD-01_ace.png',2:'CD-05_num2.png',3:'CD-06_num3.png',
+      4:'CD-07_num4.png',5:'CD-08_num5.png',6:'CD-09_num6.png',
+      7:'CD-10_num7.png',8:'CD-11_num8.png',9:'CD-12_num9.png',
+      10:'CD-13_num10.png',11:'CD-04_jack.png',12:'CD-03_queen.png',13:'CD-02_king.png'
+    };
+    const SC_IMG = 'SC-01_scatter_dragon.png';
+    const ALL_IMGS = Object.values(CARD_IMG);
+    const REEL_SYMBOLS = 30;
+
+    function cellImg(cell) { return cell.isScatter ? SC_IMG : CARD_IMG[cell.value]; }
+    function randomImg() { return ALL_IMGS[Math.floor(Math.random() * 13)]; }
+    function fmt(n) { return Math.round(n).toLocaleString(); }
+
+    // Get cell height from reel
+    function getCellH() {
+      const reel = document.querySelector('.reel');
+      return Math.floor(reel.getBoundingClientRect().height / 3);
+    }
+
+    function buildStrip(col, finalCells) { buildStripN(col, finalCells, REEL_SYMBOLS); }
+
+    function animateSpin(board, fgBonusSymbols, onSidesStop) {
+      return new Promise(resolve => {
+        spinning = true;
+        const cellH = getCellH();
+        if (turbo) {
+          for (let col = 0; col < 3; col++) {
+            const strip = document.querySelector(`#reel-${col} .reel-strip`);
+            strip.innerHTML = '';
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateY(0px)';
+            for (let r = 0; r < 3; r++) {
+              const div = document.createElement('div');
+              div.className = 'cell';
+              div.style.height = cellH + 'px';
+              div.id = `cell-${r}-${col}`;
+              div.innerHTML = `<img src="assets/img/${cellImg(board[r][col])}">`;
+              if (fgBonusSymbols && col === 1 && fgBonusSymbols[r] > 0) {
+                div.innerHTML += `<span class="cell-bonus">💰${Math.round(gm.bet * fgBonusSymbols[r])}</span>`;
+              }
+              strip.appendChild(div);
+            }
+          }
+          spinning = false;
+          if (onSidesStop) onSidesStop();
+          resolve();
+          return;
+        }
+        const overshoot = Math.round(cellH * 0.05);
+        const MID_SYMBOLS = 200;
+        const sideScrollDist = REEL_SYMBOLS * cellH;
+        const sideFastDur = 700;
+        const highSpeed = sideScrollDist / sideFastDur;
+
+        // Build side reels
+        for (let col of [0, 2]) {
+          buildStripN(col, [board[0][col], board[1][col], board[2][col]], REEL_SYMBOLS);
+        }
+
+        if (fgBonusSymbols) {
+          // FG mode: all 3 columns use strip animation, mid uses single easeOut like Normal
+          buildStripN(1, [board[0][1], board[1][1], board[2][1]], MID_SYMBOLS, fgBonusSymbols);
+          let done = 0;
+          // Side reels: fast + decel
+          const fastDist = sideScrollDist - 9 * cellH;
+          const fastDur = Math.round(fastDist / highSpeed);
+          for (let col of [0, 2]) {
+            const strip = document.querySelector(`#reel-${col} .reel-strip`);
+            strip.style.transition = `transform ${fastDur}ms linear`;
+            strip.style.transform = `translateY(-${9 * cellH}px)`;
+            setTimeout(() => {
+              strip.style.transition = `transform 1350ms cubic-bezier(0.22, 1, 0.36, 1)`;
+              strip.style.transform = `translateY(${overshoot}px)`;
+              setTimeout(() => {
+                strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
+                strip.style.transform = `translateY(0px)`;
+                setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 100);
+              }, 1350);
+            }, fastDur);
+          }
+          // Trigger onSidesStop after sides settle
+          setTimeout(() => { if (onSidesStop) onSidesStop(); }, fastDur + 1350 + 90 + 100);
+          // Middle reel: single 5s easeOut
+          const midStrip = document.querySelector('#reel-1 .reel-strip');
+          midStrip.offsetHeight;
+          midStrip.style.transition = `transform 5000ms cubic-bezier(0.1, 0.7, 0.3, 1)`;
+          midStrip.style.transform = `translateY(0px)`;
+          setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 5100);
+        } else {
+          // Normal mode: all 3 columns use strip animation (mid spins longer)
+          buildStripN(1, [board[0][1], board[1][1], board[2][1]], MID_SYMBOLS);
+          const configs = [
+            { col: 0, scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+            { col: 1, scrollDist: MID_SYMBOLS * cellH, decelDist: 18 * cellH, decelMs: 2400, ease: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+            { col: 2, scrollDist: sideScrollDist, decelDist: 9 * cellH, decelMs: 1350, ease: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+          ];
+          let sidesCount = 0;
+          let done = 0;
+          for (const cfg of configs) {
+            const strip = document.querySelector(`#reel-${cfg.col} .reel-strip`);
+            if (cfg.col === 1) {
+              // Middle reel: force reflow then single easeOut curve
+              strip.offsetHeight; // force reflow
+              strip.style.transition = `transform 5000ms cubic-bezier(0.1, 0.7, 0.3, 1)`;
+              strip.style.transform = `translateY(0px)`;
+              setTimeout(() => { done++; if (done === 3) { spinning = false; resolve(); } }, 5100);
+            } else {
+              const fastDist = cfg.scrollDist - cfg.decelDist;
+              const fastDur = Math.round(fastDist / highSpeed);
+              strip.style.transition = `transform ${fastDur}ms linear`;
+              strip.style.transform = `translateY(-${cfg.decelDist}px)`;
+              setTimeout(() => {
+                strip.style.transition = `transform ${cfg.decelMs}ms ${cfg.ease}`;
+                strip.style.transform = `translateY(${overshoot}px)`;
+                setTimeout(() => {
+                  strip.style.transition = 'transform 90ms cubic-bezier(0.33, 1, 0.68, 1)';
+                  strip.style.transform = `translateY(0px)`;
+                  setTimeout(() => {
+                    sidesCount++; if (sidesCount === 2 && onSidesStop) onSidesStop();
+                    done++; if (done === 3) { spinning = false; resolve(); }
+                  }, 100);
+                }, cfg.decelMs);
+              }, fastDur);
+            }
+          }
+        }
+      });
+    }
+
+
+    function buildStripN(col, finalCells, numSym, bonusSymbols) {
+      const strip = document.querySelector(`#reel-${col} .reel-strip`);
+      const cellH = getCellH();
+      strip.innerHTML = '';
+      strip.style.transition = 'none';
+      // Final cells first (top), then randoms below
+      for (let r = 0; r < 3; r++) {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.style.height = cellH + 'px';
+        div.id = `cell-${r}-${col}`;
+        div.innerHTML = `<img src="assets/img/${cellImg(finalCells[r])}">`;
+        if (bonusSymbols && bonusSymbols[r] > 0) {
+          div.innerHTML += `<span class="cell-bonus">💰${Math.round(gm.bet * bonusSymbols[r])}</span>`;
+        }
+        strip.appendChild(div);
+      }
+      for (let i = 0; i < numSym; i++) {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.style.height = cellH + 'px';
+        div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+        if (bonusSymbols) {
+          const rSym = FG_SYMS[Math.floor(Math.random() * FG_SYMS.length)];
+          if (rSym > 0) div.innerHTML += `<span class="cell-bonus">💰${Math.round(gm.bet * rSym)}</span>`;
+        }
+        strip.appendChild(div);
+      }
+      // Start scrolled down (showing randoms), will animate up to show finals
+      strip.style.transform = `translateY(-${numSym * cellH}px)`;
+    }
+
+    // Animate middle column cells individually for JP (only rows with JP symbol)
+    const FG_SYMS = [0.2, 0.33, 0.5, 1.0, 1.5, 0];
+
+    // JP system — symbol pool with bet-weighted content
+    const JP_PRIZE = { GRAND: 30000, MAJOR: 6000, MINI: 1500 };
+    function getJpPool(gap, bet) {
+      const pool = [];
+      if (gap === 1) {
+        if (bet >= 1200) pool.push('GRAND','GRAND','GRAND','MAJOR','MAJOR','MAJOR','MAJOR','MINI','MINI','MINI','MINI','normal','normal','normal','normal');
+        else if (bet >= 600) pool.push('GRAND','GRAND','MAJOR','MAJOR','MAJOR','MINI','MINI','MINI','normal','normal','normal','normal','normal','normal','normal');
+        else if (bet >= 300) pool.push('GRAND','MAJOR','MAJOR','MINI','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+        else pool.push('MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+      } else {
+        if (bet >= 1200) pool.push('MAJOR','MAJOR','MAJOR','MAJOR','MINI','MINI','MINI','MINI','normal','normal','normal','normal','normal','normal','normal');
+        else if (bet >= 600) pool.push('MAJOR','MAJOR','MAJOR','MINI','MINI','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+        else if (bet >= 300) pool.push('MAJOR','MAJOR','MINI','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+        else pool.push('MAJOR','MINI','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal','normal');
+      }
+      return pool;
+    }
+    function pickJpSymbol(pool) { return pool[Math.floor(Math.random() * pool.length)]; }
+    function checkJpSlotWin(symbols) {
+      if (symbols[0] && symbols[0] !== 'normal' && symbols[0] === symbols[1] && symbols[1] === symbols[2]) return symbols[0];
+      return null;
+    }
+    function getJpImg(sym) {
+      if (sym === 'GRAND') return 'assets/img/GRAND.png';
+      if (sym === 'MAJOR') return 'assets/img/MAJOR.png';
+      if (sym === 'MINI') return 'assets/img/MINI.png';
+      return null;
+    }
+
+    const fgReelEl = $('fg-reel'), fgStripEl = $('fg-reel-strip');
+
+    function showFgReel() {}
+    function hideFgReel() {}
+
+    function flyFgCoins(judgments, bonusSymbols) {
+      const flyers = [];
+      for (const j of judgments) {
+        if (j.type !== 'through' || bonusSymbols[j.row] === 0) continue;
+        const cell = document.getElementById(`cell-${j.row}-1`);
+        const badge = $(`badge-${j.row}`);
+        const src = cell && cell.querySelector('.cell-bonus');
+        if (!src || !badge) continue;
+        const srcRect = src.getBoundingClientRect();
+        const dstRect = badge.getBoundingClientRect();
+        const flyer = document.createElement('span');
+        flyer.textContent = `💰${Math.round(gm.bet * bonusSymbols[j.row])}`;
+        flyer.style.cssText = `position:fixed;left:${srcRect.left}px;top:${srcRect.top}px;z-index:9999;font-size:13px;color:#ffd700;font-weight:bold;background:rgba(0,0,0,0.7);border-radius:8px;padding:2px 6px;transition:all 600ms cubic-bezier(0.25,1,0.5,1);pointer-events:none;`;
+        document.body.appendChild(flyer);
+        flyers.push({ clone: flyer, dstRect, badge, sym: bonusSymbols[j.row] });
+        sfx('coin_fly');
+        requestAnimationFrame(() => {
+          flyer.style.left = `${dstRect.left + dstRect.width/2 - 20}px`;
+          flyer.style.top = `${dstRect.top + dstRect.height/2 - 10}px`;
+          flyer.style.transform = 'scale(1.3)';
+          flyer.style.opacity = '0.8';
+        });
+      }
+      if (flyers.length === 0) return Promise.resolve();
+      return new Promise(resolve => {
+        setTimeout(() => {
+          for (const f of flyers) {
+            f.clone.remove();
+            const amt = Math.round(gm.bet * f.sym);
+            f.badge.textContent = `💰${fmt(amt)}`;
+            f.badge.className = `badge badge-${f.badge.id.slice(-1)} win`;
+          }
+          resolve();
+        }, 650);
+      });
+    }
+
+    function showBigWin(amount, label, coinColors) {
+      compPaused = true;
+      return new Promise(resolve => {
+        // Play corresponding win SFX (loop until collect)
+        const winSfxName = label.includes('SUPER') ? 'supermegawin' : 'megawin';
+        const winAudio = new Audio(`assets/sfx/${winSfxName}.mp3`);
+        winAudio.loop = false;
+        winAudio.volume = 0.5;
+        winAudio.play().catch(() => {});
+        // After first play, loop from specified start point
+        const loopStart = label.includes('SUPER') ? 1.5 : 1.5;
+        winAudio.addEventListener('ended', function loopTail() {
+          winAudio.currentTime = loopStart;
+          winAudio.play().catch(() => {});
+        });
+        const ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.7);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;';
+        // Title
+        const title = document.createElement('div');
+        title.textContent = label;
+        title.style.cssText = 'text-align:center;white-space:pre-line;font-size:4.5rem;font-weight:900;color:#4dc9f6;paint-order:stroke fill;-webkit-text-stroke:2px #ffd700;text-shadow:0 0 20px rgba(77,201,246,0.8),0 0 40px rgba(255,215,0,0.6),0 4px 8px rgba(0,0,0,0.8);animation:bigWinEntry 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards,bigWinPulse 1s 0.6s infinite;position:relative;z-index:2;';
+        ov.appendChild(title);
+        // Amount (show total immediately)
+        const num = document.createElement('div');
+        num.style.cssText = 'text-align:center;font-size:4.5rem;font-weight:900;color:#ffd700;margin-top:10px;text-shadow:0 0 4px #4dc9f6,0 0 8px #4dc9f6,0 0 20px rgba(77,201,246,0.8),0 0 40px rgba(255,215,0,0.6),0 4px 8px rgba(0,0,0,0.8);position:relative;z-index:2;';
+        num.textContent = amount.toLocaleString();
+        ov.appendChild(num);
+        // Collect button
+        const btn = document.createElement('button');
+        btn.textContent = '得分';
+        btn.style.cssText = 'margin-top:20px;padding:12px 40px;border:none;border-radius:8px;background:linear-gradient(180deg,#ffd700,#c9a032);color:#1a1a2e;font-size:1.3rem;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);position:relative;z-index:2;';
+        ov.appendChild(btn);
+        // Stars
+        for (let i = 0; i < 18; i++) {
+          const star = document.createElement('span');
+          star.textContent = Math.random() > 0.5 ? '✦' : '✧';
+          star.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${Math.random()*100}%;font-size:${12+Math.random()*16}px;color:${Math.random()>0.5?'#ffd700':'#fff'};animation:starTwinkle ${0.6+Math.random()*1}s ${Math.random()*1.5}s infinite;opacity:0;`;
+          ov.appendChild(star);
+        }
+        // Continuous coin spawner
+        function spawnCoins() {
+          for (let i = 0; i < 15; i++) {
+            const c = document.createElement('div');
+            const sz = 12 + Math.random() * 18;
+            c.style.cssText = `position:absolute;left:${Math.random()*100}%;top:-30px;width:${sz}px;height:${sz}px;border-radius:50%;background:linear-gradient(135deg,${coinColors});box-shadow:0 0 4px rgba(255,215,0,0.5);opacity:${0.5+Math.random()*0.5};animation:coinRain ${2+Math.random()*1.5}s linear forwards;`;
+            ov.appendChild(c);
+            setTimeout(() => c.remove(), 4000);
+          }
+          for (let i = 0; i < 30; i++) {
+            const c = document.createElement('div');
+            const sz = 14 + Math.random() * 20;
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 100 + Math.random() * 200;
+            c.style.cssText = `position:absolute;left:50%;top:50%;margin-left:-${sz/2}px;margin-top:-${sz/2}px;width:${sz}px;height:${sz}px;border-radius:50%;background:linear-gradient(135deg,${coinColors});box-shadow:0 0 6px rgba(255,215,0,0.8);animation:coinBurst ${0.8+Math.random()*1}s ease-out both;--dx:${Math.cos(angle)*dist}px;--dy:${Math.sin(angle)*dist-40}px;--rot:${Math.random()*720-360}deg;`;
+            ov.appendChild(c);
+            setTimeout(() => c.remove(), 2500);
+          }
+        }
+        spawnCoins();
+        const coinInterval = setInterval(spawnCoins, 300);
+        document.body.appendChild(ov);
+        setTimeout(() => { if (!btn.disabled) btn.click(); }, 3000);
+        // Collect button handler
+        btn.onclick = () => {
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          winAudio.pause();
+          const countSfx = new Audio('assets/sfx/countup.mp3');
+          countSfx.loop = true; countSfx.volume = 0.4;
+          countSfx.play().catch(() => {});
+          const dur = 2000, t0 = performance.now();
+          const startBal = gm.balance;
+          function tick(now) {
+            const p = Math.min((now - t0) / dur, 1);
+            const ease = 1 - Math.pow(1 - p, 3);
+            const remaining = Math.round(amount * (1 - ease));
+            num.textContent = remaining.toLocaleString();
+            gm.balance = startBal + Math.round(amount * ease);
+            $('balance').textContent = fmt(gm.balance);
+            if (p < 1) requestAnimationFrame(tick);
+            else { clearInterval(coinInterval); countSfx.pause(); ov.remove(); compPaused = false; resolve(); }
+          }
+          requestAnimationFrame(tick);
+        };
+      });
+    }
+
+    async function showFGResult(total) {
+      $('auto-btn').disabled = false;
+      const ratio = total / gm.bet;
+      if (ratio >= 5) {
+        const label = ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!';
+        const colors = ratio >= 30 ? '#ffd700,#ff8c00' : ratio >= 15 ? '#c0c0c0,#808080' : '#cd7f32,#8b4513';
+        await showBigWin(total, label, colors);
+        updateRing(0);
+        return;
+      }
+      const overlay = $('fg-result-overlay');
+      const amountEl = $('fg-result-amount');
+      const bigEl = $('fg-result-big');
+      overlay.style.display = 'flex';
+      bigEl.style.display = 'none';
+      amountEl.textContent = '0';
+      const duration = 2000, start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / duration, 1);
+        amountEl.textContent = fmt(Math.round(total * p));
+        if (p < 1) requestAnimationFrame(tick);
+        else sfx('coin_count');
+      }
+      requestAnimationFrame(tick);
+      const close = () => { overlay.style.display = 'none'; updateRing(0); };
+      overlay.onclick = close;
+      setTimeout(close, 3500);
+    }
+
+    // === Bonus Game Controller ===
+    const CARD_NAMES = ['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    let bgInstance = null, bgRoundTimer = null;
+
+    async function playDragonGateOpening() {
+      return new Promise(resolve => {
+        const root = document.querySelector('.game-root');
+        const ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,0);transition:background 0.2s;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden;';
+        document.body.appendChild(ov);
+        setTimeout(() => { ov.style.background = 'rgba(0,0,0,0.8)'; root.style.transition = 'transform 0.5s'; root.style.transform = 'scale(1.05)'; }, 0);
+        // Gate (80% width, 60% height)
+        const gate = document.createElement('div');
+        gate.style.cssText = 'position:relative;width:100vw;height:100vh;display:flex;perspective:800px;';
+        const leftDoor = document.createElement('div');
+        leftDoor.style.cssText = 'width:50%;height:100%;background:linear-gradient(135deg,#1a1a2e,#2d1b00);border:4px solid #ffd700;border-right:none;transform-origin:left;transition:transform 0.5s ease-out;border-radius:12px 0 0 12px;box-shadow:inset -20px 0 40px rgba(255,215,0,0.4);';
+        const rightDoor = document.createElement('div');
+        rightDoor.style.cssText = 'width:50%;height:100%;background:linear-gradient(225deg,#1a1a2e,#2d1b00);border:4px solid #ffd700;border-left:none;transform-origin:right;transition:transform 0.5s ease-out;border-radius:0 12px 12px 0;box-shadow:inset 20px 0 40px rgba(255,215,0,0.4);';
+        // Door crack glow (bright wide)
+        const glow = document.createElement('div');
+        glow.style.cssText = 'position:absolute;left:40%;right:40%;top:5%;bottom:5%;background:linear-gradient(90deg,transparent,rgba(255,215,0,1),rgba(255,255,200,1),rgba(255,215,0,1),transparent);opacity:0;transition:opacity 0.3s;filter:blur(8px);';
+        gate.appendChild(leftDoor); gate.appendChild(rightDoor); gate.appendChild(glow);
+        gate.style.transform = 'scaleY(0)'; gate.style.transition = 'transform 0.7s cubic-bezier(0.34,1.56,0.64,1)';
+        ov.appendChild(gate);
+        // Rise gate
+        setTimeout(() => { gate.style.transform = 'scaleY(1)'; glow.style.opacity = '1'; sfx('gate_rise'); }, 200);
+        // Open doors + massive shockwave + heavy shake
+        setTimeout(() => {
+          leftDoor.style.transform = 'rotateY(-100deg)';
+          rightDoor.style.transform = 'rotateY(100deg)';
+          sfx('gate_open_sfx');
+          sfx('dragon_roar');
+          // Shockwave (scale 0→5)
+          const wave = document.createElement('div');
+          wave.style.cssText = 'position:absolute;width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,215,0,0.9);box-shadow:0 0 30px rgba(255,215,0,0.6);transform:scale(0);transition:transform 0.6s ease-out,opacity 0.6s;';
+          ov.appendChild(wave);
+          requestAnimationFrame(() => { wave.style.transform = 'scale(8)'; wave.style.opacity = '0'; });
+          // Heavy camera shake (60px)
+          root.style.transition = 'none';
+          let shakes = 0;
+          const shakeId = setInterval(() => { root.style.transform = `scale(1.05) translate(${(Math.random()-0.5)*60}px,${(Math.random()-0.5)*40}px)`; if(++shakes>12){clearInterval(shakeId);root.style.transform='scale(1.05)';} }, 30);
+          // Bright flash
+          const flash = document.createElement('div');
+          flash.style.cssText = 'position:fixed;inset:0;background:rgba(255,215,0,0.5);z-index:2501;pointer-events:none;transition:opacity 0.4s;';
+          document.body.appendChild(flash);
+          setTimeout(() => { flash.style.opacity = '0'; setTimeout(() => flash.remove(), 400); }, 50);
+        }, 900);
+        // Dragon flies out (large, using golden-dragon.png)
+        setTimeout(() => {
+          const dragon = document.createElement('img');
+          dragon.src = 'assets/img/golden-dragon.png';
+          dragon.style.cssText = 'position:absolute;width:70vw;height:auto;object-fit:contain;animation:dragonFlyOut 1.2s ease-out forwards;filter:drop-shadow(0 0 20px rgba(255,215,0,0.8));';
+          ov.appendChild(dragon);
+          // 100 gold particles
+          for (let i = 0; i < 100; i++) {
+            const p = document.createElement('div');
+            const sz = 4 + Math.random() * 10;
+            const angle = Math.random() * 360;
+            const dist = 50 + Math.random() * 200;
+            p.style.cssText = `position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:radial-gradient(circle,#fff,#ffd700);opacity:0;left:50%;top:50%;transform:translate(-50%,-50%);animation:dragonParticle 1s ${i*20}ms ease-out forwards;--angle:${angle}deg;--dist:${dist}px;`;
+            ov.appendChild(p);
+          }
+        }, 1300);
+        // Fade out
+        setTimeout(() => { root.style.transition = 'transform 0.5s'; root.style.transform = ''; ov.style.transition = 'opacity 0.5s'; ov.style.opacity = '0'; }, 2800);
+        setTimeout(() => { ov.remove(); resolve(); }, 3500);
+      });
+    }
+
+    function showFgBgChoice() {
+      compPaused = true;
+      $('fgbg-choice').style.display = 'flex';
+    }
+
+    const FG_INFO = '<h3 style="color:#ffd700">FREE GAME</h3><ul><li>8 轉免費遊戲</li><li>中輪帶有獎勵符號（依 bet 大小決定）</li><li>穿門時獲得對應金額獎勵</li></ul>';
+    const BG_INFO = '<h3 style="color:#ffd700">BONUS GAME</h3><ul><li>12 局射龍門</li><li>初始籌碼 = bet × 2</li><li>穿門：贏得下注金額（×1）</li><li>碰壁：扣 2 倍、同值碰壁：扣 3 倍、未中：扣 1 倍</li><li>All in 輸：歸零拿回初始籌碼</li><li>12 局結束後，獲得累積贏分；若贏分低於初始籌碼，則保底拿回初始籌碼。</li></ul>';
+
+    let _tutorialCallback = null;
+    function showTutorial(content, storageKey, callback) {
+      $('tutorial-content').innerHTML = content;
+      $('tutorial-overlay').style.display = 'flex';
+      _tutorialCallback = () => {
+        $('tutorial-overlay').style.display = 'none';
+        callback();
+      };
+    }
+    $('tutorial-start').addEventListener('click', () => { if (_tutorialCallback) _tutorialCallback(); });
+    $('tutorial-close').addEventListener('click', () => { $('tutorial-overlay').style.display = 'none'; showFgBgChoice(); });
+
+    $('choose-fg').addEventListener('click', () => {
+      $('fgbg-choice').style.display = 'none';
+      showTutorial(FG_INFO, 'fgTutorialDismissed', () => { compPaused = false; gm.fg.start(); $('auto-btn').disabled = true; setTimeout(doSpin, 300); });
+    });
+
+    $('choose-bg').addEventListener('click', () => {
+      $('fgbg-choice').style.display = 'none';
+      showTutorial(BG_INFO, 'bgTutorialDismissed', () => { compPaused = false; startBonusGame(); });
+    });
+
+    $('choice-info-close').addEventListener('click', () => { $('choice-info-overlay').style.display = 'none'; });
+
+    function startBonusGame() {
+      const pool = gm.jp.pools.basic + gm.jp.pools.major + gm.jp.pools.grand;
+      bgInstance = new BonusGame(gm.bet, pool);
+      // Hide main game elements
+      $('bg-bonus').style.display = 'block';
+      for (let i = 0; i < 3; i++) { const el = document.getElementById(`reel-${i}`); if (el) el.style.display = 'none'; $(`badge-${i}`).style.display = 'none'; }
+      $('results').style.display = 'none';
+      $('scatter-ring').style.display = 'none';
+      const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = 'none';
+      const jpContainer = document.querySelector('.jp-pool-container'); if (jpContainer) jpContainer.style.display = 'none';
+      // Show BG inline UI
+      $('bg-inline').style.display = 'block';
+      $('bg-chip-bar').style.display = 'flex';
+      // Swap control panels
+      document.querySelector('.ctrl-panel').style.display = 'none';
+      $('bg-ctrl-panel').style.display = '';
+      $('bg-deal-btn').disabled = true;
+      bgUpdateUI();
+      bgNewRound();
+    }
+
+    function bgNewRound() {
+      if (!bgInstance || !bgInstance.active) { if (bgInstance) bgEnd(); return; }
+      $('bg-result-text').textContent = '';
+      $('bg-result-text').className = 'bg-result-text';
+      const { left, right } = bgInstance.deal();
+      $('bg-card-l').innerHTML = `<img src="assets/img/${CARD_IMG[left]}">`;
+      $('bg-card-l').className = 'bg-card face';
+      $('bg-card-r').innerHTML = `<img src="assets/img/${CARD_IMG[right]}">`;
+      $('bg-card-r').className = 'bg-card face';
+      $('bg-card-m').innerHTML = `<img src="assets/img/back.png">`;
+      $('bg-card-m').className = 'bg-card back';
+      const info = bgInstance.getGateInfo();
+      $('bg-gate-info').textContent = '';
+      bgBuildChips();
+      $('spin-btn').disabled = true;
+      // Round timer
+      let roundLeft = bgInstance.roundTime;
+      
+      $('bg-round-timer').textContent = roundLeft;
+      if (bgRoundTimer) clearInterval(bgRoundTimer);
+      bgRoundTimer = setInterval(() => {
+        roundLeft--;
+        
+        $('bg-round-timer').textContent = roundLeft;
+        if (roundLeft <= 0) {
+          clearInterval(bgRoundTimer);
+          if (!bgInstance || !bgInstance.active) return;
+          // Auto min bet
+          const minBet = Math.round(bgInstance.chips * 0.1);
+          if (minBet > 0) { bgInstance.roundBet = minBet; bgDeal(); }
+          else bgEnd();
+        }
+      }, 1000);
+    }
+
+    function bgBuildChips() {
+      const container = $('bg-chip-btns');
+      container.innerHTML = '';
+      const chips = [
+        { pct: 10, x: 78, y: 616 },
+        { pct: 20, x: 129, y: 616 },
+        { pct: 30, x: 180, y: 616 },
+        { pct: 50, x: 231, y: 616 },
+        { pct: 100, x: 281, y: 616 },
+      ];
+      chips.forEach(c => {
+        const amt = Math.round(bgInstance.chips * c.pct / 100);
+        const btn = document.createElement('button');
+        btn.className = 'bg-chip-btn';
+        btn.textContent = `${c.pct}%\n${fmt(amt)}`;
+        btn.style.whiteSpace = 'pre-line';
+        btn.style.left = (c.x / 390 * 100) + '%';
+        btn.style.top = (c.y / 844 * 100) + '%';
+        btn.disabled = amt <= 0;
+        btn.addEventListener('click', () => {
+          container.querySelectorAll('.bg-chip-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          sfx('chip_select');
+          bgInstance.roundBet = amt;
+          $('bg-deal-btn').disabled = false;
+        });
+        container.appendChild(btn);
+      });
+      // Default select first chip (10%)
+      const firstBtn = container.querySelector('.bg-chip-btn');
+      if (firstBtn && !firstBtn.disabled) {
+        firstBtn.classList.add('selected');
+        bgInstance.roundBet = Math.round(bgInstance.chips * 10 / 100);
+        $('bg-deal-btn').disabled = false;
+      }
+    }
+
+    function bgDeal() {
+      if (!bgInstance || !bgInstance.active) return;
+      sfx('card_deal');
+      if (bgRoundTimer) clearInterval(bgRoundTimer);
+      $('bg-deal-btn').disabled = true;
+      $('bg-chip-btns').querySelectorAll('.bg-chip-btn').forEach(b => { b.disabled = true; });
+      // Flip animation
+      const midCard = $('bg-card-m');
+      midCard.classList.add('flip');
+      setTimeout(() => {
+        if (!bgInstance) return; // guard against race with bgEnd
+        const result = bgInstance.reveal();
+        midCard.innerHTML = `<img src="assets/img/${CARD_IMG[result.mid]}">`;
+        midCard.className = 'bg-card face';
+        const resEl = $('bg-result-text');
+        const winEl = $('bg-win');
+        const balEl = $('bg-balance');
+        if (result.mult > 0) {
+          const winBefore = bgInstance.winnings;
+          bgInstance.applyResult(result);
+          const won = bgInstance.winnings - winBefore;
+          resEl.textContent = '穿門!';
+          resEl.className = 'bg-result-text win';
+          sfx('gate_through');
+          bgAnimateValue(winEl, '', winBefore, bgInstance.winnings, 900, true);
+          bgAnimateValue(balEl, '', bgInstance.chips - won, bgInstance.chips, 900, false);
+        } else {
+          const wasAllIn = bgInstance.roundBet >= bgInstance.chips;
+          const chipsBefore = bgInstance.chips;
+          const winBefore = bgInstance.winnings;
+          bgInstance.applyResult(result);
+          if (result.type === 'wall') { resEl.textContent = '碰壁！'; sfx('wall_hit'); }
+          else if (result.type === 'same-hit') { resEl.textContent = '同值撞柱！'; sfx('wall_hit'); }
+          else { resEl.textContent = '未穿'; }
+          resEl.className = 'bg-result-text lose';
+          if (wasAllIn && !bgInstance.active) {
+            // All in 輸：演出歸零效果
+            bgAnimateValue(balEl, '', chipsBefore, 0, 600, false);
+            bgAnimateValue(winEl, '', winBefore, bgInstance.winnings, 600, false);
+          } else {
+            bgAnimateValue(balEl, '', chipsBefore, bgInstance.chips, 600, false);
+          }
+        }
+        $('bg-round-counter').textContent = `${bgInstance.rounds}/${bgInstance.maxRounds}`;
+        // Next round after delay
+        setTimeout(() => {
+          if (!bgInstance) return;
+          if (bgInstance.active && bgInstance.chips > 0) bgNewRound();
+          else {
+            if (bgInstance.chips <= 0) {
+              $('bg-result-text').textContent = '💸 籌碼用盡！';
+              $('bg-result-text').className = 'bg-result-text lose';
+              setTimeout(() => bgEnd(), 1500);
+            } else bgEnd();
+          }
+        }, 2000);
+      }, 750); // halfway through flip
+    }
+
+    function bgUpdateUI() {
+      $('bg-balance').textContent = fmt(bgInstance.chips);
+      $('bg-win').textContent = fmt(bgInstance.winnings);
+      $('bg-round-counter').textContent = `${bgInstance.rounds}/${bgInstance.maxRounds}`;
+    }
+
+    const bgCountSfx = new Audio('assets/sfx/countup.mp3');
+    bgCountSfx.loop = true; bgCountSfx.volume = 0.4;
+    function bgAnimateValue(el, prefix, from, to, duration, isWin) {
+      if (isWin) { bgCountSfx.currentTime = 0; bgCountSfx.play().catch(()=>{}); }
+      else { sfx('lose'); }
+      const t0 = performance.now();
+      function tick(now) {
+        const p = Math.min((now - t0) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = prefix + fmt(Math.round(from + (to - from) * ease));
+        if (p < 1) requestAnimationFrame(tick);
+        else if (isWin) bgCountSfx.pause();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    async function bgEnd() {
+      if (!bgInstance) return;
+      if (bgRoundTimer) clearInterval(bgRoundTimer);
+      const finalWin = bgInstance.cashOut();
+      const isGuaranteed = finalWin === bgInstance.guarantee && bgInstance.winnings <= bgInstance.guarantee;
+      // Hide BG inline UI
+      $('bg-inline').style.display = 'none';
+      $('bg-chip-bar').style.display = 'none';
+      // Swap panels back
+      $('bg-ctrl-panel').style.display = 'none';
+      document.querySelector('.ctrl-panel').style.display = '';
+      // Restore main game elements
+      $('bg-bonus').style.display = 'none';
+      for (let i = 0; i < 3; i++) { const el = document.getElementById(`reel-${i}`); if (el) el.style.display = ''; $(`badge-${i}`).style.display = ''; }
+      $('results').style.display = '';
+      $('scatter-ring').style.display = '';
+      const mascot = document.querySelector('.mascot-dragon'); if (mascot) mascot.style.display = '';
+      const jpContainer = document.querySelector('.jp-pool-container'); if (jpContainer) jpContainer.style.display = '';
+      bgInstance = null;
+      updateUI();
+      await showBGResult(finalWin, isGuaranteed);
+      tryEndCompetition();
+    }
+
+    async function showBGResult(total, isGuaranteed) {
+      const ratio = total / gm.bet;
+      if (ratio >= 5) {
+        const label = ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!';
+        const colors = ratio >= 30 ? '#ffd700,#ff8c00' : ratio >= 15 ? '#c0c0c0,#808080' : '#cd7f32,#8b4513';
+        await showBigWin(total, label, colors);
+        updateUI(); updateRing(0);
+        return;
+      }
+      const overlay = $('fg-result-overlay');
+      const amountEl = $('fg-result-amount');
+      const bigEl = $('fg-result-big');
+      const titleEl = overlay.querySelector('.fg-result-title');
+      titleEl.textContent = isGuaranteed ? 'BONUS GAME（保底）' : 'BONUS GAME';
+      overlay.style.display = 'flex';
+      bigEl.style.display = 'none';
+      amountEl.textContent = '0';
+      const duration = 2000, start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / duration, 1);
+        amountEl.textContent = fmt(Math.round(total * p));
+        if (p < 1) requestAnimationFrame(tick);
+        else sfx('coin_count');
+      }
+      requestAnimationFrame(tick);
+      const close = () => {
+        overlay.style.display = 'none';
+        titleEl.textContent = 'FREE GAME';
+        gm.balance += total;
+        updateUI(); updateRing(0);
+      };
+      overlay.onclick = close;
+      setTimeout(close, 3500);
+    }
+
+
+
+    function autoFitText(el, type) {
+      const len = el.textContent.length;
+      if (type === 'balance') {
+        if (len > 7) el.style.fontSize = '13px';
+        else if (len > 5) el.style.fontSize = '14px';
+        else el.style.fontSize = '16px';
+      } else if (type === 'bet') {
+        if (len >= 3) el.style.fontSize = '13px';
+        else el.style.fontSize = '15px';
+      }
+    }
+    function updateUI() {
+      $('balance').textContent = fmt(gm.balance);
+      $('bet').textContent = fmt(gm.bet);
+      autoFitText($('balance'), 'balance');
+      autoFitText($('bet'), 'bet');
+      $('spin-btn').disabled = spinning || !gm.canSpin();
+      $('bet-dec').disabled = spinning || gm.betIndex <= 0;
+      $('bet-inc').disabled = spinning || gm.betIndex >= 7;
+      $('auto-btn').textContent = autoSpins > 0 ? `${autoSpins}` : 'AUTO';
+      const fgEl = $('fg-info');
+      if (gm.fg.active) { fgEl.style.display = 'block'; fgEl.textContent = `FG: ${gm.fg.spinsLeft}轉`; }
+      else { fgEl.style.display = 'none'; }
+      // Update JP pool display
+      // JP pool display handled by auto-climb setInterval
+    }
+
+    async function doSpin() {
+      if (spinning || compSubmitted) return;
+      if (!gm.canSpin()) {
+        autoStopped = true; autoSpins = 0; updateUI();
+        const ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;pointer-events:none;';
+        ov.innerHTML = '<div style="color:#fff;font-size:1.5rem;font-weight:bold;">No more money!</div>';
+        document.body.appendChild(ov);
+        setTimeout(() => ov.remove(), 2000);
+        return;
+      }
+      // 清除殘留動畫元素（防止記憶體洩漏）
+      document.querySelectorAll('.win-sweep, .win-particle, .coin-rain, .coin-burst, .dragon-sweep, .sc-darken, .sc-hint-text').forEach(el => el.remove());
+      document.querySelectorAll('[style*="position: fixed"][style*="z-index"]').forEach(el => { if(parseInt(el.style.zIndex)>9000) el.remove(); });
+      document.querySelectorAll('.cell').forEach(c => { c.style.backgroundColor=''; c.style.boxShadow=''; c.style.transform=''; });
+      for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
+      const isFG = gm.fg.active;
+      sfx('spin_charge');
+      updateUI();
+      const result = gm.executeSpin();
+      if (!result) return;
+      // Debug: force narrow board for JP testing
+      if (window._debugForceNarrow && result.mode === 'normal') {
+        window._debugForceNarrow = false;
+        for (let r = 0; r < 3; r++) {
+          const gap = Math.floor(Math.random() * 3) + 1;
+          const base = Math.floor(Math.random() * (12 - gap)) + 1;
+          result.board[r] = [
+            { value: base, isScatter: false },
+            { value: base + 1, isScatter: false },
+            { value: base + gap + 1, isScatter: false }
+          ];
+        }
+        result.judgments = judgeBoard(result.board);
+      }
+      if (result.mode === 'fg') {
+        await animateSpin(result.board, result.bonusSymbols, () => {
+          document.getElementById('reel-1').style.animation = 'jpFlash 0.15s infinite alternate';
+        });
+        document.getElementById('reel-1').style.animation = '';
+        sfx('spin_release');
+        // Fly coin from mid-column to badge (non-blocking in FG)
+        flyFgCoins(result.judgments, result.bonusSymbols);
+        await new Promise(r => setTimeout(r, 700));
+        $('win').textContent = fmt(result.totalScore);
+        updateUI();
+        if (result.fgDone) { await showFGResult(result.totalScore); tryEndCompetition(); }
+        else { setTimeout(() => doSpin(), 400); }
+        return result;
+      }
+      // Normal mode: JP pool on all-narrow
+      let jpSlotWin = null;
+      let jpPerRow = [null, null, null];
+      const allNarrow = result.judgments.every(j => j.type !== 'scatter' && j.type !== 'same-hit' && j.type !== 'same-miss' && j.gap >= 1 && j.gap <= 3);
+      if (allNarrow) {
+        const minGap = Math.min(...result.judgments.map(j => j.gap));
+        const pool = getJpPool(minGap, gm.bet);
+        // Debug force
+        if (window._debugForceJp) {
+          const tier = window._debugForceJp; window._debugForceJp = null;
+          jpPerRow = [tier, tier, tier];
+        } else {
+          for (let r = 0; r < 3; r++) jpPerRow[r] = pickJpSymbol(pool);
+        }
+        jpSlotWin = checkJpSlotWin(jpPerRow);
+      }
+      await animateSpin(result.board, null, () => {
+        const midReel = document.getElementById('reel-1');
+        const flashAnim = allNarrow ? 'jpFlashRedGold 0.15s infinite alternate' : 'jpFlash 0.15s infinite alternate';
+        midReel.style.animation = flashAnim;
+        if (allNarrow) {
+          sfx('narrow_gate');
+          if (jpPerRow.some(x => x && x !== 'normal')) {
+            const midStrip = document.querySelector('#reel-1 .reel-strip');
+            const cells = midStrip.querySelectorAll('.cell');
+            cells.forEach(c => {
+              if (c.id) return;
+              const sym = jpPerRow[Math.floor(Math.random() * 3)];
+              if (sym && sym !== 'normal') c.innerHTML += `<img src="${getJpImg(sym)}" style="position:absolute;bottom:2px;right:2px;width:48px;height:48px;z-index:5;object-fit:contain;">`;
+            });
+            for (let r = 0; r < 3; r++) {
+              if (jpPerRow[r] && jpPerRow[r] !== 'normal') {
+                const cell = document.getElementById(`cell-${r}-1`);
+                if (cell) cell.innerHTML += `<img class="jp-overlay-icon" src="${getJpImg(jpPerRow[r])}" style="position:absolute;bottom:2px;right:2px;width:48px;height:48px;z-index:5;object-fit:contain;">`;
+              }
+            }
+          }
+        }
+      });
+      sfx('spin_release');
+      const midReelPost = document.getElementById('reel-1');
+      if (allNarrow) {
+        await new Promise(res => setTimeout(res, 1200));
+        if (!jpSlotWin) {
+          document.querySelectorAll('.jp-overlay-icon').forEach(el => el.remove());
+          midReelPost.style.animation = '';
+        }
+      } else {
+        midReelPost.style.animation = '';
+      }
+      showResult(result);
+      // Play result sfx + win line effect
+      if (result.mode === 'normal') {
+        // Scatter first (top-to-bottom, left-to-right), with fly to collector
+        if (result.scatterCount > 0) await revealScatters(result.board, result.scatterCount);
+        // Wall hits — await each so the effect is visible
+        for (const j of result.judgments) {
+          if (j.type === 'wall' || j.type === 'same-hit') await playWallHit(j.row);
+        }
+        updateRing(gm.scatterLamps);
+        for (const j of result.judgments) {
+          if (j.type === 'through') sfx('gate_through');
+        }
+        if (result.totalPayout > 0) sfx('coin_count');
+        if (result.fgTriggered) sfx('gate_open');
+        const winRows = result.judgments
+          .filter(j => j.type === 'through')
+          .map(j => ({ row: j.row, badgeEl: $(`badge-${j.row}`) }));
+        if (winRows.length > 0) await playWinLines(winRows);
+        // JP win
+        if (jpSlotWin) {
+          sfx('coin_fly');
+          // Fly JP icons to badge area
+          const icons = document.querySelectorAll('.jp-overlay-icon');
+          icons.forEach((icon, i) => {
+            const badge = document.getElementById(`badge-${i}`);
+            if (!badge) return;
+            const srcRect = icon.getBoundingClientRect();
+            const dstRect = badge.getBoundingClientRect();
+            icon.style.cssText = `position:fixed;left:${srcRect.left}px;top:${srcRect.top}px;width:48px;height:48px;z-index:9999;object-fit:contain;transition:all 600ms cubic-bezier(0.25,1,0.5,1);pointer-events:none;`;
+            document.body.appendChild(icon);
+            setTimeout(() => { icon.style.left = `${dstRect.left}px`; icon.style.top = `${dstRect.top}px`; icon.style.width = '24px'; icon.style.height = '24px'; }, 50 + i * 100);
+          });
+          await new Promise(res => setTimeout(res, 900));
+          icons.forEach(el => el.remove());
+          const jpAmount = jpSlotWin === 'GRAND' ? jpGrand : jpSlotWin === 'MAJOR' ? jpMajor : jpMini;
+          gm.balance += jpAmount;
+          if (jpSlotWin === 'GRAND') jpGrand = 30000;
+          else if (jpSlotWin === 'MAJOR') jpMajor = 6000;
+          else jpMini = 1500;
+          const jpSubLabel = jpSlotWin === 'GRAND' ? 'SUPER MEGA WIN!' : jpSlotWin === 'MAJOR' ? 'MEGA WIN!' : 'BIG WIN!';
+          await showBigWin(jpAmount, 'JACKPOT!\n' + jpSubLabel, '#ffd700,#ff8c00');
+          midReelPost.style.animation = '';
+        }
+      }
+      // BIG WIN check (skip if JP already showing its own overlay)
+      if (result.mode === 'normal' && !jpSlotWin && result.totalPayout > 0) {
+        const ratio = result.totalPayout / gm.bet;
+        if (ratio >= 5) await showBigWin(result.totalPayout, ratio >= 30 ? 'SUPER MEGA WIN!' : ratio >= 15 ? 'MEGA WIN!' : 'BIG WIN!', ratio >= 30 ? '#ffd700,#ff8c00' : ratio >= 15 ? '#e8e8e8,#b0b0b0' : '#e8a04a,#cd7f32');
+      }
+      updateUI();
+      if (result.fgTriggered || (result.mode === 'fg' && gm.fg.active)) {
+        if (result.fgTriggered) { autoStopped = true; autoSpins = 0; await playDragonGateOpening(); showFgBgChoice(); gm.scatterLamps = 0; }
+        else { setTimeout(() => doSpin(), 400); }
+      }
+      tryEndCompetition();
+      return result;
+    }
+
+    function showResult(result) {
+      for (let r = 0; r < 3; r++) { $(`badge-${r}`).textContent = ''; $(`badge-${r}`).className = 'badge badge-' + r; }
+      if (result.mode === 'fg') { return; }
+      result.judgments.forEach(j => {
+        const badge = $(`badge-${j.row}`);
+        const rowScatters = [result.board[j.row][0], result.board[j.row][1], result.board[j.row][2]].filter(c => c.isScatter).length;
+        if (rowScatters > 0) { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> +${rowScatters}`; badge.classList.add('sc'); }
+        else if (j.type === 'through') { badge.textContent = '穿門\n+' + fmt(Math.round(gm.bet/3*j.mult)); badge.classList.add('win'); }
+        else if (j.type === 'wall') { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> -1`; badge.classList.add('wall'); }
+        else if (j.type === 'same-hit') { badge.innerHTML = `<img src="assets/img/SC-01_scatter_dragon.png" style="width:30%;height:auto;object-fit:contain;vertical-align:middle;"> -2`; badge.classList.add('wall'); }
+        else { badge.textContent = '—'; }
+      });
+      const winEl = $('win');
+      if (result.totalPayout > 0) { winEl.textContent = fmt(result.totalPayout); winEl.style.color = '#ffd700'; }
+      else { winEl.textContent = '0'; winEl.style.color = '#ffd700'; }
+      $('results').textContent = result.fgTriggered ? '🎰 Free Game!' : '';
+    }
+
+    // Auto
+    function toggleAuto() {
+      if (autoSpins > 0) { autoStopped = true; autoSpins = 0; updateUI(); return; }
+      $('auto-overlay').style.display = 'flex';
+    }
+    async function startAuto() {
+      $('auto-overlay').style.display = 'none';
+      autoSpins = autoCount; autoStopped = false;
+      while (autoSpins > 0 && !autoStopped && gm.canSpin()) {
+        await doSpin(); autoSpins--; updateUI();
+        if (autoSpins > 0 && !autoStopped) await new Promise(r => setTimeout(r, 300));
+      }
+      autoSpins = 0; updateUI();
+    }
+
+    // Init: show random symbols
+    function initReels() {
+      const cellH = getCellH() || 100;
+      for (let col = 0; col < 3; col++) {
+        const strip = document.querySelector(`#reel-${col} .reel-strip`);
+        strip.innerHTML = '';
+        strip.style.transition = 'none';
+        strip.style.transform = 'translateY(0)';
+        for (let r = 0; r < 3; r++) {
+          const div = document.createElement('div');
+          div.className = 'cell';
+          div.style.height = cellH + 'px';
+          div.id = `cell-${r}-${col}`;
+          div.innerHTML = `<img src="assets/img/${randomImg()}">`;
+          if (r === 2) div.style.marginTop = '6px';
+          strip.appendChild(div);
+        }
+      }
+    }
+
+    initReels();
+    updateUI();
+    $('results').textContent = '';
+    updateRing(gm.scatterLamps);
+    $('spin-btn').addEventListener('click', doSpin);
+    $('bg-deal-btn').addEventListener('click', () => { if (bgInstance) bgDeal(); });
+    $('bet-dec').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex-1); updateUI(); } });
+    $('bet-inc').addEventListener('click', () => { if (!spinning) { gm.setBetIndex(gm.betIndex+1); updateUI(); } });
+    $('auto-btn').addEventListener('click', toggleAuto);
+    $('auto-start').addEventListener('click', startAuto);
+    $('auto-cancel').addEventListener('click', () => { $('auto-overlay').style.display = 'none'; });
+    $('auto-dec').addEventListener('click', () => { autoCount = Math.max(10, autoCount-10); $('auto-count-display').textContent = autoCount+' 局'; });
+    $('auto-inc').addEventListener('click', () => { autoCount = Math.min(100, autoCount+10); $('auto-count-display').textContent = autoCount+' 局'; });
+    // Rules overlay
+    let compPaused = false;
+    let playerName = '';
+    let playerTeam = 'SF';
+    let compEndTime = 0;
+    let compTimerInterval = null;
+    let compEnded = false;
+    let compSubmitted = false;
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbxRJAhGu732WkIRj17yUhZ4bGTqdVY-wHjv2gIhVAWNs5z7n8J3tY5Uo5UogmYrH4y2/exec';
+
+    function closeRules() { $('rules-overlay').style.display = 'none'; $('rules-start-btn').style.display = 'none'; startBGM(); }
+    function startCompetition() {
+      closeRules();
+    }
+    $('rules-btn').addEventListener('click', () => { $('rules-overlay').style.display = 'flex'; });
+    $('bg-rules-btn').addEventListener('click', () => { $('rules-overlay').style.display = 'flex'; });
+    $('rules-close').addEventListener('click', closeRules);
+    $('rules-start-btn').addEventListener('click', startCompetition);
+    $('rules-overlay').addEventListener('click', e => { if (e.target === $('rules-overlay')) closeRules(); });
+
+    $('name-confirm-btn').addEventListener('click', () => {
+      const name = $('player-name-input').value.trim();
+      if (!name) return;
+      playerName = name;
+      playerTeam = $('player-team-select').value;
+      $('name-overlay').style.display = 'none';
+      // Start 5 min timer
+      compEndTime = Date.now() + 5 * 60 * 1000;
+      $('comp-timer').style.display = 'block';
+      compTimerInterval = setInterval(() => {
+        if (compPaused) { compEndTime += 1000; return; }
+        const left = Math.max(0, compEndTime - Date.now());
+        const m = Math.floor(left / 60000);
+        const s = Math.floor((left % 60000) / 1000);
+        $('comp-timer').textContent = `剩餘 ${m}:${s.toString().padStart(2,'0')}`;
+        if (left <= 0) { clearInterval(compTimerInterval); compEnded = true; $('comp-timer').textContent = '時間到，等待當局結束...'; tryEndCompetition(); }
+      }, 1000);
+    });
+
+    function tryEndCompetition() {
+      if (!compEnded || gm.fg.active || bgInstance || spinning) return;
+      endCompetition();
+    }
+
+    async function endCompetition() {
+      if (compSubmitted) return;
+      compSubmitted = true;
+      $('comp-timer').textContent = '時間到！';
+      autoStopped = true; autoSpins = 0;
+      const finalScore = gm.balance;
+      async function submitScore(name, score, team) {
+        for (let i = 0; i < 3; i++) {
+          try { await fetch(API_BASE, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({name, score, team})}); return true; } catch(e) {}
+          await new Promise(r => setTimeout(r, 1000 + i * 1000));
+        }
+        return false;
+      }
+      await submitScore('\u200B' + playerName, finalScore, playerTeam);
+      await new Promise(r => setTimeout(r, 1000));
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;padding:24px;overflow-y:auto;';
+      ov.innerHTML = `<div style="color:#ffd700;font-size:1.4rem;font-weight:bold;margin:16px 0;">⏰ 時間到！</div><div style="color:#fff;margin-bottom:4px;">你的分數</div><div style="color:#ffd700;font-size:2.2rem;font-weight:bold;margin-bottom:16px;">${fmt(finalScore)}</div><div style="color:#ffd700;font-size:1.1rem;font-weight:bold;margin-bottom:8px;">🏆 個人排行</div><div id="comp-lb" style="width:100%;max-width:360px;"></div><div style="color:#ffd700;font-size:1.1rem;font-weight:bold;margin:16px 0 8px;">👥 組別排行</div><div id="comp-team-lb" style="width:100%;max-width:360px;"></div>`;
+      document.body.appendChild(ov);
+      async function refreshLb() {
+        try {
+          const resp = await fetch(API_BASE);
+          const data = await resp.json();
+          const medals = ['','🥇','🥈','🥉'];
+          const lb = document.getElementById('comp-lb');
+          const tlb = document.getElementById('comp-team-lb');
+          if (!data.scores || !data.scores.length) { lb.innerHTML = '<div style="color:#666;text-align:center;">尚無紀錄</div>'; tlb.innerHTML = ''; return; }
+          lb.innerHTML = data.scores.map((s,i) => {
+            const isMe = s.name.replace(/\u200B/g,'') === playerName && s.score === finalScore;
+            const bg = isMe ? 'background:rgba(255,215,0,0.15);border:1px solid #ffd700;' : 'border:1px solid #333;';
+            const medal = medals[i+1] || '';
+            const tag = isMe ? ' <span style="color:#ffd700;font-size:0.75rem;">← 你</span>' : '';
+            const tm = s.team ? `[${s.team}] ` : '';
+            return `<div style="${bg}border-radius:6px;padding:8px 12px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;"><span style="color:#aaa;">#${i+1} ${medal} ${tm}${s.name.replace(/\u200B/g,'')}${tag}</span><span style="color:#ffd700;font-weight:bold;">${Math.round(s.score).toLocaleString()}</span></div>`;
+          }).join('');
+          // Team rankings (average)
+          const teams = {};
+          const teamCount = {};
+          data.scores.forEach(s => { const t = s.team || '?'; teams[t] = (teams[t] || 0) + s.score; teamCount[t] = (teamCount[t] || 0) + 1; });
+          const sorted = Object.entries(teams).map(([t, total]) => [t, total, teamCount[t], Math.round(total / teamCount[t])]).sort((a,b) => b[3] - a[3]);
+          tlb.innerHTML = sorted.map(([t, total, cnt, avg], i) => {
+            const isMyTeam = t === playerTeam;
+            const bg = isMyTeam ? 'background:rgba(255,215,0,0.15);border:1px solid #ffd700;' : 'border:1px solid #333;';
+            const medal = medals[i+1] || '';
+            return `<div style="${bg}border-radius:6px;padding:8px 12px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;"><span style="color:#aaa;">#${i+1} ${medal} ${t}（${cnt}人）</span><span style="color:#ffd700;font-weight:bold;">平均 ${avg.toLocaleString()}</span></div>`;
+          }).join('');
+        } catch(e) {}
+      }
+      refreshLb();
+      setInterval(refreshLb, 5000);
+    }
+    $('vol-btn').addEventListener('click', () => {
+      muted = !muted;
+      $('vol-btn').classList.toggle('muted', muted);
+      $('vol-btn').innerHTML = muted
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>';
+      bgm.volume = muted ? 0 : 0.3;
+    });
+    $('turbo-btn').addEventListener('click', () => {
+      turbo = !turbo;
+      $('turbo-btn').classList.toggle('active', turbo);
+      $('turbo-btn').style.background = turbo ? 'rgba(255,215,0,0.25)' : '';
+    });
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doSpin(); }
+      if (e.key === 'f' && !gm.fg.active && !spinning) { gm.scatterLamps = 9; updateRing(9); window._debugForceScatter = true; }
+      if (e.key === 'b' || e.key === 'B') { window._debugForceBigWin = 'big'; }
+      if (e.key === 'v' || e.key === 'V') { window._debugForceBigWin = 'mega'; }
+      if (e.key === 'x' || e.key === 'X') { window._debugForceBigWin = 'super'; }
+      if (e.key === 'j' || e.key === 'J') { window._debugForceJp = 'GRAND'; window._debugForceNarrow = true; }
+      if (e.key === 'm' || e.key === 'M') { window._debugForceJp = 'MAJOR'; window._debugForceNarrow = true; }
+      if (e.key === 'n' || e.key === 'N') { window._debugForceJp = 'MINI'; window._debugForceNarrow = true; }
+      if (e.key === 'k' || e.key === 'K') { window._debugForceNarrow = true; }
+    });
+    // Mobile debug panel (long press 2s)
+    (function(){
+      let lpt;
+      document.addEventListener('touchstart', () => { lpt = setTimeout(showDbg, 2000); });
+      document.addEventListener('touchend', () => clearTimeout(lpt));
+      document.addEventListener('touchmove', () => clearTimeout(lpt));
+      const actions = {
+        'f': () => { gm.scatterLamps = 9; updateRing(9); window._debugForceScatter = true; },
+        'b': () => { window._debugForceBigWin = 'big'; },
+        'v': () => { window._debugForceBigWin = 'mega'; },
+        'x': () => { window._debugForceBigWin = 'super'; },
+        'j': () => { window._debugForceJp = 'GRAND'; window._debugForceNarrow = true; },
+        'm': () => { window._debugForceJp = 'MAJOR'; window._debugForceNarrow = true; },
+        'n': () => { window._debugForceJp = 'MINI'; window._debugForceNarrow = true; },
+        'k': () => { window._debugForceNarrow = true; },
+      };
+      function showDbg() {
+        const d = document.createElement('div');
+        d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:rgba(0,0,0,0.9);border:2px solid #ffd700;border-radius:12px;padding:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;';
+        const btns = [['F','f'],['B','b'],['V','v'],['X','x'],['J','j'],['M','m'],['N','n'],['K','k']];
+        btns.forEach(([label, key]) => {
+          const b = document.createElement('button');
+          b.textContent = label;
+          b.style.cssText = 'width:44px;height:44px;border-radius:50%;border:2px solid #ffd700;background:#222;color:#ffd700;font-size:16px;font-weight:bold;cursor:pointer;';
+          b.onclick = () => { if (actions[key]) actions[key](); d.remove(); };
+          d.appendChild(b);
+        });
+        const close = document.createElement('button');
+        close.textContent = '✕';
+        close.style.cssText = 'width:44px;height:44px;border-radius:50%;border:1px solid #666;background:#333;color:#fff;font-size:16px;cursor:pointer;';
+        close.onclick = () => d.remove();
+        d.appendChild(close);
+        document.body.appendChild(d);
+      }
+    })();
+    $('fgbg-close').addEventListener('click', () => { $('fgbg-choice').style.display = 'none'; });
+
+    // JP Pool auto-climb — independent timers per tier
+    let jpGrand = 30000, jpMajor = 6000, jpMini = 1500;
+    function animateJp(el, start, end, duration) {
+      const range = end - start;
+      const t0 = performance.now();
+      function step(now) {
+        const t = Math.min((now - t0) / duration, 1);
+        const ease = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(start + range * ease).toLocaleString();
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    const grandEl = $('jp-grand-val'), majorEl = $('jp-major-val'), miniEl = $('jp-mini-val');
+    grandEl.textContent = jpGrand.toLocaleString();
+    majorEl.textContent = jpMajor.toLocaleString();
+    miniEl.textContent = jpMini.toLocaleString();
+    (function tickMini() {
+      setTimeout(() => {
+        const prev = jpMini;
+        jpMini += Math.ceil(Math.random() * 5);
+        if (jpMini >= jpMajor) jpMini = 1500;
+        animateJp(miniEl, prev, jpMini, 800);
+        tickMini();
+      }, 2000 + Math.random() * 2000);
+    })();
+    (function tickMajor() {
+      setTimeout(() => {
+        const prev = jpMajor;
+        jpMajor += 3 + Math.floor(Math.random() * 6);
+        if (jpMajor >= jpGrand) jpMajor = 6000;
+        animateJp(majorEl, prev, jpMajor, 800);
+        tickMajor();
+      }, 5000 + Math.random() * 5000);
+    })();
+    (function tickGrand() {
+      setTimeout(() => {
+        const prev = jpGrand;
+        jpGrand += 5 + Math.floor(Math.random() * 11);
+        animateJp(grandEl, prev, jpGrand, 800);
+        tickGrand();
+      }, 10000 + Math.random() * 10000);
+    })();
+
+    window.focus();
+  </script>
+</body>
+</html>
