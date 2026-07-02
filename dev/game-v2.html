@@ -6,54 +6,47 @@
   <title>射龍門 Slot V2</title>
   <link rel="stylesheet" href="css/game.css">
   <style>
-    /* === V2 UI Enhancements (收斂版) === */
+    /* === V2 UI — 沉穩質感，光源只在 symbol === */
 
-    /* 1. 背景輕微調整 + 淡暗角 */
-    .bg-layer { filter: saturate(0.85) brightness(0.85); }
+    /* 背景壓暗 */
+    .bg-layer { filter: saturate(0.8) brightness(0.75); }
     .game-root::before {
       content: ''; position: absolute; inset: 0; z-index: 1;
-      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.3) 100%);
+      background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.4) 100%);
       pointer-events: none;
     }
 
-    /* 2. 盤面浮出（減弱） */
-    .reel { box-shadow: 0 0 20px rgba(255,215,0,0.2), 0 0 40px rgba(0,0,0,0.4); }
+    /* 盤面：無 glow，只有暗色陰影沉底 */
+    .reel { box-shadow: 0 4px 16px rgba(0,0,0,0.6); }
 
-    /* 3. 視覺優先序：裝飾輕微降 opacity */
-    .mascot-dragon { opacity: 0.6; }
+    /* 裝飾壓暗 */
+    .mascot-dragon { opacity: 0.5; }
 
-    /* 5. 符號辨識度（減弱） */
+    /* Symbol 放大滿版 */
+    .cell img { width: 95%; height: 95%; object-fit: contain; }
+
+    /* 符號：高階微亮，數字不處理（自然亮度即焦點） */
     .cell img[src*="CD-01_ace"],
     .cell img[src*="CD-04_jack"],
     .cell img[src*="CD-03_queen"],
     .cell img[src*="CD-02_king"] {
-      filter: drop-shadow(0 0 3px rgba(255,215,0,0.5));
-    }
-    .cell img[src*="CD-05_num"],
-    .cell img[src*="CD-06_num"],
-    .cell img[src*="CD-07_num"],
-    .cell img[src*="CD-08_num"],
-    .cell img[src*="CD-09_num"],
-    .cell img[src*="CD-10_num"],
-    .cell img[src*="CD-11_num"],
-    .cell img[src*="CD-12_num"],
-    .cell img[src*="CD-13_num"] {
-      filter: brightness(0.9);
+      filter: brightness(1.1);
     }
 
-    /* 6. Hold 欄位 placeholder */
-    .scatter-ring .ring-bg { border: 2px dashed rgba(255,215,0,0.3); }
-
-    /* 7. JP 卡片 */
+    /* JP 卡片：沉穩無光 */
     .jp-values { gap: 12px; font-family: monospace; font-size: 1.1em; }
-    .jp-val { letter-spacing: 1px; }
+    .jp-val { letter-spacing: 1px; text-shadow: none; }
+    .jp-pool-container { filter: brightness(0.9); }
 
-    /* 8. 底部功能列放大 */
-    .ctrl-adj { transform: scale(1.15); background: rgba(255,255,255,0.08); }
-    .ctrl-auto-upper { transform: scale(1.1); background: rgba(255,255,255,0.08); }
-    .ctrl-func { transform: scale(1.1); }
+    /* 底部列：沉穩無光 */
+    .ctrl-adj { transform: scale(1.15); background: rgba(0,0,0,0.3); box-shadow: none; }
+    .ctrl-auto-upper { transform: scale(1.1); background: rgba(0,0,0,0.3); box-shadow: none; }
+    .ctrl-func { transform: scale(1.1); box-shadow: none; }
 
-    /* 9. 進度條 */
+    /* Hold 欄位 */
+    .scatter-ring .ring-bg { border: 2px dashed rgba(255,215,0,0.2); }
+
+    /* 進度條 */
     #scatter-progress-bar {
       position: absolute; bottom: -8px; left: 10%; right: 10%; height: 5px;
       background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;
