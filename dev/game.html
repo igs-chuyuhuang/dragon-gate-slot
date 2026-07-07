@@ -1057,6 +1057,22 @@
       updateUI();
       const result = gm.executeSpin();
       if (!result) return;
+      // Debug: force scatter for FG/BG trigger testing
+      if (window._debugForceScatter && result.mode === 'normal') {
+        window._debugForceScatter = false;
+        // Force at least 1 scatter on board for visual
+        const hasScatter = result.board.some(row => row.some(c => c.isScatter));
+        if (!hasScatter) {
+          const r = Math.floor(Math.random() * 3);
+          const c = Math.floor(Math.random() * 3);
+          result.board[r][c] = { value: result.board[r][c].value, isScatter: true };
+          result.scatterCount = countScatters(result.board);
+        }
+        // Force trigger regardless of lamp count
+        gm.scatterLamps = 0;
+        result.fgTriggered = true;
+        result.scatterLamps = 0;
+      }
       // Debug: force narrow board for JP testing
       if (window._debugForceNarrow && result.mode === 'normal') {
         window._debugForceNarrow = false;
